@@ -1,67 +1,67 @@
 <x-layouts::auth :title="__('Register')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+        <x-auth-header :title="'Buat Akun Baru'" :description="'Daftar untuk mulai mengakses program belajar Anda.'" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ route('register.store') }}" class="mx-auto flex w-full flex-col gap-6">
             @csrf
             <!-- Name -->
             <flux:input
                 name="name"
-                :label="__('Name')"
+                :label="'Nama Lengkap'"
                 :value="old('name')"
                 type="text"
                 required
                 autofocus
                 autocomplete="name"
-                :placeholder="__('Full name')"
+                :placeholder="'Nama lengkap'"
             />
 
             <!-- Email Address -->
             <flux:input
                 name="email"
-                :label="__('Email address')"
+                :label="'Alamat Email'"
                 :value="old('email')"
                 type="email"
                 required
                 autocomplete="email"
-                placeholder="email@example.com"
+                placeholder="email@anda.com"
             />
 
             <!-- Password -->
             <flux:input
                 name="password"
-                :label="__('Password')"
+                :label="'Password'"
                 type="password"
                 required
                 autocomplete="new-password"
-                :placeholder="__('Password')"
+                :placeholder="'Buat password'"
                 viewable
             />
 
             <!-- Confirm Password -->
             <flux:input
                 name="password_confirmation"
-                :label="__('Confirm password')"
+                :label="'Konfirmasi Password'"
                 type="password"
                 required
                 autocomplete="new-password"
-                :placeholder="__('Confirm password')"
+                :placeholder="'Ulangi password'"
                 viewable
             />
 
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Create account') }}
+            <div class="flex items-center justify-center">
+                <flux:button type="submit" variant="primary" class="epi-auth-btn w-full" data-test="register-user-button">
+                    Daftar Sekarang
                 </flux:button>
             </div>
         </form>
 
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
+        <div class="mx-auto w-full border-t border-slate-200 pt-7 text-center text-sm text-slate-500">
+            <span class="uppercase tracking-wide">Sudah punya akun?</span>
+            <flux:link class="epi-auth-link ml-1 font-semibold uppercase tracking-wide" :href="route('login')" wire:navigate>Masuk</flux:link>
         </div>
     </div>
 </x-layouts::auth>

@@ -1,31 +1,33 @@
 <x-layouts::auth :title="__('Forgot password')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
+        <x-auth-header :title="'Lupa Password'" :description="'Masukkan email Anda untuk mendapatkan link reset password.'" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('password.email') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ route('password.email') }}" class="mx-auto flex w-full flex-col gap-6">
             @csrf
 
             <!-- Email Address -->
             <flux:input
                 name="email"
-                :label="__('Email address')"
+                :label="'Alamat Email'"
                 type="email"
                 required
                 autofocus
-                placeholder="email@example.com"
+                placeholder="email@anda.com"
             />
 
-            <flux:button variant="primary" type="submit" class="w-full" data-test="email-password-reset-link-button">
-                {{ __('Email password reset link') }}
-            </flux:button>
+            <div class="flex items-center justify-center">
+                <flux:button variant="primary" type="submit" class="epi-auth-btn w-full" data-test="email-password-reset-link-button">
+                    Kirim Link Reset
+                </flux:button>
+            </div>
         </form>
 
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">
-            <span>{{ __('Or, return to') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('log in') }}</flux:link>
+        <div class="mx-auto w-full border-t border-slate-200 pt-7 text-center text-sm text-slate-500">
+            <span class="uppercase tracking-wide">Kembali ke</span>
+            <flux:link class="epi-auth-link ml-1 font-semibold uppercase tracking-wide" :href="route('login')" wire:navigate>Halaman Login</flux:link>
         </div>
     </div>
 </x-layouts::auth>

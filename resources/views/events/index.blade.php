@@ -1,21 +1,22 @@
 <x-layouts::public title="Events">
     <section class="mx-auto max-w-[var(--container-5xl)] px-4 py-10">
-        <x-ui.section-header
-            title="Events"
-            description="Daftar event premium yang sedang dibuka."
-        />
+        <div class="rounded-[2rem] border border-slate-200 bg-white/92 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] md:p-8">
+            <x-ui.section-header
+                title="Events"
+                description="Daftar event premium yang sedang dibuka."
+            />
 
-        @if ($events->count() === 0)
-            <div class="mt-6">
-                <x-ui.empty-state
-                    title="Belum ada event"
-                    description="Event akan muncul di sini saat sudah dipublish."
-                />
-            </div>
-        @else
-            <div class="mt-6 grid gap-4 md:grid-cols-2">
-                @foreach ($events as $event)
-                    <x-ui.card class="p-6">
+            @if ($events->count() === 0)
+                <div class="mt-6">
+                    <x-ui.empty-state
+                        title="Belum ada event"
+                        description="Event akan muncul di sini saat sudah dipublish."
+                    />
+                </div>
+            @else
+                <div class="mt-6 grid gap-4 md:grid-cols-2">
+                    @foreach ($events as $event)
+                        <x-ui.card class="p-6">
                         <div class="flex items-start justify-between gap-4">
                             <div class="min-w-0">
                                 <div class="text-sm font-semibold text-zinc-900 dark:text-white">
@@ -52,14 +53,15 @@
                                 Lihat detail
                             </x-ui.button>
                         </div>
-                    </x-ui.card>
-                @endforeach
-            </div>
+                        </x-ui.card>
+                    @endforeach
+                </div>
 
-            <div class="mt-6">
-                {{ $events->links() }}
-            </div>
-        @endif
+                <div class="mt-6">
+                    {{ $events->links() }}
+                </div>
+            @endif
+        </div>
     </section>
 </x-layouts::public>
 

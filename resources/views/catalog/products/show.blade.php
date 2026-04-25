@@ -1,12 +1,13 @@
 <x-layouts::public :title="$product->title">
     <section class="mx-auto max-w-[var(--container-5xl)] px-4 py-10">
-        <div class="mb-6">
-            <x-ui.button variant="ghost" size="sm" :href="route('catalog.products.index')">
-                ← Kembali ke katalog
-            </x-ui.button>
-        </div>
+        <div class="rounded-[2rem] border border-slate-200 bg-white/92 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] md:p-8">
+            <div class="mb-6">
+                <x-ui.button variant="ghost" size="sm" :href="route('catalog.products.index')">
+                    ← Kembali ke katalog
+                </x-ui.button>
+            </div>
 
-        <div class="grid gap-8 lg:grid-cols-5">
+            <div class="grid gap-8 lg:grid-cols-5">
             <div class="lg:col-span-3">
                 <x-ui.card class="overflow-hidden">
                     <div class="aspect-[16/10] bg-zinc-100 dark:bg-zinc-800">
@@ -99,6 +100,22 @@
                                 Produk belum tersedia
                             </x-ui.button>
                         @endif
+
+                        @if ($product->landing_page_enabled)
+                            <x-ui.button variant="ghost" size="md" :href="route('offer.show', $product->slug)">
+                                Lihat Landing Page
+                            </x-ui.button>
+                        @endif
+
+                        @if (
+                            $product->landing_page_enabled
+                            && $product->is_affiliate_enabled
+                            && $viewerChannel?->isActive()
+                        )
+                            <x-ui.button variant="secondary" size="md" :href="route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $viewerChannel->epic_code])">
+                                Link Landing Page Affiliate
+                            </x-ui.button>
+                        @endif
                     </div>
 
                     @if ((float) $product->effective_price <= 0)
@@ -133,6 +150,7 @@
                     </div>
                 @endif
             </div>
+        </div>
         </div>
     </section>
 </x-layouts::public>

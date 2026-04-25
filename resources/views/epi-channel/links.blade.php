@@ -28,6 +28,7 @@
                 <div class="mt-6 grid gap-4 md:grid-cols-2">
                     @foreach ($products as $product)
                         @php($refLink = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code)
+                        @php($landingLink = $product->landing_page_enabled ? route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]) : null)
 
                         <x-ui.card class="p-6">
                             <div class="flex items-start justify-between gap-4">
@@ -45,13 +46,39 @@
                                 <x-ui.button variant="ghost" size="sm" :href="route('catalog.products.show', $product->slug)">Buka</x-ui.button>
                             </div>
 
-                            <div class="mt-4">
+                            <div class="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+                                Link referral produk
+                            </div>
+
+                            <div class="mt-2">
                                 <input
                                     type="text"
                                     readonly
                                     value="{{ $refLink }}"
                                     class="w-full rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none ring-0 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
                                 />
+                            </div>
+
+                            @if ($landingLink)
+                                <div class="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+                                    Link landing page affiliate
+                                </div>
+
+                                <div class="mt-2">
+                                    <input
+                                        type="text"
+                                        readonly
+                                        value="{{ $landingLink }}"
+                                        class="w-full rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none ring-0 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                                    />
+                                </div>
+                            @endif
+
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <x-ui.button variant="ghost" size="sm" :href="route('catalog.products.show', $product->slug)">Detail produk</x-ui.button>
+                                @if ($landingLink)
+                                    <x-ui.button variant="secondary" size="sm" :href="$landingLink">Buka landing</x-ui.button>
+                                @endif
                             </div>
                         </x-ui.card>
                     @endforeach

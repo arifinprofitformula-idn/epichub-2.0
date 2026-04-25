@@ -189,6 +189,66 @@ class ProductForm
                             ->columns(3)
                             ->columnSpanFull(),
 
+                        Section::make('Landing Page Penawaran')
+                            ->schema([
+                                Toggle::make('landing_page_enabled')
+                                    ->label('Aktifkan landing page')
+                                    ->default(false)
+                                    ->live(),
+
+                                TextInput::make('landing_page_meta_title')
+                                    ->label('Meta title')
+                                    ->maxLength(255)
+                                    ->nullable()
+                                    ->hidden(fn (Get $get): bool => ! (bool) $get('landing_page_enabled')),
+
+                                Textarea::make('landing_page_meta_description')
+                                    ->label('Meta description')
+                                    ->rows(3)
+                                    ->nullable()
+                                    ->hidden(fn (Get $get): bool => ! (bool) $get('landing_page_enabled')),
+
+                                FileUpload::make('landing_page_zip_path')
+                                    ->label('ZIP landing page')
+                                    ->disk('local')
+                                    ->directory('product-landings/zips')
+                                    ->acceptedFileTypes([
+                                        'application/zip',
+                                        'application/x-zip-compressed',
+                                        'multipart/x-zip',
+                                    ])
+                                    ->maxSize(20480)
+                                    ->downloadable()
+                                    ->helperText('Upload ZIP berisi index.html dan folder assets. File akan diekstrak otomatis dan dirender sebagai landing page produk.')
+                                    ->hidden(fn (Get $get): bool => ! (bool) $get('landing_page_enabled')),
+
+                                TextInput::make('landing_page_entry_file')
+                                    ->label('Entry file')
+                                    ->default('index.html')
+                                    ->required(fn (Get $get): bool => (bool) $get('landing_page_enabled'))
+                                    ->hidden(fn (Get $get): bool => ! (bool) $get('landing_page_enabled')),
+
+                                TextInput::make('landing_page_preview_url')
+                                    ->label('Preview link landing page')
+                                    ->readOnly()
+                                    ->dehydrated(false)
+                                    ->formatStateUsing(fn (?Product $record, Get $get): string => filled($get('slug'))
+                                        ? route('offer.show', ['product' => $get('slug')], absolute: true)
+                                        : 'Isi slug produk terlebih dahulu.')
+                                    ->hidden(fn (Get $get): bool => ! (bool) $get('landing_page_enabled')),
+
+                                Textarea::make('landing_page_shortcode_help')
+                                    ->label('Shortcode tersedia')
+                                    ->rows(6)
+                                    ->dehydrated(false)
+                                    ->default("{{product_name}}\n{{product_title}}\n{{product_slug}}\n{{product_type}}\n{{product_price}}\n{{product_sale_price}}\n{{product_effective_price}}\n{{product_short_description}}\n{{product_description}}\n{{checkout_url}}\n{{catalog_url}}\n{{affiliate_name}}\n{{affiliate_code}}\n{{affiliate_store_name}}\n{{affiliate_referral_link}}")
+                                    ->readOnly()
+                                    ->columnSpanFull()
+                                    ->hidden(fn (Get $get): bool => ! (bool) $get('landing_page_enabled')),
+                            ])
+                            ->columns(2)
+                            ->columnSpanFull(),
+
                         Section::make('Files (metadata)')
                             ->schema([
                                 Repeater::make('files')

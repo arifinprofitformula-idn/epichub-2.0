@@ -60,6 +60,12 @@ class ProductCatalogController
     public function show(Product $product): View
     {
         $product->load(['category', 'files', 'bundledProducts']);
+        $viewerChannel = null;
+
+        if (auth()->check()) {
+            auth()->user()->loadMissing('epiChannel');
+            $viewerChannel = auth()->user()->epiChannel;
+        }
 
         abort_unless($product->status?->value === 'published', 404);
         abort_unless($product->visibility?->value === 'public', 404);
@@ -67,6 +73,7 @@ class ProductCatalogController
 
         return view('catalog.products.show', [
             'product' => $product,
+            'viewerChannel' => $viewerChannel,
         ]);
     }
 }

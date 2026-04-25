@@ -1,12 +1,13 @@
 <x-layouts::public :title="$event->title">
     <section class="mx-auto max-w-[var(--container-5xl)] px-4 py-10">
-        <div class="mb-6">
-            <x-ui.button variant="ghost" size="sm" :href="route('events.index')">
-                ← Kembali
-            </x-ui.button>
-        </div>
+        <div class="rounded-[2rem] border border-slate-200 bg-white/92 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] md:p-8">
+            <div class="mb-6">
+                <x-ui.button variant="ghost" size="sm" :href="route('events.index')">
+                    ← Kembali
+                </x-ui.button>
+            </div>
 
-        <div class="grid gap-6 lg:grid-cols-5">
+            <div class="grid gap-6 lg:grid-cols-5">
             <div class="lg:col-span-3">
                 <x-ui.card class="p-6 md:p-8">
                     <div class="flex items-start justify-between gap-4">
@@ -99,6 +100,7 @@
                     </div>
                 </x-ui.card>
             </div>
+        </div>
         </div>
     </section>
 </x-layouts::public>

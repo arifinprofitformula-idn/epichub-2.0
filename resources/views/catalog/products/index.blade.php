@@ -1,16 +1,17 @@
 <x-layouts::public title="Produk">
     <section class="mx-auto max-w-[var(--container-5xl)] px-4 py-10">
-        <x-ui.section-header
-            eyebrow="Katalog"
-            title="Produk Digital"
-            description="Temukan produk digital premium yang bisa kamu akses dari satu tempat."
-        >
-            <x-ui.button variant="ghost" size="sm" :href="route('home')">
-                Kembali
-            </x-ui.button>
-        </x-ui.section-header>
+        <div class="rounded-[2rem] border border-slate-200 bg-white/92 p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] md:p-8">
+            <x-ui.section-header
+                eyebrow="Katalog"
+                title="Produk Digital"
+                description="Temukan produk digital premium yang bisa kamu akses dari satu tempat."
+            >
+                <x-ui.button variant="ghost" size="sm" :href="route('home')">
+                    Kembali
+                </x-ui.button>
+            </x-ui.section-header>
 
-        <x-ui.card class="mt-6 p-5">
+            <x-ui.card class="mt-6 p-5">
             <form method="GET" action="{{ route('catalog.products.index') }}" class="grid gap-3 md:grid-cols-4">
                 <div class="md:col-span-2">
                     <label class="text-xs font-medium text-zinc-600 dark:text-zinc-300">Cari</label>
@@ -66,22 +67,22 @@
                     </div>
                 </div>
             </form>
-        </x-ui.card>
+            </x-ui.card>
 
-        @if ($products->count() === 0)
-            <div class="mt-8">
-                <x-ui.empty-state
-                    title="Belum ada produk"
-                    description="Saat ini belum ada produk yang dipublish. Coba lagi nanti."
-                    action-label="Kembali ke Home"
-                    :action-href="route('home')"
-                />
-            </div>
-        @else
-            <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($products as $product)
-                    <a href="{{ route('catalog.products.show', $product->slug) }}" class="group">
-                        <x-ui.card class="h-full overflow-hidden">
+            @if ($products->count() === 0)
+                <div class="mt-8">
+                    <x-ui.empty-state
+                        title="Belum ada produk"
+                        description="Saat ini belum ada produk yang dipublish. Coba lagi nanti."
+                        action-label="Kembali ke Home"
+                        :action-href="route('home')"
+                    />
+                </div>
+            @else
+                <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($products as $product)
+                        <a href="{{ route('catalog.products.show', $product->slug) }}" class="group">
+                            <x-ui.card class="h-full overflow-hidden">
                             <div class="aspect-[16/10] bg-zinc-100 dark:bg-zinc-800">
                                 @if (filled($product->thumbnail))
                                     <img
@@ -128,14 +129,15 @@
                                     </x-ui.button>
                                 </div>
                             </div>
-                        </x-ui.card>
-                    </a>
-                @endforeach
-            </div>
+                            </x-ui.card>
+                        </a>
+                    @endforeach
+                </div>
 
-            <div class="mt-8">
-                {{ $products->links() }}
-            </div>
-        @endif
+                <div class="mt-8">
+                    {{ $products->links() }}
+                </div>
+            @endif
+        </div>
     </section>
 </x-layouts::public>

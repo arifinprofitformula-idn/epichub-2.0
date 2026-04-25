@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Catalog\ProductCatalogController;
+use App\Http\Controllers\Catalog\ProductLandingAssetController;
+use App\Http\Controllers\Catalog\ProductLandingPageController;
 use App\Http\Controllers\Catalog\EventCatalogController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\MyCourseController;
@@ -26,6 +28,15 @@ Route::middleware([CaptureReferralFromRequest::class])->prefix('produk')->name('
     Route::get('/', [ProductCatalogController::class, 'index'])->name('index');
     Route::get('/{product:slug}', [ProductCatalogController::class, 'show'])->name('show');
 });
+
+Route::prefix('offer')->name('offer.')->group(function () {
+    Route::get('/{product:slug}', [ProductLandingPageController::class, 'show'])->name('show');
+    Route::get('/{product:slug}/ref/{epicCode}', [ProductLandingPageController::class, 'showAffiliate'])->name('affiliate');
+});
+
+Route::get('/offer-assets/{token}/{path}', [ProductLandingAssetController::class, 'show'])
+    ->where('path', '.*')
+    ->name('offer-assets.show');
 
 Route::middleware([CaptureReferralFromRequest::class])->prefix('events')->name('events.')->group(function () {
     Route::get('/', [EventCatalogController::class, 'index'])->name('index');

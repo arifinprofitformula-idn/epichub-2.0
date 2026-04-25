@@ -4,7 +4,7 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar sticky collapsible class="epic-sidebar border-e border-zinc-800/80 bg-zinc-950 text-white">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
@@ -15,22 +15,30 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" :href="route('orders.index')" :current="request()->routeIs('orders.*')" wire:navigate>
+                        {{ __('Invoice') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
             <flux:spacer />
 
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
-
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            <div class="hidden lg:block px-2 pb-2">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="group inline-flex w-full items-center justify-center gap-2 rounded-[1rem] border border-rose-300/80 bg-[linear-gradient(180deg,#fff1f2_0%,#ffe4e6_100%)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-rose-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_12px_24px_rgba(190,24,93,0.14)] transition duration-200 hover:-translate-y-0.5 hover:border-rose-400 hover:bg-[linear-gradient(180deg,#ffe4e6_0%,#fecdd3_100%)] hover:text-rose-800 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_0_0_1px_rgba(244,63,94,0.12),0_16px_28px_rgba(244,63,94,0.2),0_0_22px_rgba(251,113,133,0.16)] active:translate-y-0 active:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_16px_rgba(190,24,93,0.14)]"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" class="size-4 transition duration-200 group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M14 16.5L18.5 12L14 7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M18 12H9.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                            <path d="M9.75 5.75H7.75C6.64543 5.75 5.75 6.64543 5.75 7.75V16.25C5.75 17.3546 6.64543 18.25 7.75 18.25H9.75" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                        Logout
+                    </button>
+                </form>
+            </div>
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
@@ -65,6 +73,9 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
+                        <flux:menu.item :href="route('orders.index')" icon="document-text" wire:navigate>
+                            {{ __('Invoice') }}
+                        </flux:menu.item>
                         <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
                             {{ __('Settings') }}
                         </flux:menu.item>

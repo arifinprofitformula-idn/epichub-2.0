@@ -1,19 +1,13 @@
 <x-layouts::public title="EPIC Hub Premium">
-    <div class="relative overflow-hidden">
-        <div class="absolute inset-0 -z-10">
-            <div class="absolute -top-24 left-1/2 h-80 w-[42rem] -translate-x-1/2 rounded-full bg-amber-200/50 blur-3xl dark:bg-amber-500/10"></div>
-            <div class="absolute -top-10 right-[-10rem] h-72 w-72 rounded-full bg-cyan-200/50 blur-3xl dark:bg-cyan-500/10"></div>
-            <div class="absolute bottom-[-8rem] left-[-10rem] h-72 w-72 rounded-full bg-amber-200/60 blur-3xl dark:bg-amber-500/10"></div>
-        </div>
-
-        <section class="mx-auto max-w-[var(--container-5xl)] px-4 py-14 md:py-20">
+    <section class="mx-auto max-w-[var(--container-5xl)] px-4 py-8 md:py-10">
+        <div class="rounded-[2rem] border border-slate-200 bg-white/90 p-8 shadow-[0_20px_50px_rgba(15,23,42,0.09)] md:p-12">
             <div class="grid gap-10 md:grid-cols-2 md:items-center">
                 <div>
-                    <x-ui.badge variant="info">Futuristic but human</x-ui.badge>
-                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-zinc-900 dark:text-white md:text-5xl">
+                    <x-ui.badge variant="info">Platform Belajar Digital</x-ui.badge>
+                    <h1 class="mt-4 text-3xl font-semibold tracking-tight text-slate-900 md:text-5xl">
                         Pusat Produk Digital Premium, Kelas, Event, dan Peluang Penghasilan
                     </h1>
-                    <p class="mt-4 text-base leading-relaxed text-zinc-600 dark:text-zinc-300">
+                    <p class="mt-4 text-base leading-relaxed text-slate-600">
                         Satu platform untuk belajar, membeli produk digital, mengikuti event, dan bertumbuh bersama ekosistem EPIC Hub Premium.
                     </p>
 
@@ -26,9 +20,9 @@
                         </x-ui.button>
                     </div>
 
-                    <div class="mt-8 grid gap-3 text-sm text-zinc-600 dark:text-zinc-300 sm:grid-cols-2">
+                    <div class="mt-8 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
                         <div class="flex items-start gap-2">
-                            <span class="mt-0.5 inline-flex size-5 items-center justify-center rounded-full bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+                            <span class="mt-0.5 inline-flex size-5 items-center justify-center rounded-full bg-amber-100 text-amber-900">
                                 <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20 7L10.5 16.5L4 10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
@@ -36,7 +30,7 @@
                             <div>Akses terpusat untuk produk, kelas, dan event</div>
                         </div>
                         <div class="flex items-start gap-2">
-                            <span class="mt-0.5 inline-flex size-5 items-center justify-center rounded-full bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+                            <span class="mt-0.5 inline-flex size-5 items-center justify-center rounded-full bg-amber-100 text-amber-900">
                                 <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20 7L10.5 16.5L4 10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
@@ -48,26 +42,26 @@
 
                 <div class="md:justify-self-end">
                     <x-ui.card class="p-6 shadow-[var(--shadow-card)]">
-                        <div class="text-sm font-semibold text-zinc-900 dark:text-white">Preview pengalaman</div>
+                        <div class="text-sm font-semibold text-slate-900">Preview pengalaman</div>
                         <div class="mt-3 grid gap-3">
-                            <div class="rounded-[var(--radius-xl)] border border-zinc-200/70 p-4 dark:border-zinc-800">
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400">Dashboard</div>
-                                <div class="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">Ringkasan akses & aktivitas</div>
+                            <div class="rounded-[var(--radius-xl)] border border-zinc-200/70 p-4">
+                                <div class="text-xs text-slate-500">Dashboard</div>
+                                <div class="mt-1 text-sm font-semibold text-slate-900">Ringkasan akses & aktivitas</div>
                             </div>
-                            <div class="rounded-[var(--radius-xl)] border border-zinc-200/70 p-4 dark:border-zinc-800">
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400">Library</div>
-                                <div class="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">Produk dimiliki & kelas aktif</div>
+                            <div class="rounded-[var(--radius-xl)] border border-zinc-200/70 p-4">
+                                <div class="text-xs text-slate-500">Library</div>
+                                <div class="mt-1 text-sm font-semibold text-slate-900">Produk dimiliki & kelas aktif</div>
                             </div>
-                            <div class="rounded-[var(--radius-xl)] border border-zinc-200/70 p-4 dark:border-zinc-800">
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400">Growth</div>
-                                <div class="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">Teaser EPI Channel</div>
+                            <div class="rounded-[var(--radius-xl)] border border-zinc-200/70 p-4">
+                                <div class="text-xs text-slate-500">Growth</div>
+                                <div class="mt-1 text-sm font-semibold text-slate-900">Teaser EPI Channel</div>
                             </div>
                         </div>
                     </x-ui.card>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
 
     <section id="produk" class="mx-auto max-w-[var(--container-5xl)] px-4 py-14">
         <x-ui.section-header

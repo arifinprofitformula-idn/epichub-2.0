@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Orders\CancelOrderAction;
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,14 +13,22 @@ class OrderController extends Controller
 {
     public function index(Request $request): View
     {
-        $orders = Order::query()
-            ->where('user_id', $request->user()->id)
-            ->with(['items', 'payments'])
+        $baseQuery = Order::query()
+            ->where('user_id', $request->user()->id);
+
+        $orders = (clone $baseQuery)
+            ->with(['items.product', 'payments'])
             ->latest()
             ->paginate(10);
 
         return view('orders.index', [
             'orders' => $orders,
+            'invoiceSummary' => [
+                'total_orders' => (clone $baseQuery)->count(),
+                'unpaid_orders' => (clone $baseQuery)
+                    ->whereIn('status', [OrderStatus::Pending, OrderStatus::Unpaid])
+                    ->count(),
+            ],
         ]);
     }
 

@@ -93,6 +93,7 @@
                         <div class="mt-6 grid gap-4 md:grid-cols-2">
                             @foreach ($featuredProducts as $product)
                                 @php($refLink = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code)
+                                @php($landingLink = $product->landing_page_enabled ? route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]) : null)
 
                                 <x-ui.card class="p-5">
                                     <div class="text-sm font-semibold text-zinc-900 dark:text-white">{{ $product->title }}</div>
@@ -114,8 +115,22 @@
                                         />
                                     </div>
 
-                                    <div class="mt-4">
+                                    @if ($landingLink)
+                                        <div class="mt-4">
+                                            <input
+                                                type="text"
+                                                readonly
+                                                value="{{ $landingLink }}"
+                                                class="w-full rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none ring-0 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                                            />
+                                        </div>
+                                    @endif
+
+                                    <div class="mt-4 flex flex-wrap gap-2">
                                         <x-ui.button variant="ghost" size="sm" :href="route('catalog.products.show', $product->slug)">Buka produk</x-ui.button>
+                                        @if ($landingLink)
+                                            <x-ui.button variant="secondary" size="sm" :href="$landingLink">Landing page</x-ui.button>
+                                        @endif
                                     </div>
                                 </x-ui.card>
                             @endforeach
