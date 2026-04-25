@@ -1,6 +1,7 @@
 <?php
 
 use App\Concerns\PasswordValidationRules;
+use App\Actions\Oms\SendPasswordChangeToOmsAction;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -44,7 +45,7 @@ new #[Title('Security settings')] class extends Component {
     /**
      * Update the password for the currently authenticated user.
      */
-    public function updatePassword(): void
+    public function updatePassword(SendPasswordChangeToOmsAction $sendPasswordChangeToOms): void
     {
         try {
             $validated = $this->validate([
@@ -57,13 +58,21 @@ new #[Title('Security settings')] class extends Component {
             throw $e;
         }
 
-        Auth::user()->update([
+        $user = Auth::user();
+
+        $user->update([
             'password' => $validated['password'],
         ]);
+
+        $synced = $sendPasswordChangeToOms->execute($user, (string) $validated['password']);
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
         Flux::toast(variant: 'success', text: __('Password updated.'));
+
+        if (! $synced && config('epichub.oms.enabled', false)) {
+            Flux::toast(variant: 'warning', text: 'Password sudah diubah, namun sinkronisasi ke OMS gagal. Silakan hubungi admin.');
+        }
     }
 
     /**

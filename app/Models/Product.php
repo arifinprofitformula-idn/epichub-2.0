@@ -1,0 +1,181 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\AffiliateCommissionType;
+use App\Enums\ProductAccessType;
+use App\Enums\ProductStatus;
+use App\Enums\ProductType;
+use App\Enums\ProductVisibility;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+
+#[Fillable([
+    'product_category_id',
+    'title',
+    'slug',
+    'short_description',
+    'full_description',
+    'product_type',
+    'thumbnail',
+    'price',
+    'sale_price',
+    'status',
+    'visibility',
+    'access_type',
+    'stock',
+    'quota',
+    'publish_at',
+    'is_featured',
+    'is_affiliate_enabled',
+    'affiliate_commission_type',
+    'affiliate_commission_value',
+    'sort_order',
+    'metadata',
+])]
+class Product extends Model
+{
+    use SoftDeletes;
+
+    /**
+     * @return BelongsTo<ProductCategory, $this>
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ProductCategory::class, 'product_category_id');
+    }
+
+    /**
+     * @return HasMany<ProductFile, $this>
+     */
+    public function files(): HasMany
+    {
+        return $this->hasMany(ProductFile::class);
+    }
+
+    public function course(): HasOne
+    {
+        return $this->hasOne(Course::class);
+    }
+
+    public function event(): HasOne
+    {
+        return $this->hasOne(Event::class);
+    }
+
+    /**
+     * @return HasMany<UserProduct, $this>
+     */
+    public function userProducts(): HasMany
+    {
+        return $this->hasMany(UserProduct::class);
+    }
+
+    /**
+     * Produk-produk yang termasuk dalam bundle ini.
+     *
+     * @return BelongsToMany<Product, $this>
+     */
+    public function bundledProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'product_bundles',
+            'bundle_product_id',
+            'bundled_product_id',
+        )->withPivot(['sort_order'])->withTimestamps()->orderByPivot('sort_order');
+    }
+
+    /**
+     * Bundle-bundle yang memasukkan produk ini.
+     *
+     * @return BelongsToMany<Product, $this>
+     */
+    public function parentBundles(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'product_bundles',
+            'bundled_product_id',
+            'bundle_product_id',
+        )->withPivot(['sort_order'])->withTimestamps();
+    }
+
+    public function scopePublished(Builder $query): void
+    {
+        $query
+            ->where('status', ProductStatus::Published)
+            ->where(function (Builder $query): void {
+                $query->whereNull('publish_at')->orWhere('publish_at', '<=', Carbon::now());
+            });
+    }
+
+    public function scopeVisiblePublic(Builder $query): void
+    {
+        $query->where('visibility', ProductVisibility::Public);
+    }
+
+    public function scopeFeatured(Builder $query): void
+    {
+        $query->where('is_featured', true);
+    }
+
+    protected function effectivePrice(): Attribute
+    {
+        return Attribute::make(
+            get: function (): string {
+                $price = (string) $this->price;
+                $salePrice = $this->sale_price !== null ? (string) $this->sale_price : null;
+
+                if ($salePrice === null) {
+                    return $price;
+                }
+
+                if ((float) $salePrice <= 0) {
+                    return $price;
+                }
+
+                return (float) $salePrice < (float) $price ? $salePrice : $price;
+            },
+        );
+    }
+
+    protected function hasDiscount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->sale_price !== null && (float) $this->sale_price > 0 && (float) $this->sale_price < (float) $this->price,
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'product_type' => ProductType::class,
+            'status' => ProductStatus::class,
+            'visibility' => ProductVisibility::class,
+            'access_type' => ProductAccessType::class,
+            'price' => 'decimal:2',
+            'sale_price' => 'decimal:2',
+            'stock' => 'integer',
+            'quota' => 'integer',
+            'publish_at' => 'datetime',
+            'is_featured' => 'boolean',
+            'is_affiliate_enabled' => 'boolean',
+            'affiliate_commission_type' => AffiliateCommissionType::class,
+            'affiliate_commission_value' => 'decimal:2',
+            'sort_order' => 'integer',
+            'metadata' => 'array',
+        ];
+    }
+}

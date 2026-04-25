@@ -294,7 +294,7 @@ new class extends Component {
                                     <flux:icon.check
                                         x-show="copied"
                                         variant="solid"
-                                        class="text-green-500"
+                                        class="text-amber-500"
                                     ></flux:icon>
                                 </button>
                             @endempty

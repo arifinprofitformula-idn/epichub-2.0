@@ -11,6 +11,17 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
+    --container-5xl: 64rem;
+
+    --radius-sm: 0.625rem;
+    --radius-md: 0.875rem;
+    --radius-lg: 1.125rem;
+    --radius-xl: 1.5rem;
+    --radius-2xl: 1.75rem;
+
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-card: 0 12px 40px rgba(2, 6, 23, 0.08);
+
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
     --color-zinc-200: #e5e5e5;
@@ -23,16 +34,52 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
-    --color-accent-foreground: var(--color-white);
+    --color-cyan-50: #ecfeff;
+    --color-cyan-100: #cffafe;
+    --color-cyan-200: #a5f3fc;
+    --color-cyan-300: #67e8f9;
+    --color-cyan-400: #22d3ee;
+    --color-cyan-500: #06b6d4;
+    --color-cyan-600: #0891b2;
+    --color-cyan-700: #0e7490;
+    --color-cyan-800: #155e75;
+    --color-cyan-900: #164e63;
+    --color-cyan-950: #083344;
+
+    --color-amber-50: #fff8e1;
+    --color-amber-100: #ffecb3;
+    --color-amber-200: #ffe082;
+    --color-amber-300: #ffd54f;
+    --color-amber-400: #ffca28;
+    --color-amber-500: #ffd700;
+    --color-amber-600: #ffa500;
+    --color-amber-700: #cc8400;
+    --color-amber-800: #996300;
+    --color-amber-900: #664200;
+    --color-amber-950: #332100;
+
+    --color-rose-50: #fff1f2;
+    --color-rose-100: #ffe4e6;
+    --color-rose-200: #fecdd3;
+    --color-rose-300: #fda4af;
+    --color-rose-400: #fb7185;
+    --color-rose-500: #f43f5e;
+    --color-rose-600: #e11d48;
+    --color-rose-700: #be123c;
+    --color-rose-800: #9f1239;
+    --color-rose-900: #881337;
+    --color-rose-950: #4c0519;
+
+    --color-accent: var(--color-amber-500);
+    --color-accent-content: var(--color-amber-500);
+    --color-accent-foreground: var(--color-zinc-950);
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        --color-accent: var(--color-amber-500);
+        --color-accent-content: var(--color-amber-500);
+        --color-accent-foreground: var(--color-zinc-950);
     }
 }
 
@@ -58,7 +105,7 @@
 input:focus[data-flux-control],
 textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
-    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-white dark:ring-offset-zinc-950;
 }
 
 /* \[:where(&)\]:size-4 {
