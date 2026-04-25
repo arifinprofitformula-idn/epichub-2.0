@@ -12,56 +12,57 @@ class VerifyOmsRequest
     {
         if (! config('epichub.oms.enabled', false)) {
             return response()->json([
-                'code' => (string) config('epichub.oms.response.failed', '99'),
-                'message' => 'OMS integration disabled.',
+                'response_code' => (string) config('epichub.oms.response.failed', '99'),
+                'message' => 'Gagal',
+                'error' => 'OMS integration disabled.',
             ], 403);
         }
 
-        $token = (string) $request->header('X-OMS-Token', '');
-        $expectedToken = (string) config('epichub.oms.inbound_secret', '');
-
-        if ($expectedToken !== '' && hash_equals($expectedToken, $token)) {
-            return $next($request);
-        }
-
-        $signature = (string) $request->header('X-OMS-Signature', '');
-        $timestamp = (string) $request->header('X-OMS-Timestamp', '');
+        $requestId = trim((string) $request->header('X-OMS-Request-Id', ''));
+        $timestamp = trim((string) $request->header('X-OMS-Timestamp', ''));
+        $signature = trim((string) $request->header('X-OMS-Signature', ''));
         $secret = (string) config('epichub.oms.signature_secret', '');
 
-        if ($signature === '' || $timestamp === '' || $secret === '') {
+        if ($requestId === '' || $timestamp === '' || $signature === '' || $secret === '') {
             return response()->json([
-                'code' => (string) config('epichub.oms.response.failed', '99'),
-                'message' => 'Invalid signature.',
+                'response_code' => (string) config('epichub.oms.response.failed', '99'),
+                'message' => 'Gagal',
+                'error' => 'Invalid OMS signature headers.',
             ], 401);
         }
 
         if (! ctype_digit($timestamp)) {
             return response()->json([
-                'code' => (string) config('epichub.oms.response.failed', '99'),
-                'message' => 'Invalid timestamp.',
+                'response_code' => (string) config('epichub.oms.response.failed', '99'),
+                'message' => 'Gagal',
+                'error' => 'Invalid timestamp.',
             ], 401);
         }
 
-        $now = time();
         $ts = (int) $timestamp;
         $maxSkew = (int) config('epichub.oms.signature_max_skew_seconds', 300);
 
-        if (abs($now - $ts) > $maxSkew) {
+        if (abs(time() - $ts) > $maxSkew) {
             return response()->json([
-                'code' => (string) config('epichub.oms.response.failed', '99'),
-                'message' => 'Signature expired.',
+                'response_code' => (string) config('epichub.oms.response.failed', '99'),
+                'message' => 'Gagal',
+                'error' => 'Signature expired.',
             ], 401);
         }
 
         $rawBody = $request->getContent();
-        $expected = hash_hmac('sha256', $timestamp.'.'.$rawBody, $secret);
+        $expected = hash_hmac('sha256', $timestamp.$requestId.$rawBody, $secret);
 
         if (! hash_equals($expected, $signature)) {
             return response()->json([
-                'code' => (string) config('epichub.oms.response.failed', '99'),
-                'message' => 'Invalid signature.',
+                'response_code' => (string) config('epichub.oms.response.failed', '99'),
+                'message' => 'Gagal',
+                'error' => 'Invalid signature.',
             ], 401);
         }
+
+        $request->attributes->set('oms_request_id', $requestId);
+        $request->attributes->set('oms_timestamp', $timestamp);
 
         return $next($request);
     }

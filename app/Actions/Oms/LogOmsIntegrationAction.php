@@ -23,7 +23,7 @@ class LogOmsIntegrationAction
         ?string $ipAddress = null,
         ?string $userAgent = null,
     ): void {
-        OmsIntegrationLog::query()->create([
+        $payload = [
             'direction' => $direction,
             'action' => $action,
             'request_id' => $requestId,
@@ -38,17 +38,34 @@ class LogOmsIntegrationAction
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent,
             'processed_at' => now(),
-        ]);
+        ];
+
+        if ($requestId !== null && $requestId !== '') {
+            $record = OmsIntegrationLog::query()->where('request_id', $requestId)->first();
+
+            if ($record) {
+                $record->update($payload);
+
+                return;
+            }
+        }
+
+        OmsIntegrationLog::query()->create($payload);
     }
 
     protected function sanitize(array $payload): array
     {
-        $clean = $payload;
+        $clean = [];
 
-        foreach (['password', 'password_encrypted', 'encrypted_password', 'new_password'] as $key) {
-            if (array_key_exists($key, $clean)) {
-                $clean[$key] = '***';
+        foreach ($payload as $key => $value) {
+            $normalized = strtolower((string) $key);
+
+            if (in_array($normalized, ['password', 'password_encrypted', 'encrypted_password', 'new_password', 'plain_password'], true)) {
+                $clean[$key] = '[REDACTED]';
+                continue;
             }
+
+            $clean[$key] = is_array($value) ? $this->sanitize($value) : $value;
         }
 
         return $clean;

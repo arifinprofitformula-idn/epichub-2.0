@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Affiliates\AttachReferralToOrderAction;
 use App\Actions\Event\CheckEventCheckoutEligibilityAction;
 use App\Actions\Orders\CreateDirectOrderAction;
 use App\Enums\ProductType;
@@ -44,7 +43,7 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function store(Request $request, Product $product, CreateDirectOrderAction $action, AttachReferralToOrderAction $attachReferralToOrder): RedirectResponse
+    public function store(Request $request, Product $product, CreateDirectOrderAction $action): RedirectResponse
     {
         $product = Product::query()
             ->whereKey($product->getKey())
@@ -53,8 +52,7 @@ class CheckoutController extends Controller
             ->firstOrFail();
 
         try {
-            $payment = $action->execute($request->user(), $product);
-            $attachReferralToOrder->execute($request, $payment->order);
+            $payment = $action->execute($request->user(), $product, $request);
         } catch (RuntimeException $e) {
             return back()->withErrors([
                 'checkout' => $e->getMessage(),

@@ -5,14 +5,14 @@ namespace App\Actions\Oms;
 use App\Enums\OmsIntegrationDirection;
 use App\Enums\OmsIntegrationStatus;
 use App\Models\User;
-use App\Services\Oms\OmsPasswordCrypto;
+use App\Services\Oms\OmsPasswordCipher;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class SendPasswordChangeToOmsAction
 {
     public function __construct(
-        protected OmsPasswordCrypto $crypto,
+        protected OmsPasswordCipher $cipher,
         protected LogOmsIntegrationAction $logOms,
     ) {
     }
@@ -41,10 +41,9 @@ class SendPasswordChangeToOmsAction
         $timestamp = (string) time();
 
         $payload = [
-            'request_id' => $requestId,
-            'epic_code' => $epicCode,
-            'email' => $user->email,
-            'password_encrypted' => $this->crypto->encrypt($plainPassword),
+            'kode_epic' => $epicCode,
+            'email_epic' => $user->email,
+            'encrypted_password' => $this->cipher->encrypt($plainPassword),
         ];
 
         $secret = (string) config('epichub.oms.signature_secret', '');
@@ -54,11 +53,12 @@ class SendPasswordChangeToOmsAction
             return false;
         }
 
-        $signature = $secret !== '' ? hash_hmac('sha256', $timestamp.'.'.$rawBody, $secret) : '';
+        $signature = $secret !== '' ? hash_hmac('sha256', $timestamp.$requestId.$rawBody, $secret) : '';
 
         try {
             $response = Http::timeout((int) config('epichub.oms.outbound_timeout', 10))
                 ->withHeaders([
+                    'X-OMS-Request-Id' => $requestId,
                     'X-OMS-Timestamp' => $timestamp,
                     'X-OMS-Signature' => $signature,
                     'Accept' => 'application/json',
@@ -66,7 +66,7 @@ class SendPasswordChangeToOmsAction
                 ->post($url, $payload);
 
             $json = $response->json() ?: [];
-            $code = (string) data_get($json, 'code', '');
+            $code = (string) data_get($json, 'response_code', '');
 
             $success = $response->successful() && $code === (string) config('epichub.oms.response.success', '00');
 
@@ -81,7 +81,7 @@ class SendPasswordChangeToOmsAction
                 httpStatus: $response->status(),
                 requestPayload: $payload,
                 responsePayload: is_array($json) ? $json : null,
-                errorMessage: $success ? null : (string) data_get($json, 'message', 'OMS failed'),
+                errorMessage: $success ? null : (string) data_get($json, 'error', data_get($json, 'message', 'OMS failed')),
             );
 
             return $success;

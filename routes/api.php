@@ -1,11 +1,10 @@
 <?php
 
-use App\Http\Controllers\Oms\OmsAccountController;
-use App\Http\Controllers\Oms\OmsPasswordController;
+use App\Http\Controllers\Oms\OmsEpiChannelController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['oms'])->prefix('oms')->name('oms.')->group(function () {
-    Route::post('/accounts', [OmsAccountController::class, 'store'])->name('accounts.store');
-    Route::post('/passwords/change', [OmsPasswordController::class, 'change'])->name('passwords.change');
+Route::middleware(['oms', 'throttle:60,1'])->prefix('oms/epi-channel')->name('oms.epi-channel.')->group(function () {
+    Route::post('/create-account', [OmsEpiChannelController::class, 'createAccount'])->name('create-account');
+    Route::post('/change-password', [OmsEpiChannelController::class, 'changePassword'])->name('change-password');
 });
 

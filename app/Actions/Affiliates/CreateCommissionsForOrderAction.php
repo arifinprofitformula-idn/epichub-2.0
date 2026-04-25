@@ -4,6 +4,7 @@ namespace App\Actions\Affiliates;
 
 use App\Enums\AffiliateCommissionType;
 use App\Enums\CommissionStatus;
+use App\Enums\OrderStatus;
 use App\Enums\ReferralOrderStatus;
 use App\Models\Commission;
 use App\Models\Order;
@@ -22,9 +23,21 @@ class CreateCommissionsForOrderAction
             'user.epiChannel',
         ]);
 
+        if (! in_array($order->status, [OrderStatus::Paid], true)) {
+            return collect();
+        }
+
+        if (in_array($order->status, [OrderStatus::Cancelled, OrderStatus::Refunded], true)) {
+            return collect();
+        }
+
         $referralOrder = $order->referralOrder;
 
         if (! $referralOrder) {
+            return collect();
+        }
+
+        if (in_array($referralOrder->status, [ReferralOrderStatus::Cancelled, ReferralOrderStatus::Refunded], true)) {
             return collect();
         }
 

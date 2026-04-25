@@ -2,6 +2,7 @@
 
 namespace App\Actions\Orders;
 
+use App\Actions\Affiliates\AttachReferralToOrderAction;
 use App\Actions\Event\CheckEventCheckoutEligibilityAction;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
@@ -13,7 +14,9 @@ use App\Models\Product;
 use App\Models\User;
 use App\Support\OrderNumberGenerator;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -21,10 +24,11 @@ class CreateDirectOrderAction
 {
     public function __construct(
         protected CheckEventCheckoutEligibilityAction $checkEventCheckoutEligibility,
+        protected AttachReferralToOrderAction $attachReferralToOrder,
     ) {
     }
 
-    public function execute(User $user, Product $product): Payment
+    public function execute(User $user, Product $product, ?Request $request = null): Payment
     {
         $product = Product::query()
             ->whereKey($product->getKey())
@@ -50,7 +54,7 @@ class CreateDirectOrderAction
             $attempts++;
 
             try {
-                return DB::transaction(function () use ($user, $product, $unitPrice): Payment {
+                return DB::transaction(function () use ($user, $product, $unitPrice, $request): Payment {
                     $orderNumber = OrderNumberGenerator::nextOrderNumber();
                     $paymentNumber = OrderNumberGenerator::nextPaymentNumber();
 
@@ -75,13 +79,26 @@ class CreateDirectOrderAction
                         'subtotal_amount' => $unitPrice,
                     ]);
 
-                    return $order->payments()->create([
+                    $payment = $order->payments()->create([
                         'payment_number' => $paymentNumber,
                         'payment_method' => PaymentMethod::ManualBankTransfer,
                         'status' => PaymentStatus::Pending,
                         'amount' => $unitPrice,
                         'currency' => 'IDR',
                     ]);
+
+                    if ($request) {
+                        try {
+                            $this->attachReferralToOrder->execute($request, $order);
+                        } catch (\Throwable $e) {
+                            Log::warning('Failed to attach referral to order.', [
+                                'order_id' => $order->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+
+                    return $payment;
                 });
             } catch (QueryException $e) {
                 if ($attempts >= 3 || ! $this->isUniqueConstraintViolation($e)) {
