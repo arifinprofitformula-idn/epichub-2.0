@@ -1,144 +1,166 @@
-<x-layouts::public title="Dashboard Penghasilan">
-    <section class="mx-auto max-w-[var(--container-5xl)] px-4 py-10">
+<x-layouts::app :title="__('Dashboard EPI Channel')">
+    @include('epi-channel.partials.page-shell-start')
         <x-ui.section-header
-            title="Dashboard Penghasilan"
-            description="Pantau klik, order referral, dan komisi kamu di EPI Channel."
+            eyebrow="EPI Channel"
+            title="Dashboard EPI Channel"
+            description="Pantau status channel, link referral utama, performa klik, order referral, komisi, dan payout."
         >
             <x-ui.button variant="ghost" size="sm" :href="route('dashboard')">
-                Kembali ke dashboard
+                Dashboard utama
             </x-ui.button>
         </x-ui.section-header>
 
         @if (! $channel || ! $channel->isActive())
             <div class="mt-6">
-                <x-ui.empty-state
-                    title="EPI Channel belum aktif"
-                    description="Aktivasi dilakukan melalui OMS atau admin. Setelah aktif, dashboard penghasilan akan muncul di sini."
-                >
-                    <x-slot:action>
-                        <x-ui.button variant="primary" :href="route('catalog.products.index')">
-                            Jelajahi produk
-                        </x-ui.button>
-                    </x-slot:action>
-                </x-ui.empty-state>
+                @include('epi-channel.partials.inactive-state', ['channel' => $channel])
             </div>
         @else
-            <div class="mt-6 grid gap-4 md:grid-cols-3">
-                <x-ui.stat-card label="Klik" :value="$stats['clicks']" description="Total referral visit" />
-                <x-ui.stat-card label="Order Referral" :value="$stats['referral_orders']" description="Tercatat" />
-                <x-ui.stat-card label="Komisi Pending" :value="'Rp '.number_format((float) $stats['commission_pending_amount'], 0, ',', '.')" :description="$stats['commission_pending_count'].' item'" />
-                <x-ui.stat-card label="Komisi Approved" :value="'Rp '.number_format((float) $stats['commission_approved_amount'], 0, ',', '.')" :description="$stats['commission_approved_count'].' item'" />
-                <x-ui.stat-card label="Komisi Paid" :value="'Rp '.number_format((float) $stats['commission_paid_amount'], 0, ',', '.')" :description="$stats['commission_paid_count'].' item'" />
+            <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                <x-ui.stat-card label="Status Channel" value="Aktif" :description="$channel->epic_code" />
+                <x-ui.stat-card label="Total Clicks" :value="$stats['clicks']" description="Referral visits" />
+                <x-ui.stat-card label="Referral Orders" :value="$stats['referral_orders']" description="Order teratribusikan" />
+                <x-ui.stat-card label="Komisi Pending" :value="'Rp '.number_format((float) $stats['commission_pending_amount'], 0, ',', '.')" description="Menunggu approval" />
+                <x-ui.stat-card label="Komisi Approved" :value="'Rp '.number_format((float) $stats['commission_approved_amount'], 0, ',', '.')" description="Siap dibayarkan" />
+                <x-ui.stat-card label="Komisi Paid" :value="'Rp '.number_format((float) $stats['commission_paid_amount'], 0, ',', '.')" description="Sudah dibayarkan" />
+                <x-ui.stat-card label="Payout Paid" :value="'Rp '.number_format((float) $stats['total_payout_paid'], 0, ',', '.')" description="Akumulasi payout" />
             </div>
 
-            <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <div class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.9fr)]">
                 <x-ui.card class="p-6">
-                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">Profil EPI Channel</div>
-                    <div class="mt-3 grid gap-2 text-sm text-zinc-600 dark:text-zinc-300">
-                        <div class="flex items-center justify-between gap-4">
-                            <div>EPIC Code</div>
-                            <div class="font-semibold text-zinc-900 dark:text-white">{{ $channel->epic_code }}</div>
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <div class="text-sm font-semibold text-zinc-900 dark:text-white">Profil ringkas channel</div>
+                            <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Informasi inti EPI Channel untuk aktivitas promosi harian.</div>
                         </div>
-                        <div class="flex items-center justify-between gap-4">
-                            <div>Status</div>
-                            <x-ui.badge variant="success">Aktif</x-ui.badge>
-                        </div>
-                        <div class="flex items-center justify-between gap-4">
-                            <div>Nama store</div>
-                            <div class="font-semibold text-zinc-900 dark:text-white">{{ $channel->store_name ?: '-' }}</div>
-                        </div>
+                        @include('epi-channel.partials.status-badge', ['status' => $channel->status])
                     </div>
-                </x-ui.card>
 
-                <x-ui.card class="p-6">
-                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">Referral link utama</div>
-                    <div class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
-                        Gunakan link ini saat membagikan halaman produk.
+                    <div class="mt-5 grid gap-3 text-sm text-zinc-600 dark:text-zinc-300 md:grid-cols-2">
+                        <div class="rounded-[var(--radius-lg)] border border-zinc-200 bg-zinc-50/80 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/70">
+                            <div class="text-xs uppercase tracking-[0.18em] text-zinc-400">EPIC Code</div>
+                            <div class="mt-2 font-semibold text-zinc-900 dark:text-white">{{ $channel->epic_code }}</div>
+                        </div>
+                        <div class="rounded-[var(--radius-lg)] border border-zinc-200 bg-zinc-50/80 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/70">
+                            <div class="text-xs uppercase tracking-[0.18em] text-zinc-400">Store Name</div>
+                            <div class="mt-2 font-semibold text-zinc-900 dark:text-white">{{ $channel->store_name ?: '-' }}</div>
+                        </div>
                     </div>
-                    <div class="mt-4">
-                        <input
-                            type="text"
-                            readonly
-                            value="{{ $mainReferralLink }}"
-                            class="w-full rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm outline-none ring-0 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                        />
+
+                    <div class="mt-5">
+                        @include('epi-channel.partials.copy-field', [
+                            'label' => 'Referral Link Utama',
+                            'value' => $mainReferralLink,
+                            'fieldId' => 'epi-channel-main-link',
+                        ])
                     </div>
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <x-ui.button variant="secondary" size="sm" :href="route('epi-channel.links')">Link Produk</x-ui.button>
+
+                    <div class="mt-5 flex flex-wrap gap-2">
+                        <x-ui.button variant="primary" size="sm" :href="route('epi-channel.links')">Link Promosi</x-ui.button>
+                        <x-ui.button variant="ghost" size="sm" :href="route('epi-channel.products')">Produk Promosi</x-ui.button>
                         <x-ui.button variant="ghost" size="sm" :href="route('epi-channel.commissions')">Komisi</x-ui.button>
                         <x-ui.button variant="ghost" size="sm" :href="route('epi-channel.payouts')">Payout</x-ui.button>
-                        <x-ui.button variant="ghost" size="sm" :href="route('epi-channel.promo-assets')">Materi</x-ui.button>
+                    </div>
+                </x-ui.card>
+
+                <x-ui.card class="p-6">
+                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">Recent commissions</div>
+                    <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Lihat pergerakan komisi terbaru dari referral order milik channel kamu.</div>
+
+                    <div class="mt-5 space-y-3">
+                        @forelse ($recentCommissions as $commission)
+                            <div class="rounded-[var(--radius-lg)] border border-zinc-200 px-4 py-3 dark:border-zinc-800">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <div class="font-semibold text-zinc-900 dark:text-white">{{ $commission->product?->title ?? 'Produk' }}</div>
+                                        <div class="mt-1 text-xs text-zinc-500">Order {{ $commission->order?->order_number ?? ('#'.$commission->order_id) }}</div>
+                                    </div>
+                                    @include('epi-channel.partials.status-badge', ['status' => $commission->status])
+                                </div>
+                                <div class="mt-2 text-sm font-semibold text-zinc-900 dark:text-white">
+                                    Rp {{ number_format((float) $commission->commission_amount, 0, ',', '.') }}
+                                </div>
+                            </div>
+                        @empty
+                            <x-ui.empty-state
+                                title="Belum ada komisi"
+                                description="Komisi terbaru akan muncul di area ini setelah order referral diproses."
+                            />
+                        @endforelse
                     </div>
                 </x-ui.card>
             </div>
 
-            <div class="mt-6">
+            <div class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
                 <x-ui.card class="p-6">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <div class="text-sm font-semibold text-zinc-900 dark:text-white">Produk untuk dipromosikan</div>
-                            <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Pilih produk, lalu bagikan link referral.</div>
+                            <div class="text-sm font-semibold text-zinc-900 dark:text-white">Produk promosi</div>
+                            <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Produk affiliate aktif yang paling siap untuk kamu bagikan.</div>
                         </div>
-                        <x-ui.button variant="secondary" size="sm" :href="route('epi-channel.links')">Lihat semua</x-ui.button>
+                        <x-ui.button variant="ghost" size="sm" :href="route('epi-channel.products')">
+                            Lihat semua
+                        </x-ui.button>
                     </div>
 
-                    @if ($featuredProducts->count() === 0)
-                        <div class="mt-6">
+                    <div class="mt-5 grid gap-4 md:grid-cols-2">
+                        @forelse ($featuredProducts as $product)
+                            @php($productLink = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code)
+
+                            <div class="rounded-[var(--radius-lg)] border border-zinc-200 p-4 dark:border-zinc-800">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <div class="font-semibold text-zinc-900 dark:text-white">{{ $product->title }}</div>
+                                        <div class="mt-1 text-xs text-zinc-500">{{ $product->product_type?->label() ?? $product->product_type?->value ?? '-' }}</div>
+                                    </div>
+                                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">
+                                        Rp {{ number_format((float) $product->effective_price, 0, ',', '.') }}
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    @include('epi-channel.partials.copy-field', [
+                                        'label' => 'Link produk referral',
+                                        'value' => $productLink,
+                                        'fieldId' => 'dashboard-product-link-'.$product->id,
+                                    ])
+                                </div>
+                            </div>
+                        @empty
+                            <div class="md:col-span-2">
+                                <x-ui.empty-state
+                                    title="Belum ada produk affiliate"
+                                    description="Admin belum mengaktifkan affiliate untuk produk mana pun."
+                                />
+                            </div>
+                        @endforelse
+                    </div>
+                </x-ui.card>
+
+                <x-ui.card class="p-6">
+                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">Top products by click</div>
+                    <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Produk yang paling banyak menerima referral visit dari channel kamu.</div>
+
+                    <div class="mt-5 space-y-3">
+                        @forelse ($topProductsByClick as $row)
+                            <div class="flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border border-zinc-200 px-4 py-3 dark:border-zinc-800">
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-zinc-900 dark:text-white">{{ $row->product?->title ?? 'Produk tidak ditemukan' }}</div>
+                                    <div class="mt-1 text-xs text-zinc-500">{{ $row->product?->slug ?? '-' }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">{{ $row->total_clicks }}</div>
+                                    <div class="text-xs text-zinc-500">clicks</div>
+                                </div>
+                            </div>
+                        @empty
                             <x-ui.empty-state
-                                title="Belum ada produk affiliate"
-                                description="Admin belum mengaktifkan affiliate untuk produk manapun."
+                                title="Belum ada data kunjungan"
+                                description="Top product akan muncul setelah link referral mulai dikunjungi."
                             />
-                        </div>
-                    @else
-                        <div class="mt-6 grid gap-4 md:grid-cols-2">
-                            @foreach ($featuredProducts as $product)
-                                @php($refLink = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code)
-                                @php($landingLink = $product->landing_page_enabled ? route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]) : null)
-
-                                <x-ui.card class="p-5">
-                                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">{{ $product->title }}</div>
-                                    <div class="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                                        Komisi:
-                                        @if ($product->affiliate_commission_type)
-                                            {{ $product->affiliate_commission_type->value }} {{ (float) $product->affiliate_commission_value }}
-                                        @else
-                                            -
-                                        @endif
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <input
-                                            type="text"
-                                            readonly
-                                            value="{{ $refLink }}"
-                                            class="w-full rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none ring-0 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                                        />
-                                    </div>
-
-                                    @if ($landingLink)
-                                        <div class="mt-4">
-                                            <input
-                                                type="text"
-                                                readonly
-                                                value="{{ $landingLink }}"
-                                                class="w-full rounded-[var(--radius-lg)] border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none ring-0 focus:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                                            />
-                                        </div>
-                                    @endif
-
-                                    <div class="mt-4 flex flex-wrap gap-2">
-                                        <x-ui.button variant="ghost" size="sm" :href="route('catalog.products.show', $product->slug)">Buka produk</x-ui.button>
-                                        @if ($landingLink)
-                                            <x-ui.button variant="secondary" size="sm" :href="$landingLink">Landing page</x-ui.button>
-                                        @endif
-                                    </div>
-                                </x-ui.card>
-                            @endforeach
-                        </div>
-                    @endif
+                        @endforelse
+                    </div>
                 </x-ui.card>
             </div>
         @endif
-    </section>
-</x-layouts::public>
-
+    @include('epi-channel.partials.page-shell-end')
+</x-layouts::app>

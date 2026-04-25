@@ -13,6 +13,7 @@ use App\Http\Controllers\MyCourseLessonController;
 use App\Http\Controllers\MyEventAccessController;
 use App\Http\Controllers\MyEventController;
 use App\Http\Controllers\MyEpiChannelController;
+use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\MyProductController;
 use App\Http\Controllers\MyProductFileController;
 use App\Http\Controllers\OrderController;
@@ -50,12 +51,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+
     Route::prefix('epi-channel')->name('epi-channel.')->group(function () {
-        Route::get('/', [MyEpiChannelController::class, 'index'])->name('index');
+        Route::get('/', [MyEpiChannelController::class, 'dashboard'])->name('dashboard');
         Route::get('/links', [MyEpiChannelController::class, 'links'])->name('links');
+        Route::get('/products', [MyEpiChannelController::class, 'products'])->name('products');
+        Route::get('/visits', [MyEpiChannelController::class, 'visits'])->name('visits');
+        Route::get('/orders', [MyEpiChannelController::class, 'orders'])->name('orders');
         Route::get('/commissions', [MyEpiChannelController::class, 'commissions'])->name('commissions');
         Route::get('/payouts', [MyEpiChannelController::class, 'payouts'])->name('payouts');
         Route::get('/promo-assets', [MyEpiChannelController::class, 'promoAssets'])->name('promo-assets');
+        Route::get('/profile', [MyEpiChannelController::class, 'profile'])->name('profile');
     });
 
     Route::prefix('produk-saya')->name('my-products.')->group(function () {
@@ -101,6 +108,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/{payment}', [PaymentController::class, 'show'])->name('show');
+        Route::get('/{payment}/proof', [PaymentController::class, 'proof'])->name('proof.show');
         Route::post('/{payment}/proof', [PaymentController::class, 'storeProof'])->name('proof.store');
     });
 });

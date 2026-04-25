@@ -4,6 +4,9 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        @php($epiChannel = auth()->user()->loadMissing('epiChannel')->epiChannel)
+        @php($hasActiveEpiChannel = $epiChannel?->isActive() ?? false)
+
         <flux:sidebar sticky collapsible class="epic-sidebar border-e border-zinc-800/80 bg-zinc-950 text-white">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
@@ -15,9 +18,51 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="document-text" :href="route('orders.index')" :current="request()->routeIs('orders.*')" wire:navigate>
-                        {{ __('Invoice') }}
+                    <flux:sidebar.item icon="shopping-bag" :href="route('marketplace.index')" :current="request()->routeIs('marketplace.*')" wire:navigate>
+                        Marketplace
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="squares-2x2" :href="route('my-products.index')" :current="request()->routeIs('my-products.*') || request()->routeIs('my-courses.*') || request()->routeIs('my-events.*')" wire:navigate>
+                        Produk Saya
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="cog-6-tooth" :href="route('profile.edit')" :current="request()->routeIs('profile.edit') || request()->routeIs('settings.*')" wire:navigate>
+                        Pengaturan
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                <flux:sidebar.group heading="EPI Channel" class="grid">
+                    @if ($hasActiveEpiChannel)
+                        <flux:sidebar.item icon="chart-bar" :href="route('epi-channel.dashboard')" :current="request()->routeIs('epi-channel.dashboard')" wire:navigate>
+                            Dashboard EPIC
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="link" :href="route('epi-channel.links')" :current="request()->routeIs('epi-channel.links')" wire:navigate>
+                            Link Promosi
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="shopping-bag" :href="route('epi-channel.products')" :current="request()->routeIs('epi-channel.products')" wire:navigate>
+                            Produk Promosi
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="cursor-arrow-rays" :href="route('epi-channel.visits')" :current="request()->routeIs('epi-channel.visits')" wire:navigate>
+                            Kunjungan
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('epi-channel.orders')" :current="request()->routeIs('epi-channel.orders')" wire:navigate>
+                            Referral Order
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="banknotes" :href="route('epi-channel.commissions')" :current="request()->routeIs('epi-channel.commissions')" wire:navigate>
+                            Komisi
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="credit-card" :href="route('epi-channel.payouts')" :current="request()->routeIs('epi-channel.payouts')" wire:navigate>
+                            Payout
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="photo" :href="route('epi-channel.promo-assets')" :current="request()->routeIs('epi-channel.promo-assets')" wire:navigate>
+                            Materi Promosi
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="identification" :href="route('epi-channel.profile')" :current="request()->routeIs('epi-channel.profile')" wire:navigate>
+                            Profil Channel
+                        </flux:sidebar.item>
+                    @else
+                        <flux:sidebar.item icon="information-circle" :href="route('epi-channel.dashboard')" :current="request()->routeIs('epi-channel.*')" wire:navigate>
+                            Status EPI Channel
+                        </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
@@ -73,11 +118,14 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('orders.index')" icon="document-text" wire:navigate>
-                            {{ __('Invoice') }}
+                        <flux:menu.item :href="route('marketplace.index')" icon="shopping-bag" wire:navigate>
+                            Marketplace
+                        </flux:menu.item>
+                        <flux:menu.item :href="route('my-products.index')" icon="squares-2x2" wire:navigate>
+                            Produk Saya
                         </flux:menu.item>
                         <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
-                            {{ __('Settings') }}
+                            Pengaturan
                         </flux:menu.item>
                     </flux:menu.radio.group>
 

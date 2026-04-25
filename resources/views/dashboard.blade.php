@@ -44,11 +44,11 @@
                         </p>
 
                         <div class="mt-6 flex flex-wrap gap-3">
-                            <a href="#kursus-saya" class="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-cyan-300 hover:text-cyan-700">
-                                Lanjutkan kelas
+                            <a href="{{ route('my-products.index') }}" class="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-cyan-300 hover:text-cyan-700">
+                                Lihat Semua Akses
                             </a>
-                            <a href="#katalog-lms" class="inline-flex items-center rounded-full border border-transparent bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_10px_25px_rgba(245,158,11,0.25)] transition hover:brightness-95">
-                                Jelajahi katalog LMS
+                            <a href="{{ route('marketplace.index') }}" class="inline-flex items-center rounded-full border border-transparent bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_10px_25px_rgba(245,158,11,0.25)] transition hover:brightness-95">
+                                Marketplace
                             </a>
                         </div>
                     </div>
@@ -280,7 +280,7 @@
             </div>
         </section>
 
-        <section class="mt-10 grid gap-4 md:grid-cols-3">
+        <section class="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <x-ui.card class="p-5">
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Event</div>
                 <div class="mt-3 text-3xl font-semibold tracking-tight text-slate-900">{{ $activeEventsCount }}</div>
@@ -297,6 +297,22 @@
                 <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">EPI Channel</div>
                 <div class="mt-3 text-lg font-semibold tracking-tight text-slate-900">{{ $epiChannelStatus }}</div>
                 <p class="mt-2 text-sm text-slate-500">{{ $epiChannelDescription }}</p>
+                <div class="mt-4">
+                    <x-ui.button variant="ghost" size="sm" :href="route('epi-channel.dashboard')">
+                        {{ $epiChannel?->isActive() ? 'Dashboard Penghasilan' : 'Status EPI Channel' }}
+                    </x-ui.button>
+                </div>
+            </x-ui.card>
+
+            <x-ui.card class="p-5">
+                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Marketplace</div>
+                <div class="mt-3 text-lg font-semibold tracking-tight text-slate-900">Jelajahi Produk</div>
+                <p class="mt-2 text-sm text-slate-500">Temukan produk digital, kelas, event, dan bundle pilihan EPIC Hub.</p>
+                <div class="mt-4">
+                    <x-ui.button variant="ghost" size="sm" :href="route('marketplace.index')">
+                        Buka Marketplace
+                    </x-ui.button>
+                </div>
             </x-ui.card>
         </section>
 
