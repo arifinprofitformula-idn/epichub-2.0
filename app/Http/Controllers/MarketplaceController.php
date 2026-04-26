@@ -136,10 +136,7 @@ class MarketplaceController extends Controller
             ? collect()
             : CourseLesson::query()
                 ->whereIn('course_id', $courseIds)
-                ->where('is_active', true)
-                ->where(function (Builder $query): void {
-                    $query->whereNull('published_at')->orWhere('published_at', '<=', now());
-                })
+                ->accessibleToLearner()
                 ->selectRaw('course_id, count(*) as total')
                 ->groupBy('course_id')
                 ->pluck('total', 'course_id');
@@ -149,7 +146,7 @@ class MarketplaceController extends Controller
             : LessonProgress::query()
                 ->where('user_id', $userId)
                 ->whereIn('course_id', $courseIds)
-                ->where('status', LessonProgressStatus::Completed)
+                ->completed()
                 ->selectRaw('course_id, count(*) as completed')
                 ->groupBy('course_id')
                 ->pluck('completed', 'course_id');

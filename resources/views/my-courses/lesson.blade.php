@@ -59,6 +59,9 @@
                 <div class="flex flex-wrap items-center gap-2 text-xs">
                     <x-ui.badge variant="info">{{ $lesson->lesson_type?->label() ?? ($lesson->lesson_type?->value ?? '-') }}</x-ui.badge>
                     <x-ui.badge variant="neutral">{{ $currentLessonIndex }}/{{ $totalLessons }}</x-ui.badge>
+                    @if (! $lesson->isRequired())
+                        <x-ui.badge variant="neutral">Opsional</x-ui.badge>
+                    @endif
                 </div>
             </div>
 
@@ -87,26 +90,64 @@
 
                                         @foreach ($sectionLessons as $sectionLesson)
                                             @php($status = $progressByLessonId[$sectionLesson->id] ?? null)
+                                            @php($access = $lessonAccessByLessonId[$sectionLesson->id] ?? ['can_access' => true, 'state' => 'open', 'status_label' => 'Terbuka', 'message' => null])
                                             @php($rowCompleted = $status?->value === 'completed')
-                                            @php($rowInProgress = $status?->value === 'in_progress')
                                             @php($isCurrentLesson = $sectionLesson->id === $lesson->id)
+                                            @php($isClickable = (bool) ($access['can_access'] ?? false))
+                                            @php($state = $access['state'] ?? 'open')
+                                            @php($dotClass = match ($state) {
+                                                'completed' => 'bg-emerald-500',
+                                                'scheduled' => 'bg-sky-500',
+                                                'locked' => 'bg-zinc-400',
+                                                default => 'bg-amber-500',
+                                            })
 
-                                            <a
-                                                href="{{ route('my-courses.lessons.show', [$userProduct, $sectionLesson]) }}"
-                                                class="block rounded-[var(--radius-md)] border px-3 py-3 transition {{ $isCurrentLesson ? 'border-amber-300 bg-amber-50' : 'border-zinc-200/70 bg-white hover:bg-zinc-50' }}"
-                                            >
-                                                <div class="flex items-start gap-3">
-                                                    <div class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {{ $rowCompleted ? 'bg-emerald-500' : ($rowInProgress ? 'bg-amber-500' : 'bg-zinc-300') }}"></div>
-                                                    <div class="min-w-0">
-                                                        <div class="truncate text-sm font-medium {{ $isCurrentLesson ? 'text-amber-900' : 'text-zinc-900' }}">
-                                                            {{ $sectionLesson->title }}
+                                            @if ($isClickable)
+                                                <a
+                                                    href="{{ route('my-courses.lessons.show', [$userProduct, $sectionLesson]) }}"
+                                                    class="block rounded-[var(--radius-md)] border px-3 py-3 transition {{ $isCurrentLesson ? 'border-amber-300 bg-amber-50' : 'border-zinc-200/70 bg-white hover:bg-zinc-50' }}"
+                                                >
+                                                    <div class="flex items-start gap-3">
+                                                        <div class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {{ $dotClass }}"></div>
+                                                        <div class="min-w-0">
+                                                            <div class="truncate text-sm font-medium {{ $isCurrentLesson ? 'text-amber-900' : 'text-zinc-900' }}">
+                                                                {{ $sectionLesson->title }}
+                                                            </div>
+                                                            <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
+                                                                <span>{{ $access['status_label'] ?? 'Terbuka' }}</span>
+                                                                @if ($sectionLesson->duration_minutes)
+                                                                    <span>•</span>
+                                                                    <span>{{ $sectionLesson->duration_minutes }} menit</span>
+                                                                @endif
+                                                            </div>
+                                                            @if (filled($access['message']) && ! $rowCompleted)
+                                                                <div class="mt-2 text-[11px] leading-5 text-zinc-500">{{ $access['message'] }}</div>
+                                                            @endif
                                                         </div>
-                                                        @if ($sectionLesson->duration_minutes)
-                                                            <div class="mt-1 text-[11px] text-zinc-500">{{ $sectionLesson->duration_minutes }} menit</div>
-                                                        @endif
+                                                    </div>
+                                                </a>
+                                            @else
+                                                <div class="block rounded-[var(--radius-md)] border border-zinc-200/70 bg-zinc-50 px-3 py-3">
+                                                    <div class="flex items-start gap-3">
+                                                        <div class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {{ $dotClass }}"></div>
+                                                        <div class="min-w-0">
+                                                            <div class="truncate text-sm font-medium text-zinc-800">
+                                                                {{ $sectionLesson->title }}
+                                                            </div>
+                                                            <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
+                                                                <span>{{ $access['status_label'] ?? 'Terkunci' }}</span>
+                                                                @if ($sectionLesson->duration_minutes)
+                                                                    <span>•</span>
+                                                                    <span>{{ $sectionLesson->duration_minutes }} menit</span>
+                                                                @endif
+                                                            </div>
+                                                            @if (filled($access['message']))
+                                                                <div class="mt-2 text-[11px] leading-5 text-zinc-500">{{ $access['message'] }}</div>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </a>
+                                            @endif
                                         @endforeach
                                     </div>
                                 @endif
@@ -122,26 +163,64 @@
 
                                     @foreach ($noSectionLessons as $sectionLesson)
                                         @php($status = $progressByLessonId[$sectionLesson->id] ?? null)
+                                        @php($access = $lessonAccessByLessonId[$sectionLesson->id] ?? ['can_access' => true, 'state' => 'open', 'status_label' => 'Terbuka', 'message' => null])
                                         @php($rowCompleted = $status?->value === 'completed')
-                                        @php($rowInProgress = $status?->value === 'in_progress')
                                         @php($isCurrentLesson = $sectionLesson->id === $lesson->id)
+                                        @php($isClickable = (bool) ($access['can_access'] ?? false))
+                                        @php($state = $access['state'] ?? 'open')
+                                        @php($dotClass = match ($state) {
+                                            'completed' => 'bg-emerald-500',
+                                            'scheduled' => 'bg-sky-500',
+                                            'locked' => 'bg-zinc-400',
+                                            default => 'bg-amber-500',
+                                        })
 
-                                        <a
-                                            href="{{ route('my-courses.lessons.show', [$userProduct, $sectionLesson]) }}"
-                                            class="block rounded-[var(--radius-md)] border px-3 py-3 transition {{ $isCurrentLesson ? 'border-amber-300 bg-amber-50' : 'border-zinc-200/70 bg-white hover:bg-zinc-50' }}"
-                                        >
-                                            <div class="flex items-start gap-3">
-                                                <div class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {{ $rowCompleted ? 'bg-emerald-500' : ($rowInProgress ? 'bg-amber-500' : 'bg-zinc-300') }}"></div>
-                                                <div class="min-w-0">
-                                                    <div class="truncate text-sm font-medium {{ $isCurrentLesson ? 'text-amber-900' : 'text-zinc-900' }}">
-                                                        {{ $sectionLesson->title }}
+                                        @if ($isClickable)
+                                            <a
+                                                href="{{ route('my-courses.lessons.show', [$userProduct, $sectionLesson]) }}"
+                                                class="block rounded-[var(--radius-md)] border px-3 py-3 transition {{ $isCurrentLesson ? 'border-amber-300 bg-amber-50' : 'border-zinc-200/70 bg-white hover:bg-zinc-50' }}"
+                                            >
+                                                <div class="flex items-start gap-3">
+                                                    <div class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {{ $dotClass }}"></div>
+                                                    <div class="min-w-0">
+                                                        <div class="truncate text-sm font-medium {{ $isCurrentLesson ? 'text-amber-900' : 'text-zinc-900' }}">
+                                                            {{ $sectionLesson->title }}
+                                                        </div>
+                                                        <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
+                                                            <span>{{ $access['status_label'] ?? 'Terbuka' }}</span>
+                                                            @if ($sectionLesson->duration_minutes)
+                                                                <span>•</span>
+                                                                <span>{{ $sectionLesson->duration_minutes }} menit</span>
+                                                            @endif
+                                                        </div>
+                                                        @if (filled($access['message']) && ! $rowCompleted)
+                                                            <div class="mt-2 text-[11px] leading-5 text-zinc-500">{{ $access['message'] }}</div>
+                                                        @endif
                                                     </div>
-                                                    @if ($sectionLesson->duration_minutes)
-                                                        <div class="mt-1 text-[11px] text-zinc-500">{{ $sectionLesson->duration_minutes }} menit</div>
-                                                    @endif
+                                                </div>
+                                            </a>
+                                        @else
+                                            <div class="block rounded-[var(--radius-md)] border border-zinc-200/70 bg-zinc-50 px-3 py-3">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full {{ $dotClass }}"></div>
+                                                    <div class="min-w-0">
+                                                        <div class="truncate text-sm font-medium text-zinc-800">
+                                                            {{ $sectionLesson->title }}
+                                                        </div>
+                                                        <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
+                                                            <span>{{ $access['status_label'] ?? 'Terkunci' }}</span>
+                                                            @if ($sectionLesson->duration_minutes)
+                                                                <span>•</span>
+                                                                <span>{{ $sectionLesson->duration_minutes }} menit</span>
+                                                            @endif
+                                                        </div>
+                                                        @if (filled($access['message']))
+                                                            <div class="mt-2 text-[11px] leading-5 text-zinc-500">{{ $access['message'] }}</div>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </a>
+                                        @endif
                                     @endforeach
                                 </div>
                             @endif
@@ -165,6 +244,10 @@
                                         @endif
                                         <span>•</span>
                                         <span>{{ $progressPercent }}% progres</span>
+                                        @if ($lesson->available_from)
+                                            <span>•</span>
+                                            <span>Tersedia {{ $lesson->available_from->timezone('Asia/Jakarta')->format('d M Y H:i') }}</span>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -308,7 +391,7 @@
                         </div>
 
                         <div class="text-xs text-zinc-500">
-                            {{ $isCompleted ? 'Lesson selesai' : ($isInProgress ? 'Sedang dipelajari' : 'Belum dimulai') }}
+                            {{ $isCompleted ? 'Lesson selesai' : ($isInProgress ? 'Sedang dipelajari' : 'Terbuka untuk dipelajari') }}
                         </div>
                     </div>
                 </main>

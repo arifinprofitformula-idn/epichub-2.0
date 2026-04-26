@@ -119,6 +119,22 @@ class CourseForm
                         ->nullable()
                         ->columnSpanFull(),
                 ])->columnSpan(1),
+
+                Section::make('Aturan Akses Materi')->schema([
+                    Select::make('lesson_access_mode')
+                        ->label('Mode akses materi')
+                        ->options([
+                            'free' => 'Bebas',
+                            'sequential' => 'Bertahap / Wajib Berurutan',
+                        ])
+                        ->default('free')
+                        ->required(),
+
+                    Toggle::make('show_locked_lessons')
+                        ->label('Tampilkan Materi Terkunci di Halaman User')
+                        ->default(true)
+                        ->helperText('Jika aktif, user tetap melihat materi terkunci beserta alasannya.'),
+                ])->columnSpanFull(),
             ])->columns(2),
         ]);
     }

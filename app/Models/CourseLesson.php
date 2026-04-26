@@ -23,14 +23,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'external_url',
     'duration_minutes',
     'sort_order',
+    'status',
+    'is_required',
     'is_preview',
     'is_active',
     'published_at',
+    'available_from',
     'metadata',
 ])]
 class CourseLesson extends Model
 {
     use SoftDeletes;
+
+    public const STATUS_DRAFT = 'draft';
+
+    public const STATUS_PUBLISHED = 'published';
 
     public function course(): BelongsTo
     {
@@ -59,7 +66,12 @@ class CourseLesson extends Model
 
     public function scopeAccessibleToLearner(Builder $query): void
     {
-        $query->where('is_active', true);
+        $query
+            ->where('is_active', true)
+            ->where('status', self::STATUS_PUBLISHED)
+            ->where(function (Builder $q): void {
+                $q->whereNull('published_at')->orWhere('published_at', '<=', now());
+            });
     }
 
     public function scopePublished(Builder $query): void
@@ -71,11 +83,35 @@ class CourseLesson extends Model
 
     public function isAvailable(): bool
     {
+        return $this->isAvailableNow();
+    }
+
+    public function isPublished(): bool
+    {
         if (! $this->is_active) {
             return false;
         }
 
+        if (($this->status ?? self::STATUS_PUBLISHED) !== self::STATUS_PUBLISHED) {
+            return false;
+        }
+
         return $this->published_at === null || $this->published_at->isPast();
+    }
+
+    public function isScheduled(): bool
+    {
+        return $this->available_from !== null && $this->available_from->isFuture();
+    }
+
+    public function isAvailableNow(): bool
+    {
+        return $this->isPublished() && ! $this->isScheduled();
+    }
+
+    public function isRequired(): bool
+    {
+        return (bool) ($this->is_required ?? true);
     }
 
     protected function casts(): array
@@ -84,9 +120,12 @@ class CourseLesson extends Model
             'lesson_type' => CourseLessonType::class,
             'duration_minutes' => 'integer',
             'sort_order' => 'integer',
+            'status' => 'string',
+            'is_required' => 'boolean',
             'is_preview' => 'boolean',
             'is_active' => 'boolean',
             'published_at' => 'datetime',
+            'available_from' => 'datetime',
             'metadata' => 'array',
         ];
     }

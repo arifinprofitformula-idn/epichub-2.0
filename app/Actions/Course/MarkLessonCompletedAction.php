@@ -15,6 +15,7 @@ class MarkLessonCompletedAction
 {
     public function __construct(
         protected ResolveCourseAccessAction $resolveCourseAccess,
+        protected ResolveCourseLessonAccessAction $resolveCourseLessonAccess,
         protected LogAccessAction $logAccess,
     ) {
     }
@@ -24,45 +25,56 @@ class MarkLessonCompletedAction
         $resolved = $this->resolveCourseAccess->execute($user, $userProduct);
         $course = $resolved['course'];
 
-        $lesson = CourseLesson::query()
-            ->where('id', $lesson->id)
-            ->where('course_id', $course->id)
-            ->accessibleToLearner()
-            ->first();
-
         if (! $lesson) {
             throw new RuntimeException('Lesson tidak ditemukan.');
         }
 
-        $now = now();
-
-        $progress = LessonProgress::query()->updateOrCreate(
-            [
-                'user_id' => $user->id,
-                'course_lesson_id' => $lesson->id,
-            ],
-            [
-                'course_id' => $course->id,
-                'user_product_id' => $userProduct->id,
-                'status' => LessonProgressStatus::Completed,
-                'completed_at' => $now,
-                'last_viewed_at' => $now,
-            ],
-        );
-
-        $this->logAccess->execute(
-            action: AccessLogAction::LessonCompleted,
+        $access = $this->resolveCourseLessonAccess->resolveWithinCourse(
             user: $user,
             userProduct: $userProduct,
-            actor: $user,
-            ipAddress: $ipAddress,
-            userAgent: $userAgent,
-            metadata: [
-                'course_id' => $course->id,
-                'course_lesson_id' => $lesson->id,
-                'lesson_title' => $lesson->title,
-            ],
+            lesson: $lesson,
+            course: $course,
+            orderedLessons: $resolved['lessons'],
+            progressRows: $resolved['progressRowsByLessonId'],
         );
+
+        if (! $access['can_access']) {
+            throw new RuntimeException('Lesson belum dapat diakses.');
+        }
+
+        $now = now();
+
+        $progress = LessonProgress::query()->firstOrNew([
+            'user_id' => $user->id,
+            'course_lesson_id' => $lesson->id,
+        ]);
+
+        $wasCompleted = $progress->exists && $progress->isCompleted();
+
+        $progress->fill([
+            'course_id' => $course->id,
+            'user_product_id' => $userProduct->id,
+            'status' => LessonProgressStatus::Completed,
+            'completed_at' => $progress->completed_at ?? $now,
+            'last_viewed_at' => $now,
+        ]);
+        $progress->save();
+
+        if (! $wasCompleted) {
+            $this->logAccess->execute(
+                action: AccessLogAction::LessonCompleted,
+                user: $user,
+                userProduct: $userProduct,
+                actor: $user,
+                ipAddress: $ipAddress,
+                userAgent: $userAgent,
+                metadata: [
+                    'course_id' => $course->id,
+                    'course_lesson_id' => $lesson->id,
+                    'lesson_title' => $lesson->title,
+                ],
+            );
+        }
 
         return $progress->refresh();
     }

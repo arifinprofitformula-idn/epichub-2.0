@@ -7,18 +7,20 @@ use App\Actions\Course\DownloadCourseLessonAttachmentAction;
 use App\Actions\Course\DownloadLessonAttachmentAction;
 use App\Actions\Course\MarkLessonCompletedAction;
 use App\Actions\Course\ResolveCourseAccessAction;
+use App\Actions\Course\ResolveCourseLessonAccessAction;
 use App\Enums\AccessLogAction;
 use App\Enums\CourseLessonType;
 use App\Enums\LessonProgressStatus;
+use App\Models\Course;
 use App\Models\CourseLesson;
 use App\Models\CourseLessonAttachment;
 use App\Models\LessonProgress;
 use App\Models\UserProduct;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -26,6 +28,7 @@ class MyCourseLessonController extends Controller
 {
     public function __construct(
         protected ResolveCourseAccessAction $resolveCourseAccess,
+        protected ResolveCourseLessonAccessAction $resolveCourseLessonAccess,
         protected MarkLessonCompletedAction $markLessonCompleted,
         protected DownloadLessonAttachmentAction $downloadLessonAttachment,
         protected DownloadCourseLessonAttachmentAction $downloadCourseLessonAttachment,
@@ -33,8 +36,19 @@ class MyCourseLessonController extends Controller
     ) {
     }
 
-    public function show(Request $request, UserProduct $userProduct, CourseLesson $courseLesson): \Illuminate\View\View
+    public function show(Request $request, UserProduct $userProduct, CourseLesson $courseLesson): View|RedirectResponse
     {
+        try {
+            $lessonAccess = $this->resolveCourseLessonAccess->execute($request->user(), $userProduct, $courseLesson);
+        } catch (RuntimeException $e) {
+            $this->logDenied($request, $userProduct, $courseLesson, 'course_access_denied', $e->getMessage());
+            abort(404);
+        }
+
+        if (! $lessonAccess['can_access']) {
+            return $this->redirectLockedLesson($userProduct, $lessonAccess);
+        }
+
         try {
             $resolved = $this->resolveCourseAccess->execute($request->user(), $userProduct);
             $course = $resolved['course'];
@@ -46,7 +60,6 @@ class MyCourseLessonController extends Controller
         $lesson = CourseLesson::query()
             ->where('id', $courseLesson->id)
             ->where('course_id', $course->id)
-            ->accessibleToLearner()
             ->with([
                 'section',
                 'attachments' => fn ($q) => $q
@@ -62,18 +75,24 @@ class MyCourseLessonController extends Controller
             abort(404);
         }
 
-        LessonProgress::query()->updateOrCreate(
-            [
-                'user_id' => $request->user()->id,
-                'course_lesson_id' => $lesson->id,
-            ],
-            [
-                'course_id' => $course->id,
-                'user_product_id' => $userProduct->id,
-                'status' => LessonProgressStatus::InProgress,
-                'last_viewed_at' => now(),
-            ],
-        );
+        $progress = LessonProgress::query()->firstOrNew([
+            'user_id' => $request->user()->id,
+            'course_lesson_id' => $lesson->id,
+        ]);
+
+        $progress->fill([
+            'course_id' => $course->id,
+            'user_product_id' => $userProduct->id,
+            'status' => $progress->isCompleted() ? LessonProgressStatus::Completed : LessonProgressStatus::InProgress,
+            'completed_at' => $progress->completed_at,
+            'last_viewed_at' => now(),
+        ]);
+        $progress->save();
+
+        $resolved['progressRowsByLessonId']->put($lesson->id, $progress->fresh());
+        $resolved['progressByLessonId'][$lesson->id] = $progress->isCompleted()
+            ? LessonProgressStatus::Completed
+            : LessonProgressStatus::InProgress;
 
         $this->logAccess->execute(
             action: AccessLogAction::LessonViewed,
@@ -90,10 +109,12 @@ class MyCourseLessonController extends Controller
             ],
         );
 
-        $nextLessonId = $resolved['lessons']->firstWhere('sort_order', '>', $lesson->sort_order)?->id;
-        $prevLessonId = $resolved['lessons']->where('sort_order', '<', $lesson->sort_order)->sortByDesc('sort_order')->first()?->id;
         $currentLessonIndex = $resolved['lessons']->search(fn (CourseLesson $row) => $row->id === $lesson->id);
         $currentProgressStatus = $resolved['progressByLessonId'][$lesson->id] ?? LessonProgressStatus::InProgress;
+        $navigationLessons = $this->navigableLessons($resolved['visibleLessons'], $resolved['lessonAccessByLessonId']);
+        $navIndex = $navigationLessons->search(fn (CourseLesson $row) => $row->id === $lesson->id);
+        $prevLessonId = $navIndex !== false && $navIndex > 0 ? $navigationLessons->get($navIndex - 1)?->id : null;
+        $nextLessonId = $navIndex !== false ? $navigationLessons->get($navIndex + 1)?->id : null;
         $downloadableAttachments = $lesson->attachments
             ->map(fn (CourseLessonAttachment $attachment) => [
                 'title' => $attachment->title,
@@ -137,8 +158,9 @@ class MyCourseLessonController extends Controller
             'course' => $course,
             'lesson' => $lesson,
             'sections' => $resolved['sections'],
-            'lessons' => $resolved['lessons'],
+            'lessons' => $resolved['visibleLessons'],
             'progressByLessonId' => $resolved['progressByLessonId'],
+            'lessonAccessByLessonId' => $resolved['lessonAccessByLessonId'],
             'progressPercent' => $resolved['progressPercent'],
             'completedLessons' => $resolved['completedLessons'],
             'totalLessons' => $resolved['totalLessons'],
@@ -153,6 +175,17 @@ class MyCourseLessonController extends Controller
     public function complete(Request $request, UserProduct $userProduct, CourseLesson $courseLesson): RedirectResponse
     {
         try {
+            $lessonAccess = $this->resolveCourseLessonAccess->execute($request->user(), $userProduct, $courseLesson);
+        } catch (RuntimeException $e) {
+            $this->logDenied($request, $userProduct, $courseLesson, 'lesson_complete_denied', $e->getMessage());
+            abort(404);
+        }
+
+        if (! $lessonAccess['can_access']) {
+            return $this->redirectLockedLesson($userProduct, $lessonAccess);
+        }
+
+        try {
             $this->markLessonCompleted->execute(
                 user: $request->user(),
                 userProduct: $userProduct,
@@ -160,12 +193,45 @@ class MyCourseLessonController extends Controller
                 ipAddress: $request->ip(),
                 userAgent: $request->userAgent(),
             );
+
+            $resolved = $this->resolveCourseAccess->execute($request->user(), $userProduct);
         } catch (RuntimeException $e) {
             $this->logDenied($request, $userProduct, $courseLesson, 'lesson_complete_denied', $e->getMessage());
             abort(404);
         }
 
-        return redirect()->back();
+        $currentIndex = $resolved['lessons']->search(fn (CourseLesson $lesson) => $lesson->id === $courseLesson->id);
+        $nextLessons = $currentIndex === false
+            ? collect()
+            : $resolved['lessons']->slice($currentIndex + 1)->values();
+
+        $nextAccessibleLesson = $nextLessons->first(function (CourseLesson $lesson) use ($resolved): bool {
+            return (bool) ($resolved['lessonAccessByLessonId'][$lesson->id]['can_access'] ?? false);
+        });
+
+        if ($nextAccessibleLesson) {
+            return redirect()->route('my-courses.lessons.show', [$userProduct, $nextAccessibleLesson]);
+        }
+
+        $firstBlockedLesson = $nextLessons->first(fn (CourseLesson $lesson): bool => isset($resolved['lessonAccessByLessonId'][$lesson->id]));
+
+        if ($firstBlockedLesson) {
+            $blockedAccess = $resolved['lessonAccessByLessonId'][$firstBlockedLesson->id];
+
+            if (($blockedAccess['reason'] ?? null) === 'scheduled') {
+                return redirect()
+                    ->route('my-courses.show', $userProduct)
+                    ->with('status', $blockedAccess['message'] ?? 'Materi berikutnya belum dibuka.')
+                    ->with('status_title', 'Materi Dijadwalkan')
+                    ->with('status_variant', 'warning');
+            }
+        }
+
+        return redirect()
+            ->route('my-courses.show', $userProduct)
+            ->with('status', 'Semua materi di kelas ini sudah selesai.')
+            ->with('status_title', 'Progress Tersimpan')
+            ->with('status_variant', 'info');
     }
 
     public function download(Request $request, UserProduct $userProduct, CourseLesson $courseLesson): StreamedResponse
@@ -187,17 +253,27 @@ class MyCourseLessonController extends Controller
     public function openExternal(Request $request, UserProduct $userProduct, CourseLesson $courseLesson): RedirectResponse
     {
         try {
-            $resolved = $this->resolveCourseAccess->execute($request->user(), $userProduct);
-            $course = $resolved['course'];
+            $lessonAccess = $this->resolveCourseLessonAccess->execute($request->user(), $userProduct, $courseLesson);
         } catch (RuntimeException $e) {
             $this->logDenied($request, $userProduct, $courseLesson, 'course_access_denied', $e->getMessage());
+            abort(404);
+        }
+
+        if (! $lessonAccess['can_access']) {
+            return $this->redirectLockedLesson($userProduct, $lessonAccess);
+        }
+
+        $courseLesson->loadMissing('course');
+        $course = $courseLesson->course;
+
+        if (! $course instanceof Course) {
+            $this->logDenied($request, $userProduct, $courseLesson, 'course_not_found', null);
             abort(404);
         }
 
         $lesson = CourseLesson::query()
             ->where('id', $courseLesson->id)
             ->where('course_id', $course->id)
-            ->accessibleToLearner()
             ->first();
 
         if (! $lesson) {
@@ -265,6 +341,44 @@ class MyCourseLessonController extends Controller
         }
     }
 
+    /**
+     * @param  array{reason: string|null, message?: string|null, available_from: \Illuminate\Support\Carbon|null}  $lessonAccess
+     */
+    protected function redirectLockedLesson(UserProduct $userProduct, array $lessonAccess): RedirectResponse
+    {
+        return redirect()
+            ->route('my-courses.show', $userProduct)
+            ->with('status', $lessonAccess['message'] ?? $this->lockedLessonMessage($lessonAccess))
+            ->with('status_title', ($lessonAccess['reason'] ?? null) === 'scheduled' ? 'Materi Dijadwalkan' : 'Materi Terkunci')
+            ->with('status_variant', 'warning');
+    }
+
+    /**
+     * @param  array{reason: string|null, available_from: \Illuminate\Support\Carbon|null}  $lessonAccess
+     */
+    protected function lockedLessonMessage(array $lessonAccess): string
+    {
+        return match ($lessonAccess['reason'] ?? null) {
+            'scheduled' => $lessonAccess['available_from']
+                ? 'Materi ini dibuka pada '.$lessonAccess['available_from']->timezone('Asia/Jakarta')->format('d M Y H:i').'.'
+                : 'Materi ini belum dibuka.',
+            'previous_required_lesson_incomplete' => 'Selesaikan materi sebelumnya terlebih dahulu.',
+            default => 'Materi ini belum dapat diakses.',
+        };
+    }
+
+    /**
+     * @param  Collection<int, CourseLesson>  $lessons
+     * @param  array<int, array<string, mixed>>  $lessonAccessByLessonId
+     * @return Collection<int, CourseLesson>
+     */
+    protected function navigableLessons(Collection $lessons, array $lessonAccessByLessonId): Collection
+    {
+        return $lessons
+            ->filter(fn (CourseLesson $lesson): bool => (bool) ($lessonAccessByLessonId[$lesson->id]['can_access'] ?? false))
+            ->values();
+    }
+
     protected function logDenied(Request $request, UserProduct $userProduct, CourseLesson $lesson, string $reason, ?string $message): void
     {
         $this->logAccess->execute(
@@ -283,4 +397,3 @@ class MyCourseLessonController extends Controller
         );
     }
 }
-

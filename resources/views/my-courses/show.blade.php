@@ -1,10 +1,14 @@
 @component('layouts::app', ['title' => $course->title])
     @php
-        $lessonsBySection = $lessons->groupBy(fn ($lesson) => $lesson->course_section_id ?? 0);
-        $continueLesson = $lessons->first(function ($lesson) use ($progressByLessonId) {
-            return ($progressByLessonId[$lesson->id] ?? null)?->value !== 'completed';
-        }) ?? $lessons->sortBy('sort_order')->first();
-        $totalSections = $sections->count() + ($lessonsBySection->get(0, collect())->count() > 0 ? 1 : 0);
+        $displayLessons = $visibleLessons ?? $lessons;
+        $lessonsBySection = $displayLessons->groupBy(fn ($lesson) => $lesson->course_section_id ?? 0);
+        $visibleSectionIds = $displayLessons->pluck('course_section_id')->filter()->unique();
+        $continueLesson = $continueLesson ?? $displayLessons->first(function ($lesson) use ($progressByLessonId, $lessonAccessByLessonId) {
+            return ($progressByLessonId[$lesson->id] ?? null)?->value !== 'completed'
+                && (bool) ($lessonAccessByLessonId[$lesson->id]['can_access'] ?? false);
+        });
+        $totalSections = $sections->filter(fn ($section) => $visibleSectionIds->contains($section->id))->count()
+            + ($lessonsBySection->get(0, collect())->count() > 0 ? 1 : 0);
         $remainingLessons = max($totalLessons - $completedLessons, 0);
     @endphp
 
@@ -19,6 +23,14 @@
                 <x-ui.badge variant="info">Ecourse Workspace</x-ui.badge>
             </div>
 
+            @if (session('status'))
+                <div class="mb-6">
+                    <x-ui.alert :variant="session('status_variant', 'info')" :title="session('status_title', 'Catatan')">
+                        {{ session('status') }}
+                    </x-ui.alert>
+                </div>
+            @endif
+
             <div class="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_380px]">
                 <div class="space-y-6">
                     <x-ui.card class="overflow-hidden border-zinc-200/80 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.22),transparent_32%),linear-gradient(135deg,#111827_0%,#27272a_48%,#18181b_100%)] p-0 text-white shadow-[var(--shadow-card)]">
@@ -28,6 +40,9 @@
                                     <span>Learning Access</span>
                                     <span class="rounded-full border border-white/15 px-3 py-1 text-[11px] tracking-[0.18em] text-white/70">
                                         {{ $userProduct->product?->title ?? 'Produk kelas' }}
+                                    </span>
+                                    <span class="rounded-full border border-white/15 px-3 py-1 text-[11px] tracking-[0.18em] text-white/70">
+                                        {{ $course->usesSequentialLessons() ? 'Mode Bertahap' : 'Mode Bebas' }}
                                     </span>
                                 </div>
 
@@ -87,10 +102,10 @@
                         </div>
                     </x-ui.card>
 
-                    @if (($lessons->count() ?? 0) === 0)
+                    @if (($displayLessons->count() ?? 0) === 0)
                         <x-ui.empty-state
-                            title="Belum ada lesson"
-                            description="Materi kelas ini belum ditambahkan."
+                            title="Belum ada materi yang bisa ditampilkan"
+                            description="Materi kelas ini belum tersedia untuk akun Anda saat ini."
                         />
                     @else
                         <div class="grid gap-4 md:grid-cols-3">
@@ -98,16 +113,16 @@
                                 <div class="text-xs uppercase tracking-[0.18em] text-zinc-500">Kesiapan belajar</div>
                                 <div class="mt-3 text-2xl font-semibold text-zinc-950">{{ $progressPercent }}%</div>
                                 <p class="mt-2 text-sm leading-6 text-zinc-600">
-                                    Ritme sudah tercatat. Tinggal lanjutkan materi yang belum selesai untuk menutup gap progres.
+                                    Ritme belajar tetap tercatat walau ada materi yang bertahap atau dijadwalkan.
                                 </p>
                             </x-ui.card>
                             <x-ui.card class="p-5">
                                 <div class="text-xs uppercase tracking-[0.18em] text-zinc-500">Fokus berikutnya</div>
                                 <div class="mt-3 text-base font-semibold text-zinc-950">
-                                    {{ $continueLesson?->title ?? 'Semua materi selesai' }}
+                                    {{ $continueLesson?->title ?? 'Belum ada materi terbuka saat ini' }}
                                 </div>
                                 <p class="mt-2 text-sm leading-6 text-zinc-600">
-                                    {{ $continueLesson?->section?->title ?? 'Materi mandiri' }}
+                                    {{ $continueLesson?->section?->title ?? 'Pantau materi yang dijadwalkan dari daftar kurikulum' }}
                                 </p>
                             </x-ui.card>
                             <x-ui.card class="p-5">
@@ -116,7 +131,7 @@
                                     {{ $sections->count() }} section terstruktur
                                 </div>
                                 <p class="mt-2 text-sm leading-6 text-zinc-600">
-                                    Kurikulum dibagi agar materi lebih mudah dipindai dan dilanjutkan dari berbagai device.
+                                    Status akses setiap materi akan terlihat langsung di bawah daftar lesson.
                                 </p>
                             </x-ui.card>
                         </div>
@@ -149,45 +164,90 @@
                                         <div class="divide-y divide-zinc-200/70">
                                             @foreach ($sectionLessons as $lesson)
                                                 @php($status = $progressByLessonId[$lesson->id] ?? null)
+                                                @php($access = $lessonAccessByLessonId[$lesson->id] ?? ['can_access' => true, 'state' => 'open', 'status_label' => 'Terbuka', 'message' => null])
                                                 @php($isCompleted = $status?->value === 'completed')
-                                                @php($isInProgress = $status?->value === 'in_progress')
+                                                @php($isClickable = (bool) ($access['can_access'] ?? false))
+                                                @php($state = $access['state'] ?? 'open')
+                                                @php($badgeClasses = match ($state) {
+                                                    'completed' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                                    'scheduled' => 'border-sky-200 bg-sky-50 text-sky-700',
+                                                    'locked' => 'border-rose-200 bg-rose-50 text-rose-700',
+                                                    default => 'border-amber-200 bg-amber-50 text-amber-700',
+                                                })
+                                                @php($numberClasses = match ($state) {
+                                                    'completed' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                                    'scheduled' => 'border-sky-200 bg-sky-50 text-sky-700',
+                                                    'locked' => 'border-zinc-200 bg-zinc-100 text-zinc-500',
+                                                    default => 'border-amber-200 bg-amber-50 text-amber-700',
+                                                })
 
-                                                <a
-                                                    href="{{ route('my-courses.lessons.show', [$userProduct, $lesson]) }}"
-                                                    class="group flex flex-col gap-4 px-6 py-5 transition hover:bg-amber-50/40 md:flex-row md:items-center md:justify-between"
-                                                >
-                                                    <div class="flex min-w-0 items-start gap-4">
-                                                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] border {{ $isCompleted ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : ($isInProgress ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-zinc-200 bg-zinc-50 text-zinc-500') }}">
-                                                            {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                                @if ($isClickable)
+                                                    <a
+                                                        href="{{ route('my-courses.lessons.show', [$userProduct, $lesson]) }}"
+                                                        class="group flex flex-col gap-4 px-6 py-5 transition hover:bg-amber-50/40 md:flex-row md:items-center md:justify-between"
+                                                    >
+                                                        <div class="flex min-w-0 items-start gap-4">
+                                                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] border {{ $numberClasses }}">
+                                                                {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                                            </div>
+                                                            <div class="min-w-0">
+                                                                <div class="font-semibold text-zinc-950 transition group-hover:text-zinc-900">
+                                                                    {{ $lesson->title }}
+                                                                </div>
+                                                                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                                                                    <span class="rounded-full bg-zinc-100 px-2.5 py-1">{{ $lesson->lesson_type?->label() ?? ($lesson->lesson_type?->value ?? '-') }}</span>
+                                                                    @if ($lesson->duration_minutes)
+                                                                        <span>{{ $lesson->duration_minutes }} menit</span>
+                                                                    @endif
+                                                                    @if (filled($lesson->short_description))
+                                                                        <span class="max-w-xl truncate">{{ $lesson->short_description }}</span>
+                                                                    @endif
+                                                                    @if (! $lesson->isRequired())
+                                                                        <span class="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-zinc-600">Opsional</span>
+                                                                    @endif
+                                                                </div>
+                                                                @if (filled($access['message']) && ! $isCompleted)
+                                                                    <div class="mt-2 text-sm text-zinc-600">{{ $access['message'] }}</div>
+                                                                @endif
+                                                            </div>
                                                         </div>
-                                                        <div class="min-w-0">
-                                                            <div class="font-semibold text-zinc-950 transition group-hover:text-zinc-900">
-                                                                {{ $lesson->title }}
+
+                                                        <div class="flex items-center gap-3">
+                                                            <span class="rounded-full border px-3 py-1.5 text-xs font-semibold {{ $badgeClasses }}">{{ $access['status_label'] }}</span>
+                                                            <span class="text-sm font-medium text-zinc-400 transition group-hover:translate-x-0.5 group-hover:text-zinc-700">Buka -></span>
+                                                        </div>
+                                                    </a>
+                                                @else
+                                                    <div class="flex flex-col gap-4 bg-zinc-50/40 px-6 py-5 md:flex-row md:items-center md:justify-between">
+                                                        <div class="flex min-w-0 items-start gap-4">
+                                                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] border {{ $numberClasses }}">
+                                                                {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
                                                             </div>
-                                                            <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                                                                <span class="rounded-full bg-zinc-100 px-2.5 py-1">{{ $lesson->lesson_type?->label() ?? ($lesson->lesson_type?->value ?? '-') }}</span>
-                                                                @if ($lesson->duration_minutes)
-                                                                    <span>{{ $lesson->duration_minutes }} menit</span>
-                                                                @endif
-                                                                @if (filled($lesson->short_description))
-                                                                    <span class="max-w-xl truncate">{{ $lesson->short_description }}</span>
+                                                            <div class="min-w-0">
+                                                                <div class="font-semibold text-zinc-800">
+                                                                    {{ $lesson->title }}
+                                                                </div>
+                                                                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                                                                    <span class="rounded-full bg-zinc-100 px-2.5 py-1">{{ $lesson->lesson_type?->label() ?? ($lesson->lesson_type?->value ?? '-') }}</span>
+                                                                    @if ($lesson->duration_minutes)
+                                                                        <span>{{ $lesson->duration_minutes }} menit</span>
+                                                                    @endif
+                                                                    @if (! $lesson->isRequired())
+                                                                        <span class="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-zinc-600">Opsional</span>
+                                                                    @endif
+                                                                </div>
+                                                                @if (filled($access['message']))
+                                                                    <div class="mt-2 text-sm text-zinc-600">{{ $access['message'] }}</div>
                                                                 @endif
                                                             </div>
+                                                        </div>
+
+                                                        <div class="flex items-center gap-3">
+                                                            <span class="rounded-full border px-3 py-1.5 text-xs font-semibold {{ $badgeClasses }}">{{ $access['status_label'] }}</span>
+                                                            <span class="text-sm font-medium text-zinc-400">Terkunci</span>
                                                         </div>
                                                     </div>
-
-                                                    <div class="flex items-center gap-3">
-                                                        @if ($isCompleted)
-                                                            <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">Selesai</span>
-                                                        @elseif ($isInProgress)
-                                                            <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">Berjalan</span>
-                                                        @else
-                                                            <span class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600">Belum mulai</span>
-                                                        @endif
-
-                                                        <span class="text-sm font-medium text-zinc-400 transition group-hover:translate-x-0.5 group-hover:text-zinc-700">Buka -></span>
-                                                    </div>
-                                                </a>
+                                                @endif
                                             @endforeach
                                         </div>
                                     </x-ui.card>
@@ -203,7 +263,7 @@
                                             <div>
                                                 <div class="text-lg font-semibold tracking-tight text-zinc-950">Materi Tambahan</div>
                                                 <div class="mt-2 text-sm text-zinc-600">
-                                                    Lesson yang tidak berada di section tertentu tetap bisa diakses cepat dari sini.
+                                                    Lesson yang tidak berada di section tertentu tetap bisa dipantau dari sini.
                                                 </div>
                                             </div>
                                             <div class="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-600">
@@ -215,40 +275,83 @@
                                     <div class="divide-y divide-zinc-200/70">
                                         @foreach ($noSectionLessons as $lesson)
                                             @php($status = $progressByLessonId[$lesson->id] ?? null)
+                                            @php($access = $lessonAccessByLessonId[$lesson->id] ?? ['can_access' => true, 'state' => 'open', 'status_label' => 'Terbuka', 'message' => null])
                                             @php($isCompleted = $status?->value === 'completed')
-                                            @php($isInProgress = $status?->value === 'in_progress')
+                                            @php($isClickable = (bool) ($access['can_access'] ?? false))
+                                            @php($state = $access['state'] ?? 'open')
+                                            @php($badgeClasses = match ($state) {
+                                                'completed' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                                'scheduled' => 'border-sky-200 bg-sky-50 text-sky-700',
+                                                'locked' => 'border-rose-200 bg-rose-50 text-rose-700',
+                                                default => 'border-amber-200 bg-amber-50 text-amber-700',
+                                            })
+                                            @php($numberClasses = match ($state) {
+                                                'completed' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                                'scheduled' => 'border-sky-200 bg-sky-50 text-sky-700',
+                                                'locked' => 'border-zinc-200 bg-zinc-100 text-zinc-500',
+                                                default => 'border-amber-200 bg-amber-50 text-amber-700',
+                                            })
 
-                                            <a
-                                                href="{{ route('my-courses.lessons.show', [$userProduct, $lesson]) }}"
-                                                class="group flex flex-col gap-4 px-6 py-5 transition hover:bg-amber-50/40 md:flex-row md:items-center md:justify-between"
-                                            >
-                                                <div class="flex min-w-0 items-start gap-4">
-                                                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] border {{ $isCompleted ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : ($isInProgress ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-zinc-200 bg-zinc-50 text-zinc-500') }}">
-                                                        {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
-                                                    </div>
-                                                    <div class="min-w-0">
-                                                        <div class="font-semibold text-zinc-950">{{ $lesson->title }}</div>
-                                                        <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                                                            <span class="rounded-full bg-zinc-100 px-2.5 py-1">{{ $lesson->lesson_type?->label() ?? ($lesson->lesson_type?->value ?? '-') }}</span>
-                                                            @if ($lesson->duration_minutes)
-                                                                <span>{{ $lesson->duration_minutes }} menit</span>
+                                            @if ($isClickable)
+                                                <a
+                                                    href="{{ route('my-courses.lessons.show', [$userProduct, $lesson]) }}"
+                                                    class="group flex flex-col gap-4 px-6 py-5 transition hover:bg-amber-50/40 md:flex-row md:items-center md:justify-between"
+                                                >
+                                                    <div class="flex min-w-0 items-start gap-4">
+                                                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] border {{ $numberClasses }}">
+                                                            {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="font-semibold text-zinc-950">{{ $lesson->title }}</div>
+                                                            <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                                                                <span class="rounded-full bg-zinc-100 px-2.5 py-1">{{ $lesson->lesson_type?->label() ?? ($lesson->lesson_type?->value ?? '-') }}</span>
+                                                                @if ($lesson->duration_minutes)
+                                                                    <span>{{ $lesson->duration_minutes }} menit</span>
+                                                                @endif
+                                                                @if (! $lesson->isRequired())
+                                                                    <span class="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-zinc-600">Opsional</span>
+                                                                @endif
+                                                            </div>
+                                                            @if (filled($access['message']) && ! $isCompleted)
+                                                                <div class="mt-2 text-sm text-zinc-600">{{ $access['message'] }}</div>
                                                             @endif
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="flex items-center gap-3">
-                                                    @if ($isCompleted)
-                                                        <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">Selesai</span>
-                                                    @elseif ($isInProgress)
-                                                        <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">Berjalan</span>
-                                                    @else
-                                                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600">Belum mulai</span>
-                                                    @endif
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="rounded-full border px-3 py-1.5 text-xs font-semibold {{ $badgeClasses }}">{{ $access['status_label'] }}</span>
+                                                        <span class="text-sm font-medium text-zinc-400 transition group-hover:translate-x-0.5 group-hover:text-zinc-700">Buka -></span>
+                                                    </div>
+                                                </a>
+                                            @else
+                                                <div class="flex flex-col gap-4 bg-zinc-50/40 px-6 py-5 md:flex-row md:items-center md:justify-between">
+                                                    <div class="flex min-w-0 items-start gap-4">
+                                                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] border {{ $numberClasses }}">
+                                                            {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="font-semibold text-zinc-800">{{ $lesson->title }}</div>
+                                                            <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                                                                <span class="rounded-full bg-zinc-100 px-2.5 py-1">{{ $lesson->lesson_type?->label() ?? ($lesson->lesson_type?->value ?? '-') }}</span>
+                                                                @if ($lesson->duration_minutes)
+                                                                    <span>{{ $lesson->duration_minutes }} menit</span>
+                                                                @endif
+                                                                @if (! $lesson->isRequired())
+                                                                    <span class="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-zinc-600">Opsional</span>
+                                                                @endif
+                                                            </div>
+                                                            @if (filled($access['message']))
+                                                                <div class="mt-2 text-sm text-zinc-600">{{ $access['message'] }}</div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
 
-                                                    <span class="text-sm font-medium text-zinc-400 transition group-hover:translate-x-0.5 group-hover:text-zinc-700">Buka -></span>
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="rounded-full border px-3 py-1.5 text-xs font-semibold {{ $badgeClasses }}">{{ $access['status_label'] }}</span>
+                                                        <span class="text-sm font-medium text-zinc-400">Terkunci</span>
+                                                    </div>
                                                 </div>
-                                            </a>
+                                            @endif
                                         @endforeach
                                     </div>
                                 </x-ui.card>
@@ -264,7 +367,7 @@
                             <div class="rounded-[var(--radius-lg)] bg-zinc-50 p-4">
                                 <div class="font-semibold text-zinc-900">Checkpoint berikutnya</div>
                                 <div class="mt-1 leading-6">
-                                    {{ $continueLesson?->title ?? 'Semua lesson selesai. Saatnya review ulang materi penting.' }}
+                                    {{ $continueLesson?->title ?? 'Belum ada materi terbuka berikutnya. Cek materi yang masih dijadwalkan atau terkunci.' }}
                                 </div>
                             </div>
                             <div class="rounded-[var(--radius-lg)] border border-zinc-200/70 p-4">
@@ -288,13 +391,13 @@
                         <div class="text-sm font-semibold text-zinc-950">Tips Penggunaan</div>
                         <div class="mt-4 space-y-3 text-sm leading-6 text-zinc-600">
                             <div class="rounded-[var(--radius-lg)] border border-zinc-200/70 p-4">
-                                Mulai dari lesson yang berstatus <span class="font-semibold text-amber-700">Berjalan</span> agar momentum belajar tidak putus.
+                                Badge <span class="font-semibold text-amber-700">Terbuka</span> berarti materi sudah bisa dipelajari sekarang.
                             </div>
                             <div class="rounded-[var(--radius-lg)] border border-zinc-200/70 p-4">
-                                Gunakan halaman lesson untuk akses video, artikel, file, atau link eksternal dalam satu pola yang konsisten.
+                                Badge <span class="font-semibold text-rose-700">Terkunci</span> berarti masih ada materi wajib sebelumnya yang belum selesai.
                             </div>
                             <div class="rounded-[var(--radius-lg)] border border-zinc-200/70 p-4">
-                                Progress disimpan per materi, jadi pengguna bisa lanjut lintas device tanpa bingung mencari posisi terakhir.
+                                Badge <span class="font-semibold text-sky-700">Dijadwalkan</span> berarti materi baru akan terbuka sesuai tanggal yang ditentukan admin.
                             </div>
                         </div>
                     </x-ui.card>

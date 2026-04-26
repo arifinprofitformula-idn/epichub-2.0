@@ -96,16 +96,13 @@ class ProductCatalogController
                     if ($courseId) {
                         $totalLessons = (int) CourseLesson::query()
                             ->where('course_id', $courseId)
-                            ->where('is_active', true)
-                            ->where(function (Builder $query): void {
-                                $query->whereNull('published_at')->orWhere('published_at', '<=', now());
-                            })
+                            ->accessibleToLearner()
                             ->count();
 
                         $completedLessons = (int) \App\Models\LessonProgress::query()
                             ->where('user_id', $user->id)
                             ->where('course_id', $courseId)
-                            ->where('status', LessonProgressStatus::Completed)
+                            ->completed()
                             ->count();
 
                         $progress = [

@@ -227,7 +227,7 @@ class MyProductController extends Controller
             : \App\Models\LessonProgress::query()
                 ->where('user_id', $userId)
                 ->whereIn('course_id', $courseIds)
-                ->where('status', LessonProgressStatus::Completed)
+                ->completed()
                 ->selectRaw('course_id, count(*) as completed')
                 ->groupBy('course_id')
                 ->pluck('completed', 'course_id');

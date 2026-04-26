@@ -42,12 +42,29 @@ class LessonProgress extends Model
 
     public function scopeCompleted(Builder $query): void
     {
-        $query->where('status', LessonProgressStatus::Completed);
+        $query->where(function (Builder $q): void {
+            $q
+                ->where('status', LessonProgressStatus::Completed)
+                ->orWhereNotNull('completed_at');
+        });
+    }
+
+    public function scopeForUserProduct(Builder $query, int $userId, ?int $userProductId = null): void
+    {
+        $query->where('user_id', $userId);
+
+        if ($userProductId === null) {
+            return;
+        }
+
+        $query->where(function (Builder $q) use ($userProductId): void {
+            $q->whereNull('user_product_id')->orWhere('user_product_id', $userProductId);
+        });
     }
 
     public function isCompleted(): bool
     {
-        return $this->status === LessonProgressStatus::Completed;
+        return $this->completed_at !== null || $this->status === LessonProgressStatus::Completed;
     }
 
     protected function casts(): array

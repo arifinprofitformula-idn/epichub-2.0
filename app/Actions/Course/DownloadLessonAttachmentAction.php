@@ -16,6 +16,7 @@ class DownloadLessonAttachmentAction
 {
     public function __construct(
         protected ResolveCourseAccessAction $resolveCourseAccess,
+        protected ResolveCourseLessonAccessAction $resolveCourseLessonAccess,
         protected LogAccessAction $logAccess,
     ) {
     }
@@ -30,14 +31,21 @@ class DownloadLessonAttachmentAction
         $resolved = $this->resolveCourseAccess->execute($user, $userProduct);
         $course = $resolved['course'];
 
-        $lesson = CourseLesson::query()
-            ->where('id', $lesson->id)
-            ->where('course_id', $course->id)
-            ->accessibleToLearner()
-            ->first();
-
         if (! $lesson) {
             throw new RuntimeException('Lesson tidak ditemukan.');
+        }
+
+        $access = $this->resolveCourseLessonAccess->resolveWithinCourse(
+            user: $user,
+            userProduct: $userProduct,
+            lesson: $lesson,
+            course: $course,
+            orderedLessons: $resolved['lessons'],
+            progressRows: $resolved['progressRowsByLessonId'],
+        );
+
+        if (! $access['can_access']) {
+            throw new RuntimeException('Attachment lesson masih terkunci.');
         }
 
         if ($lesson->lesson_type !== CourseLessonType::FileAttachment) {

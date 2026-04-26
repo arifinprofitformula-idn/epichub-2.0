@@ -156,6 +156,29 @@ class CourseLessonForm
                         ->seconds(false)
                         ->nullable(),
 
+                    Section::make('Akses & Jadwal Materi')->schema([
+                        Select::make('status')
+                            ->label('Status')
+                            ->options([
+                                'draft' => 'Draft',
+                                'published' => 'Published',
+                            ])
+                            ->default('published')
+                            ->required(),
+
+                        Toggle::make('is_required')
+                            ->label('Wajib Diselesaikan')
+                            ->default(true)
+                            ->helperText('Jika aktif, materi ini menjadi syarat untuk membuka materi berikutnya saat mode bertahap aktif.'),
+
+                        DateTimePicker::make('available_from')
+                            ->label('Jadwal Materi Dibuka')
+                            ->timezone('Asia/Jakarta')
+                            ->seconds(false)
+                            ->helperText('Kosongkan jika materi langsung tersedia setelah published.')
+                            ->nullable(),
+                    ])->columns(1),
+
                     KeyValue::make('metadata')
                         ->label('Metadata (opsional)')
                         ->addButtonLabel('Tambah item')

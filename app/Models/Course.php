@@ -23,11 +23,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'is_featured',
     'sort_order',
     'published_at',
+    'lesson_access_mode',
+    'show_locked_lessons',
     'metadata',
 ])]
 class Course extends Model
 {
     use SoftDeletes;
+
+    public const LESSON_ACCESS_MODE_FREE = 'free';
+
+    public const LESSON_ACCESS_MODE_SEQUENTIAL = 'sequential';
 
     public function product(): BelongsTo
     {
@@ -62,6 +68,16 @@ class Course extends Model
         return $this->published_at === null || $this->published_at->isPast();
     }
 
+    public function usesSequentialLessons(): bool
+    {
+        return ($this->lesson_access_mode ?? self::LESSON_ACCESS_MODE_FREE) === self::LESSON_ACCESS_MODE_SEQUENTIAL;
+    }
+
+    public function shouldShowLockedLessons(): bool
+    {
+        return (bool) ($this->show_locked_lessons ?? true);
+    }
+
     protected function casts(): array
     {
         return [
@@ -70,6 +86,8 @@ class Course extends Model
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
             'published_at' => 'datetime',
+            'lesson_access_mode' => 'string',
+            'show_locked_lessons' => 'boolean',
             'metadata' => 'array',
         ];
     }
