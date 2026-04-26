@@ -47,7 +47,17 @@ class CourseLesson extends Model
         return $this->hasMany(LessonProgress::class, 'course_lesson_id');
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(CourseLessonAttachment::class, 'course_lesson_id');
+    }
+
     public function scopeActive(Builder $query): void
+    {
+        $query->where('is_active', true);
+    }
+
+    public function scopeAccessibleToLearner(Builder $query): void
     {
         $query->where('is_active', true);
     }

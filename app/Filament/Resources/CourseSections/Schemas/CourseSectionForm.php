@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CourseSections\Schemas;
 
 use App\Models\Course;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -13,17 +14,30 @@ use Filament\Schemas\Schema;
 
 class CourseSectionForm
 {
-    public static function configure(Schema $schema): Schema
+    /**
+     * @return array<int, \Filament\Schemas\Components\Component>
+     */
+    public static function getComponents(array $options = []): array
     {
-        return $schema->components([
+        $courseSelectable = $options['course_selectable'] ?? true;
+        $courseId = $options['course_id'] ?? null;
+
+        $courseField = $courseSelectable
+            ? Select::make('course_id')
+                ->label('Course')
+                ->options(fn () => Course::query()->orderBy('title')->pluck('title', 'id'))
+                ->searchable()
+                ->preload()
+                ->required()
+            : Hidden::make('course_id')
+                ->default($courseId)
+                ->required()
+                ->dehydrated();
+
+        return [
             Grid::make(2)->schema([
                 Section::make('Section')->schema([
-                    Select::make('course_id')
-                        ->label('Course')
-                        ->options(fn () => Course::query()->orderBy('title')->pluck('title', 'id'))
-                        ->searchable()
-                        ->preload()
-                        ->required(),
+                    $courseField,
 
                     TextInput::make('title')
                         ->label('Judul')
@@ -47,7 +61,12 @@ class CourseSectionForm
                         ->default(true),
                 ])->columnSpanFull(),
             ]),
-        ]);
+        ];
+    }
+
+    public static function configure(Schema $schema, array $options = []): Schema
+    {
+        return $schema->components(static::getComponents($options));
     }
 }
 

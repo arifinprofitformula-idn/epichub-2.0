@@ -10,7 +10,6 @@ use App\Enums\ProductType;
 use App\Models\CourseLesson;
 use App\Models\LessonProgress;
 use App\Models\UserProduct;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use RuntimeException;
@@ -45,10 +44,7 @@ class MyCourseController extends Controller
             ? collect()
             : CourseLesson::query()
                 ->whereIn('course_id', $courseIds)
-                ->where('is_active', true)
-                ->where(function (Builder $q): void {
-                    $q->whereNull('published_at')->orWhere('published_at', '<=', now());
-                })
+                ->accessibleToLearner()
                 ->selectRaw('course_id, count(*) as total')
                 ->groupBy('course_id')
                 ->pluck('total', 'course_id');

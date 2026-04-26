@@ -182,7 +182,7 @@ test('card ebook mengarah ke produk saya detail', function () {
         ->get(route('my-products.index'))
         ->assertOk()
         ->assertSee(route('my-products.show', $userProduct), false)
-        ->assertSee('Akses Ebook');
+        ->assertSee('Baca Ebook');
 });
 
 test('card course mengarah ke kelas saya detail', function () {
@@ -199,6 +199,25 @@ test('card course mengarah ke kelas saya detail', function () {
         ->assertOk()
         ->assertSee(route('my-courses.show', $userProduct), false)
         ->assertSee('Masuk Kelas');
+});
+
+test('detail akses course draft tetap menampilkan masuk kelas untuk pemilik entitlement aktif', function () {
+    $user = User::factory()->create();
+    $product = makeHubProduct([
+        'title' => 'Course Draft CTA',
+        'product_type' => ProductType::Course,
+    ]);
+    makeHubCourse($product, [
+        'status' => CourseStatus::Draft,
+        'published_at' => null,
+    ]);
+    $userProduct = makeHubUserProduct($user, $product);
+
+    $this->actingAs($user)
+        ->get(route('my-products.show', $userProduct))
+        ->assertOk()
+        ->assertSee('Masuk Kelas')
+        ->assertDontSee('Materi kelas sedang disiapkan.');
 });
 
 test('card event mengarah ke event saya detail jika registrasi tersedia', function () {

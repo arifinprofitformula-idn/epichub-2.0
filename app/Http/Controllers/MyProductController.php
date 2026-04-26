@@ -10,8 +10,8 @@ use App\Enums\ProductType;
 use App\Models\CourseLesson;
 use App\Models\EventRegistration;
 use App\Models\UserProduct;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -217,10 +217,7 @@ class MyProductController extends Controller
             ? collect()
             : CourseLesson::query()
                 ->whereIn('course_id', $courseIds)
-                ->where('is_active', true)
-                ->where(function (Builder $query): void {
-                    $query->whereNull('published_at')->orWhere('published_at', '<=', now());
-                })
+                ->accessibleToLearner()
                 ->selectRaw('course_id, count(*) as total')
                 ->groupBy('course_id')
                 ->pluck('total', 'course_id');

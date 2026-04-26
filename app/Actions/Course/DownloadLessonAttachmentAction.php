@@ -8,7 +8,6 @@ use App\Enums\CourseLessonType;
 use App\Models\CourseLesson;
 use App\Models\User;
 use App\Models\UserProduct;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -34,10 +33,7 @@ class DownloadLessonAttachmentAction
         $lesson = CourseLesson::query()
             ->where('id', $lesson->id)
             ->where('course_id', $course->id)
-            ->where('is_active', true)
-            ->where(function (Builder $q): void {
-                $q->whereNull('published_at')->orWhere('published_at', '<=', now());
-            })
+            ->accessibleToLearner()
             ->first();
 
         if (! $lesson) {

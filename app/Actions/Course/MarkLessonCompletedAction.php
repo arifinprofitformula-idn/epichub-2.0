@@ -9,7 +9,6 @@ use App\Models\CourseLesson;
 use App\Models\LessonProgress;
 use App\Models\User;
 use App\Models\UserProduct;
-use Illuminate\Database\Eloquent\Builder;
 use RuntimeException;
 
 class MarkLessonCompletedAction
@@ -28,10 +27,7 @@ class MarkLessonCompletedAction
         $lesson = CourseLesson::query()
             ->where('id', $lesson->id)
             ->where('course_id', $course->id)
-            ->where('is_active', true)
-            ->where(function (Builder $q): void {
-                $q->whereNull('published_at')->orWhere('published_at', '<=', now());
-            })
+            ->accessibleToLearner()
             ->first();
 
         if (! $lesson) {

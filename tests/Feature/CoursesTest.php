@@ -192,6 +192,29 @@ test('progress percent changes after lesson completed', function () {
     $this->get(route('my-courses.show', $userProduct))->assertOk()->assertSee('100%');
 });
 
+test('future published_at lesson tetap tampil untuk user yang punya entitlement aktif', function () {
+    $user = User::factory()->create();
+    $product = makeCourseProduct();
+    $course = makePublishedCourse($product);
+    $userProduct = makeActiveCourseEntitlement($user, $product);
+
+    CourseLesson::query()->create([
+        'course_id' => $course->id,
+        'title' => 'Lesson Future Timestamp',
+        'slug' => 'lesson-future-timestamp',
+        'lesson_type' => CourseLessonType::Article,
+        'content' => '<p>Halo</p>',
+        'sort_order' => 0,
+        'is_active' => true,
+        'published_at' => now()->addDay(),
+    ]);
+
+    $this->actingAs($user);
+    $this->get(route('my-courses.show', $userProduct))
+        ->assertOk()
+        ->assertSee('Lesson Future Timestamp');
+});
+
 test('revoked entitlement cannot open course', function () {
     $user = User::factory()->create();
     $product = makeCourseProduct();
@@ -205,16 +228,36 @@ test('revoked entitlement cannot open course', function () {
     $this->get(route('my-courses.show', $userProduct))->assertNotFound();
 });
 
-test('draft/unpublished course is not accessible', function () {
+test('user with active entitlement can open draft course overview', function () {
     $user = User::factory()->create();
     $product = makeCourseProduct();
-    Course::query()->create([
-        'product_id' => $product->id,
-        'title' => 'Kelas Draft',
-        'slug' => 'kelas-draft-'.uniqid(),
-        'status' => CourseStatus::Draft,
-        'published_at' => null,
+    CourseLesson::query()->create([
+        'course_id' => Course::query()->create([
+            'product_id' => $product->id,
+            'title' => 'Kelas Draft',
+            'slug' => 'kelas-draft-'.uniqid(),
+            'status' => CourseStatus::Draft,
+            'published_at' => null,
+        ])->id,
+        'title' => 'Lesson Draft',
+        'slug' => 'lesson-draft-'.uniqid(),
+        'lesson_type' => CourseLessonType::Article,
+        'content' => '<p>Halo</p>',
+        'sort_order' => 0,
+        'is_active' => true,
+        'published_at' => now(),
     ]);
+    $userProduct = makeActiveCourseEntitlement($user, $product);
+
+    $this->actingAs($user);
+    $this->get(route('my-courses.show', $userProduct))
+        ->assertOk()
+        ->assertSee('Lesson Draft');
+});
+
+test('course overview stays unavailable when no course record exists yet', function () {
+    $user = User::factory()->create();
+    $product = makeCourseProduct();
     $userProduct = makeActiveCourseEntitlement($user, $product);
 
     $this->actingAs($user);

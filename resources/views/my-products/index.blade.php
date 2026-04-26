@@ -268,7 +268,7 @@
                                 case 'course':
                                     $primaryLabel = 'Masuk Kelas';
                                     $primaryIcon  = 'play';
-                                    $primaryUrl   = $course && $course->isPublished()
+                                    $primaryUrl   = $course
                                         ? route('my-courses.show', $userProduct)
                                         : route('my-products.show', $userProduct);
                                     break;

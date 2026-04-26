@@ -19,6 +19,8 @@ class CourseSectionResource extends Resource
 {
     protected static ?string $model = CourseSection::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
     protected static ?string $recordTitleAttribute = 'title';

@@ -106,6 +106,8 @@ class CourseForm
 
                     DateTimePicker::make('published_at')
                         ->label('Published pada (opsional)')
+                        ->timezone('Asia/Jakarta')
+                        ->helperText('Kosongkan jika kelas harus langsung tersedia. Waktu input menggunakan zona Asia/Jakarta.')
                         ->seconds(false)
                         ->nullable(),
 

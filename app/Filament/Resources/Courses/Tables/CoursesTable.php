@@ -45,14 +45,14 @@ class CoursesTable
                     ->sortable(),
 
                 TextColumn::make('sections_count')
-                    ->label('Sections')
+                    ->label('Modul')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
                 TextColumn::make('lessons_count')
-                    ->label('Lessons')
+                    ->label('Materi')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
 
                 IconColumn::make('is_featured')
                     ->label('Featured')

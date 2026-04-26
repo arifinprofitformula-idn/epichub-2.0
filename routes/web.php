@@ -89,6 +89,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [MyCourseLessonController::class, 'show'])->name('show');
             Route::post('/complete', [MyCourseLessonController::class, 'complete'])->name('complete');
             Route::get('/download', [MyCourseLessonController::class, 'download'])->name('download');
+            Route::get('/attachments/{attachment}/download', [MyCourseLessonController::class, 'downloadAttachment'])->name('attachments.download');
             Route::get('/open', [MyCourseLessonController::class, 'openExternal'])->name('open');
         });
     });

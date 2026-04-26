@@ -29,7 +29,7 @@
                 <div class="mt-6 grid gap-4 md:grid-cols-2">
                     @foreach ($userProducts as $userProduct)
                         @php($course = $userProduct->product?->course)
-                        @php($coursePublished = (bool) ($course?->isPublished()))
+                        @php($courseReady = (bool) $course)
                         @php($progress = $progressByUserProductId[$userProduct->id] ?? ['percent' => 0, 'completed' => 0, 'total' => 0])
 
                         <x-ui.card class="p-6">
@@ -43,7 +43,7 @@
                                     </div>
                                 </div>
 
-                                @if ($coursePublished)
+                                @if ($courseReady)
                                     <x-ui.button variant="secondary" size="sm" :href="route('my-courses.show', $userProduct)">
                                         Lanjut belajar
                                     </x-ui.button>

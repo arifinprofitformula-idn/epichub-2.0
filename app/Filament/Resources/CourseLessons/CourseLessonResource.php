@@ -21,6 +21,8 @@ class CourseLessonResource extends Resource
 {
     protected static ?string $model = CourseLesson::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPlayCircle;
 
     protected static ?string $recordTitleAttribute = 'title';

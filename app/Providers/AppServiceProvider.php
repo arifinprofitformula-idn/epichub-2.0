@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Support\WindowsSafeFilesystem;
 use Carbon\CarbonImmutable;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +18,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $this->app->singleton('files', fn () => new WindowsSafeFilesystem);
+            $this->app->alias('files', Filesystem::class);
+        }
     }
 
     /**

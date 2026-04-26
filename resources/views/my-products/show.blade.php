@@ -222,9 +222,9 @@
                                 @endif
                             @elseif ($type === 'course')
                                 @php($course = $userProduct->product?->course)
-                                @php($coursePublished = (bool) ($course?->isPublished()))
+                                @php($courseReady = (bool) $course)
 
-                                @if ($coursePublished)
+                                @if ($courseReady)
                                     <x-ui.alert variant="info" title="Course tersedia">
                                         Materi kelas sudah tersedia. Klik tombol di bawah untuk mulai belajar.
                                     </x-ui.alert>

@@ -17,6 +17,7 @@ enum AccessLogAction: string
     case LessonViewed = 'lesson_viewed';
     case LessonCompleted = 'lesson_completed';
     case LessonAttachmentDownloaded = 'lesson_attachment_downloaded';
+    case LessonAttachmentExternalOpened = 'lesson_attachment_external_opened';
     case EventRegistered = 'event_registered';
     case EventAccessed = 'event_accessed';
     case EventJoinClicked = 'event_join_clicked';
@@ -40,6 +41,7 @@ enum AccessLogAction: string
             self::LessonViewed => 'Lesson dibuka',
             self::LessonCompleted => 'Lesson selesai',
             self::LessonAttachmentDownloaded => 'Attachment lesson diunduh',
+            self::LessonAttachmentExternalOpened => 'Link attachment lesson dibuka',
             self::EventRegistered => 'Registrasi event',
             self::EventAccessed => 'Event dibuka',
             self::EventJoinClicked => 'Klik join event',
