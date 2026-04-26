@@ -23,6 +23,11 @@ class OrdersTable
                     ->placeholder('-')
                     ->searchable(),
 
+                TextColumn::make('referrerEpiChannel.epic_code')
+                    ->label('Referrer')
+                    ->placeholder('-')
+                    ->toggleable(),
+
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()

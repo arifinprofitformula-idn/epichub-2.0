@@ -21,6 +21,7 @@ class CreateCommissionsForOrderAction
             'items.product',
             'referralOrder.epiChannel',
             'user.epiChannel',
+            'referrerEpiChannel',
         ]);
 
         if (! in_array($order->status, [OrderStatus::Paid], true)) {
@@ -60,6 +61,8 @@ class CreateCommissionsForOrderAction
         }
 
         $results = collect();
+        $converted = false;
+        $isHouseChannel = $channel->isHouseChannel();
 
         foreach ($order->items as $item) {
             $product = $item->product;
@@ -95,6 +98,12 @@ class CreateCommissionsForOrderAction
                 continue;
             }
 
+            $converted = true;
+
+            if ($isHouseChannel) {
+                continue;
+            }
+
             $commission = Commission::query()->firstOrCreate(
                 [
                     'order_item_id' => $item->id,
@@ -110,15 +119,23 @@ class CreateCommissionsForOrderAction
                     'base_amount' => $base,
                     'commission_amount' => $amount,
                     'status' => CommissionStatus::Pending,
+                    'metadata' => [
+                        'referral_source' => $order->referral_source,
+                        'is_house_commission' => false,
+                    ],
                 ],
             );
 
             $results->push($commission);
         }
 
-        if ($results->count() > 0 && $referralOrder->status === ReferralOrderStatus::Pending) {
+        if ($converted && $referralOrder->status === ReferralOrderStatus::Pending) {
             $referralOrder->update([
                 'status' => ReferralOrderStatus::Converted,
+                'metadata' => array_merge($referralOrder->metadata ?? [], [
+                    'house_channel' => $isHouseChannel,
+                    'commission_skipped_for_house' => $isHouseChannel,
+                ]),
             ]);
         }
 

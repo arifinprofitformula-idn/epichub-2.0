@@ -50,7 +50,7 @@ class CheckoutController extends Controller
             'product' => $product,
             'isEligible' => $isEligible,
             'eligibilityMessage' => $eligibilityMessage,
-            'referralChannel' => $resolveCurrentReferral->execute($request),
+            'referralInfo' => $resolveCurrentReferral->execute($request),
         ]);
     }
 
@@ -80,7 +80,7 @@ class CheckoutController extends Controller
                         'whatsapp_number' => ['required', 'string', 'max:30', 'regex:/^[0-9+\-\s\(\)]+$/'],
                         'password' => ['required'],
                         'password_confirmation' => ['required'],
-                    ]));
+                    ]), $request);
 
                     $guestUserCreated = true;
                 }

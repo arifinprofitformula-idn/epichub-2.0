@@ -138,7 +138,7 @@ test('guest checkout does not create order when email and whatsapp belong to dif
         ->post(route('checkout.store', $product->slug), [
             'name' => 'Guest Checkout',
             'email' => 'existing-email@example.com',
-            'whatsapp_number' => '0822-2222-2222',
+            'whatsapp_number' => '628222222222',
             'password' => 'Password!23',
             'password_confirmation' => 'Password!23',
         ])
@@ -220,7 +220,7 @@ test('referral info is shown in checkout when ref is valid', function () {
         ],
     ])->get(route('checkout.show', $product->slug))
         ->assertOk()
-        ->assertSee('Transaksi ini terhubung dengan pereferral Anda.')
+        ->assertSee('Pendaftaran/pembelian ini akan terhubung dengan pereferral:')
         ->assertSee('Sponsor Aktif')
         ->assertSee('REF-CARD')
         ->assertSee('Toko Sponsor');
@@ -231,8 +231,9 @@ test('referral fallback is shown in checkout when there is no ref', function () 
 
     $this->get(route('checkout.show', $product->slug))
         ->assertOk()
-        ->assertSee('Belum ada pereferral terhubung pada transaksi ini.')
-        ->assertSee('gunakan link resmi dari pereferral Anda');
+        ->assertSee('Pendaftaran/pembelian ini akan terhubung dengan pereferral sistem EPIC Hub Official.')
+        ->assertSee('EPIC-HOUSE')
+        ->assertSee('EPIC Hub Official');
 });
 
 test('checkout url with ref can keep referral attribution for created order', function () {
@@ -252,20 +253,20 @@ test('checkout url with ref can keep referral attribution for created order', fu
         ->assertCookie('epic_ref');
 
     $visit = ReferralVisit::query()->latest('id')->firstOrFail();
-
-    $this->post(route('checkout.store', $product->slug), [
-        'name' => 'Guest Referral',
-        'email' => 'guest.referral@example.com',
-        'whatsapp_number' => '081299900000',
-        'password' => 'Password!23',
-        'password_confirmation' => 'Password!23',
-    ], [
-        'Cookie' => 'epic_ref='.json_encode([
-            'epic_code' => $channel->epic_code,
-            'visit_id' => $visit->id,
-            'at' => now()->timestamp,
-        ]),
+    $cookiePayload = json_encode([
+        'epic_code' => $channel->epic_code,
+        'visit_id' => $visit->id,
+        'at' => now()->timestamp,
     ]);
+
+    $this->withCookie('epic_ref', (string) $cookiePayload)
+        ->post(route('checkout.store', $product->slug), [
+            'name' => 'Guest Referral',
+            'email' => 'guest.referral@example.com',
+            'whatsapp_number' => '081299900000',
+            'password' => 'Password!23',
+            'password_confirmation' => 'Password!23',
+        ]);
 
     $order = Order::query()->latest('id')->firstOrFail();
 

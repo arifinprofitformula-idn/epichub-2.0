@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'default_referrer_epic_code' => env('DEFAULT_REFERRER_EPIC_CODE', 'EPIC-HOUSE'),
+    'default_referrer_owner_email' => env('DEFAULT_REFERRER_OWNER_EMAIL', 'system-referrer@epichub.local'),
     'payments' => [
         'manual_bank_transfer' => [
             'bank_name' => env('EPICHUB_BANK_NAME', 'BCA'),

@@ -2,9 +2,12 @@
 
 namespace App\Actions\Checkout;
 
+use App\Actions\Affiliates\LockUserReferrerAction;
+use App\Actions\Affiliates\ResolveReferralForUserAction;
 use App\Actions\Support\NormalizeWhatsappNumberAction;
 use App\Concerns\PasswordValidationRules;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -16,13 +19,15 @@ class CreateGuestCheckoutUserAction
 
     public function __construct(
         protected NormalizeWhatsappNumberAction $normalizeWhatsappNumber,
+        protected ResolveReferralForUserAction $resolveReferralForUser,
+        protected LockUserReferrerAction $lockUserReferrer,
     ) {
     }
 
     /**
      * @param  array{name: string, email: string, whatsapp_number: string, password: string, password_confirmation: string}  $input
      */
-    public function execute(array $input): User
+    public function execute(array $input, ?Request $request = null): User
     {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
@@ -78,6 +83,12 @@ class CreateGuestCheckoutUserAction
             $user->assignRole('customer');
         }
 
-        return $user;
+        $resolved = $this->resolveReferralForUser->execute($user, $request);
+
+        return $this->lockUserReferrer->execute(
+            user: $user,
+            epiChannel: $resolved['epiChannel'],
+            source: $resolved['source'],
+        );
     }
 }

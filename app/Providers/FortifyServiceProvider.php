@@ -52,7 +52,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::twoFactorChallengeView(fn (): Response => $this->noStoreView('pages::auth.two-factor-challenge'));
         Fortify::confirmPasswordView(fn (): Response => $this->noStoreView('pages::auth.confirm-password'));
         Fortify::registerView(fn (Request $request): Response => $this->noStoreView('pages::auth.register', [
-            'referralChannel' => app(ResolveCurrentReferralAction::class)->execute($request),
+            'referralInfo' => app(ResolveCurrentReferralAction::class)->execute($request),
         ]));
         Fortify::resetPasswordView(fn (): Response => $this->noStoreView('pages::auth.reset-password'));
         Fortify::requestPasswordResetLinkView(fn (): Response => $this->noStoreView('pages::auth.forgot-password'));

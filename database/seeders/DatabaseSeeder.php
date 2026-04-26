@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Affiliates\EnsureDefaultEpiChannelAction;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,5 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(SuperAdminSeeder::class);
+
+        app(EnsureDefaultEpiChannelAction::class)->execute();
     }
 }

@@ -10,6 +10,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -18,7 +19,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'whatsapp_number'])]
+#[Fillable(['name', 'email', 'password', 'whatsapp_number', 'referrer_epi_channel_id', 'referral_locked_at', 'referral_source'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -35,6 +36,7 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'referral_locked_at' => 'datetime',
         ];
     }
 
@@ -79,6 +81,14 @@ class User extends Authenticatable implements FilamentUser
     public function epiChannel(): HasOne
     {
         return $this->hasOne(EpiChannel::class);
+    }
+
+    /**
+     * @return BelongsTo<EpiChannel, $this>
+     */
+    public function referrerEpiChannel(): BelongsTo
+    {
+        return $this->belongsTo(EpiChannel::class, 'referrer_epi_channel_id');
     }
 
     /**

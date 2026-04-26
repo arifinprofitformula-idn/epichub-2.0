@@ -2,64 +2,27 @@
 
 namespace App\Actions\Affiliates;
 
-use App\Models\EpiChannel;
 use Illuminate\Http\Request;
 
 class ResolveCurrentReferralAction
 {
-    public function execute(Request $request): ?EpiChannel
-    {
-        $epicCode = $this->resolveEpicCode($request);
-
-        if ($epicCode === null) {
-            return null;
-        }
-
-        return EpiChannel::query()
-            ->with('user')
-            ->where('epic_code', $epicCode)
-            ->active()
-            ->first();
+    public function __construct(
+        protected ResolveReferralForUserAction $resolveReferralForUser,
+    ) {
     }
 
-    protected function resolveEpicCode(Request $request): ?string
+    /**
+     * @return array{channel: \App\Models\EpiChannel, source: string, is_locked: bool}
+     */
+    public function execute(Request $request): array
     {
-        $queryRef = trim((string) $request->query('ref', ''));
+        $user = $request->user();
+        $resolved = $this->resolveReferralForUser->execute($user, $request);
 
-        if ($queryRef !== '') {
-            return $queryRef;
-        }
-
-        $sessionRef = $request->session()->get('epichub_referral');
-
-        if (is_array($sessionRef)) {
-            $epicCode = trim((string) ($sessionRef['epic_code'] ?? ''));
-
-            if ($epicCode !== '') {
-                return $epicCode;
-            }
-        }
-
-        foreach (['epic_ref', 'epichub_ref'] as $cookieKey) {
-            $payload = $request->cookie($cookieKey);
-
-            if (! is_string($payload) || trim($payload) === '') {
-                continue;
-            }
-
-            $decoded = json_decode($payload, true);
-
-            if (! is_array($decoded)) {
-                continue;
-            }
-
-            $epicCode = trim((string) ($decoded['epic_code'] ?? ''));
-
-            if ($epicCode !== '') {
-                return $epicCode;
-            }
-        }
-
-        return null;
+        return [
+            'channel' => $resolved['epiChannel'],
+            'source' => $resolved['source'],
+            'is_locked' => (bool) ($user?->referrer_epi_channel_id),
+        ];
     }
 }

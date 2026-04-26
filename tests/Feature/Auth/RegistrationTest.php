@@ -27,6 +27,10 @@ test('new users can register', function () {
         ->assertRedirect(route('dashboard', absolute: false));
 
     $this->assertAuthenticated();
+    $this->assertDatabaseHas('users', [
+        'email' => 'test@example.com',
+        'referral_source' => 'default_system',
+    ]);
 });
 
 test('register page shows referral info when ref is valid', function () {
@@ -43,8 +47,16 @@ test('register page shows referral info when ref is valid', function () {
 
     $this->get(route('register', ['ref' => 'REG-REF']))
         ->assertOk()
-        ->assertSee('Pendaftaran ini terhubung dengan pereferral Anda.')
+        ->assertSee('Pendaftaran ini akan terhubung dengan pereferral:')
         ->assertSee('Sponsor Register')
         ->assertSee('REG-REF')
         ->assertSee('Store Register');
+});
+
+test('register page shows house referral info when there is no ref', function () {
+    $this->get(route('register'))
+        ->assertOk()
+        ->assertSee('Pendaftaran ini akan terhubung dengan pereferral sistem EPIC Hub Official.')
+        ->assertSee('EPIC-HOUSE')
+        ->assertSee('EPIC Hub Official');
 });

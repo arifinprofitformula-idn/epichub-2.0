@@ -53,6 +53,18 @@ class OrderForm
                                 ->label('Telepon')
                                 ->disabled()
                                 ->dehydrated(false),
+
+                            TextInput::make('referrerEpiChannel.epic_code')
+                                ->label('EPIC Referrer')
+                                ->disabled()
+                                ->dehydrated(false)
+                                ->placeholder('EPIC-HOUSE'),
+
+                            TextInput::make('referral_source')
+                                ->label('Referral Source')
+                                ->disabled()
+                                ->dehydrated(false)
+                                ->placeholder('-'),
                         ])
                         ->columns(1)
                         ->columnSpan(1),

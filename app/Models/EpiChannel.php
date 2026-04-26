@@ -41,6 +41,16 @@ class EpiChannel extends Model
         return $this->hasMany(ReferralOrder::class);
     }
 
+    public function referredUsers(): HasMany
+    {
+        return $this->hasMany(User::class, 'referrer_epi_channel_id');
+    }
+
+    public function attributedOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'referrer_epi_channel_id');
+    }
+
     public function commissions(): HasMany
     {
         return $this->hasMany(Commission::class);
@@ -59,6 +69,11 @@ class EpiChannel extends Model
     public function isActive(): bool
     {
         return $this->status === EpiChannelStatus::Active;
+    }
+
+    public function isHouseChannel(): bool
+    {
+        return (bool) data_get($this->metadata, 'is_house_channel', false);
     }
 
     protected function casts(): array

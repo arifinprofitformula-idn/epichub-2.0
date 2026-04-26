@@ -2,10 +2,13 @@
 
 namespace App\Actions\Fortify;
 
+use App\Actions\Affiliates\LockUserReferrerAction;
+use App\Actions\Affiliates\ResolveReferralForUserAction;
 use App\Actions\Support\NormalizeWhatsappNumberAction;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Spatie\Permission\Models\Role;
@@ -16,6 +19,8 @@ class CreateNewUser implements CreatesNewUsers
 
     public function __construct(
         protected NormalizeWhatsappNumberAction $normalizeWhatsappNumber,
+        protected ResolveReferralForUserAction $resolveReferralForUser,
+        protected LockUserReferrerAction $lockUserReferrer,
     ) {
     }
 
@@ -31,17 +36,25 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        $user = User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'whatsapp_number' => $this->normalizeWhatsappNumber->execute($input['whatsapp_number'] ?? null),
-            'password' => $input['password'],
-        ]);
+        return DB::transaction(function () use ($input): User {
+            $user = User::create([
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'whatsapp_number' => $this->normalizeWhatsappNumber->execute($input['whatsapp_number'] ?? null),
+                'password' => $input['password'],
+            ]);
 
-        if (Role::query()->where('name', 'customer')->exists()) {
-            $user->assignRole('customer');
-        }
+            if (Role::query()->where('name', 'customer')->exists()) {
+                $user->assignRole('customer');
+            }
 
-        return $user;
+            $resolved = $this->resolveReferralForUser->execute($user, request());
+
+            return $this->lockUserReferrer->execute(
+                user: $user,
+                epiChannel: $resolved['epiChannel'],
+                source: $resolved['source'],
+            );
+        });
     }
 }

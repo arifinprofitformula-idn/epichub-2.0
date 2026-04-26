@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
     'user_id',
+    'referrer_epi_channel_id',
+    'referral_source',
     'order_number',
     'status',
     'subtotal_amount',
@@ -43,6 +45,11 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function referrerEpiChannel(): BelongsTo
+    {
+        return $this->belongsTo(EpiChannel::class, 'referrer_epi_channel_id');
     }
 
     /**

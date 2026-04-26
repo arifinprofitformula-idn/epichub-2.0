@@ -226,7 +226,12 @@
                             Anda akan diarahkan ke halaman instruksi transfer dan upload bukti pembayaran.
                         </div>
 
-                        <x-referral-info-card :channel="$referralChannel ?? null" class="mt-5" />
+                        <x-referral-info-card
+                            :channel="data_get($referralInfo ?? [], 'channel')"
+                            :source="data_get($referralInfo ?? [], 'source', 'default_system')"
+                            :locked="(bool) data_get($referralInfo ?? [], 'is_locked', false)"
+                            class="mt-5"
+                        />
                     </x-ui.card>
                 </div>
             </div>

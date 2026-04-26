@@ -1,16 +1,25 @@
 @props([
     'channel' => null,
     'context' => 'checkout',
+    'source' => 'default_system',
+    'locked' => false,
 ])
 
 @php
     $isRegister = $context === 'register';
-    $title = $channel
-        ? ($isRegister ? 'Pendaftaran ini terhubung dengan pereferral Anda.' : 'Transaksi ini terhubung dengan pereferral Anda.')
-        : 'Belum ada pereferral terhubung pada transaksi ini.';
-    $description = $channel
-        ? 'Pastikan data pereferral ini sudah sesuai agar atribusi referral tetap akurat.'
-        : 'Jika Anda mendapatkan rekomendasi dari EPI Channel, gunakan link resmi dari pereferral Anda.';
+    $isDefaultSystem = $source === 'default_system';
+    $title = $locked
+        ? 'Akun Anda terhubung dengan pereferral:'
+        : ($isDefaultSystem
+            ? ($isRegister
+                ? 'Pendaftaran ini akan terhubung dengan pereferral sistem EPIC Hub Official.'
+                : 'Pendaftaran/pembelian ini akan terhubung dengan pereferral sistem EPIC Hub Official.')
+            : ($isRegister
+                ? 'Pendaftaran ini akan terhubung dengan pereferral:'
+                : 'Pendaftaran/pembelian ini akan terhubung dengan pereferral:'));
+    $description = $locked
+        ? 'Pereferral utama pada akun Anda sudah dikunci dan akan dipakai untuk transaksi berikutnya.'
+        : 'Pereferral utama akan dikunci pada akun Anda untuk transaksi berikutnya.';
 @endphp
 
 <div {{ $attributes->class('rounded-[1.75rem] border border-emerald-200/80 bg-[linear-gradient(135deg,rgba(236,253,245,0.96),rgba(240,253,250,0.92))] p-4 text-sm text-emerald-950 shadow-[0_18px_40px_rgba(16,185,129,0.10)]') }}>
@@ -35,7 +44,7 @@
                 <dl class="mt-3 grid gap-2 rounded-[1.35rem] border border-emerald-200/80 bg-white/70 p-3 sm:grid-cols-2">
                     <div>
                         <dt class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-emerald-700/70">Nama Pereferral</dt>
-                        <dd class="mt-1 font-semibold text-emerald-950">{{ $channel->user?->name ?? 'Pereferral EPIC Hub' }}</dd>
+                        <dd class="mt-1 font-semibold text-emerald-950">{{ $channel->user?->name ?? $channel->store_name ?? 'EPIC Hub Official' }}</dd>
                     </div>
                     <div>
                         <dt class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-emerald-700/70">Kode EPI Channel</dt>
@@ -49,6 +58,10 @@
                     @endif
                 </dl>
             @endif
+
+            <p class="mt-3 text-xs leading-5 text-emerald-900/70">
+                Pereferral utama akan dikunci pada akun Anda untuk transaksi berikutnya.
+            </p>
         </div>
     </div>
 </div>

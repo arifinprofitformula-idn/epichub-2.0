@@ -3,6 +3,8 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Affiliates\AttachReferralToOrderAction;
+use App\Actions\Affiliates\LockUserReferrerAction;
+use App\Actions\Affiliates\ResolveReferralForUserAction;
 use App\Actions\Event\CheckEventCheckoutEligibilityAction;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
@@ -25,6 +27,8 @@ class CreateDirectOrderAction
     public function __construct(
         protected CheckEventCheckoutEligibilityAction $checkEventCheckoutEligibility,
         protected AttachReferralToOrderAction $attachReferralToOrder,
+        protected ResolveReferralForUserAction $resolveReferralForUser,
+        protected LockUserReferrerAction $lockUserReferrer,
     ) {
     }
 
@@ -55,11 +59,14 @@ class CreateDirectOrderAction
 
             try {
                 return DB::transaction(function () use ($user, $product, $unitPrice, $request): Payment {
+                    $user = $this->ensureLockedReferrer($user, $request);
                     $orderNumber = OrderNumberGenerator::nextOrderNumber();
                     $paymentNumber = OrderNumberGenerator::nextPaymentNumber();
 
                     $order = Order::query()->create([
                         'user_id' => $user->id,
+                        'referrer_epi_channel_id' => $user->referrer_epi_channel_id,
+                        'referral_source' => $user->referral_source,
                         'order_number' => $orderNumber,
                         'status' => OrderStatus::Unpaid,
                         'subtotal_amount' => $unitPrice,
@@ -136,6 +143,23 @@ class CreateDirectOrderAction
         }
 
         return (string) $type;
+    }
+
+    protected function ensureLockedReferrer(User $user, ?Request $request = null): User
+    {
+        $user->loadMissing('referrerEpiChannel.user', 'epiChannel');
+
+        if ($user->referrer_epi_channel_id) {
+            return $user->fresh(['referrerEpiChannel.user']);
+        }
+
+        $resolved = $this->resolveReferralForUser->execute($user, $request);
+
+        return $this->lockUserReferrer->execute(
+            user: $user,
+            epiChannel: $resolved['epiChannel'],
+            source: $resolved['source'],
+        );
     }
 }
 

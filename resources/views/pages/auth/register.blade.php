@@ -229,7 +229,13 @@
                 </flux:button>
             </div>
 
-            <x-referral-info-card :channel="$referralChannel ?? null" context="register" class="-mt-2" />
+            <x-referral-info-card
+                :channel="data_get($referralInfo ?? [], 'channel')"
+                :source="data_get($referralInfo ?? [], 'source', 'default_system')"
+                :locked="(bool) data_get($referralInfo ?? [], 'is_locked', false)"
+                context="register"
+                class="-mt-2"
+            />
         </form>
 
         <div class="mx-auto w-full border-t border-slate-200 pt-7 text-center text-sm text-slate-500">
