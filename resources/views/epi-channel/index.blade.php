@@ -12,9 +12,25 @@
 
         @if (! $channel || ! $channel->isActive())
             <div class="mt-6">
-                @include('epi-channel.partials.inactive-state', ['channel' => $channel])
+                @include('epi-channel.partials.inactive-state', ['channel' => $channel, 'referrerContact' => $referrerContact])
             </div>
         @else
+            @if ($whatsappReminderNeeded)
+                <div class="mt-6 rounded-[1.5rem] border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900 shadow-[0_10px_24px_rgba(245,158,11,0.08)]">
+                    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <div class="font-semibold">Lengkapi nomor WhatsApp Anda</div>
+                            <div class="mt-1 text-amber-800/80">
+                                Lengkapi nomor WhatsApp di profil agar calon EPI Channel dapat menghubungi Anda.
+                            </div>
+                        </div>
+                        <x-ui.button variant="secondary" size="sm" :href="route('profile.edit')">
+                            Buka Profil
+                        </x-ui.button>
+                    </div>
+                </div>
+            @endif
+
             <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                 <x-ui.stat-card label="Status Channel" value="Aktif" :description="$channel->epic_code" />
                 <x-ui.stat-card label="Total Clicks" :value="$stats['clicks']" description="Referral visits" />

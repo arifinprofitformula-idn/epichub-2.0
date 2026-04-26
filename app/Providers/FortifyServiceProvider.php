@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Actions\Affiliates\ResolveCurrentReferralAction;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -45,13 +47,27 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn () => view('pages::auth.login'));
-        Fortify::verifyEmailView(fn () => view('pages::auth.verify-email'));
-        Fortify::twoFactorChallengeView(fn () => view('pages::auth.two-factor-challenge'));
-        Fortify::confirmPasswordView(fn () => view('pages::auth.confirm-password'));
-        Fortify::registerView(fn () => view('pages::auth.register'));
-        Fortify::resetPasswordView(fn () => view('pages::auth.reset-password'));
-        Fortify::requestPasswordResetLinkView(fn () => view('pages::auth.forgot-password'));
+        Fortify::loginView(fn (): Response => $this->noStoreView('pages::auth.login'));
+        Fortify::verifyEmailView(fn (): Response => $this->noStoreView('pages::auth.verify-email'));
+        Fortify::twoFactorChallengeView(fn (): Response => $this->noStoreView('pages::auth.two-factor-challenge'));
+        Fortify::confirmPasswordView(fn (): Response => $this->noStoreView('pages::auth.confirm-password'));
+        Fortify::registerView(fn (Request $request): Response => $this->noStoreView('pages::auth.register', [
+            'referralChannel' => app(ResolveCurrentReferralAction::class)->execute($request),
+        ]));
+        Fortify::resetPasswordView(fn (): Response => $this->noStoreView('pages::auth.reset-password'));
+        Fortify::requestPasswordResetLinkView(fn (): Response => $this->noStoreView('pages::auth.forgot-password'));
+    }
+
+    /**
+     * Render auth pages with headers that prevent stale CSRF-bearing forms from being cached.
+     */
+    private function noStoreView(string $view, array $data = []): Response
+    {
+        return response()
+            ->view($view, $data)
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Fri, 01 Jan 1990 00:00:00 GMT');
     }
 
     /**

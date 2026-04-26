@@ -27,7 +27,7 @@
 
         <div class="mx-auto w-full border-t border-slate-200 pt-7 text-center text-sm text-slate-500">
             <span class="uppercase tracking-wide">Kembali ke</span>
-            <flux:link class="epi-auth-link ml-1 font-semibold uppercase tracking-wide" :href="route('login')" wire:navigate>Halaman Login</flux:link>
+            <flux:link class="epi-auth-link ml-1 font-semibold uppercase tracking-wide" :href="route('login')">Halaman Login</flux:link>
         </div>
     </div>
 </x-layouts::auth>

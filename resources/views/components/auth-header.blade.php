@@ -4,7 +4,7 @@
 ])
 
 <div class="flex w-full flex-col text-center">
-    <a href="{{ route('home') }}" class="mx-auto mb-5 inline-flex items-center justify-center" wire:navigate>
+    <a href="{{ route('home') }}" class="mx-auto mb-5 inline-flex items-center justify-center">
         <img
             src="{{ asset('epic-hub-auth-logo.png') }}"
             alt="EPIC HUB"

@@ -56,6 +56,7 @@ class CaptureReferralFromRequest
         cookie()->queue(cookie('epichub_vid', $tracked['visitor_id'], $tracked['minutes']));
         cookie()->queue(cookie('epic_ref', json_encode($tracked['ref']), $tracked['minutes']));
         cookie()->queue(cookie('epichub_ref', json_encode($tracked['ref']), $tracked['minutes']));
+        $request->session()->put('epichub_referral', $tracked['ref']);
 
         return $next($request);
     }

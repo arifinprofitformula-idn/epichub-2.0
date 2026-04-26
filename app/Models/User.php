@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Actions\Support\NormalizeWhatsappNumberAction;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -17,7 +18,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'whatsapp_number'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -47,6 +48,16 @@ class User extends Authenticatable implements FilamentUser
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    public function normalizedWhatsappNumber(?string $value = null): ?string
+    {
+        return app(NormalizeWhatsappNumberAction::class)->execute($value ?? $this->whatsapp_number);
+    }
+
+    public function getWhatsappNumberForUrlAttribute(): ?string
+    {
+        return $this->normalizedWhatsappNumber();
     }
 
     public function canAccessPanel(Panel $panel): bool

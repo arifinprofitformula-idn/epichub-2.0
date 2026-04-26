@@ -102,10 +102,21 @@
     @apply  !mb-0 !leading-tight;
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
 input:focus[data-flux-control],
 textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-white dark:ring-offset-zinc-950;
+}
+
+input[data-password-match] {
+    border-color: rgba(16, 185, 129, 0.9) !important;
+    box-shadow:
+        0 0 0 1px rgba(16, 185, 129, 0.08),
+        0 0 0 4px rgba(16, 185, 129, 0.08) !important;
 }
 
 .epic-sidebar[data-flux-sidebar] {
@@ -196,4 +207,68 @@ select:focus[data-flux-control] {
 
 .epic-sidebar [data-flux-sidebar-spacer] + div {
     padding-top: 0.5rem;
+}
+
+.epi-password-rule {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    background: rgba(248, 250, 252, 0.8);
+    padding: 0.8rem 0.95rem;
+    font-size: 0.92rem;
+    color: #64748b;
+    transition:
+        border-color 180ms ease,
+        background-color 180ms ease,
+        color 180ms ease,
+        transform 180ms ease;
+}
+
+.epi-password-rule[data-met='true'] {
+    border-color: rgba(167, 243, 208, 0.9);
+    background: rgba(236, 253, 245, 0.9);
+    color: #047857;
+    transform: translateX(2px);
+}
+
+.epi-password-rule-icon {
+    display: inline-flex;
+    height: 1.65rem;
+    width: 1.65rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: rgba(254, 226, 226, 0.95);
+    color: #e11d48;
+    font-size: 0.85rem;
+    font-weight: 800;
+    transition:
+        background-color 180ms ease,
+        color 180ms ease,
+        transform 180ms ease;
+}
+
+.epi-password-rule-icon[data-met='true'] {
+    background: rgba(209, 250, 229, 0.95);
+    color: #059669;
+    transform: scale(1.04);
+}
+
+@media (min-width: 1024px) {
+    .epic-sidebar[data-flux-sidebar-collapsed-desktop] {
+        width: 0 !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border-inline-width: 0 !important;
+        overflow: hidden !important;
+        box-shadow: none !important;
+    }
+
+    .epic-sidebar[data-flux-sidebar-collapsed-desktop] > * {
+        opacity: 0;
+        pointer-events: none;
+    }
 }

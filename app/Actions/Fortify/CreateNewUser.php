@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Actions\Support\NormalizeWhatsappNumberAction;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
@@ -12,6 +13,11 @@ use Spatie\Permission\Models\Role;
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules, ProfileValidationRules;
+
+    public function __construct(
+        protected NormalizeWhatsappNumberAction $normalizeWhatsappNumber,
+    ) {
+    }
 
     /**
      * Validate and create a newly registered user.
@@ -28,6 +34,7 @@ class CreateNewUser implements CreatesNewUsers
         $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
+            'whatsapp_number' => $this->normalizeWhatsappNumber->execute($input['whatsapp_number'] ?? null),
             'password' => $input['password'],
         ]);
 

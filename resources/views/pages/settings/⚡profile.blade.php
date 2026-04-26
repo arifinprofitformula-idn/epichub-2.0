@@ -13,6 +13,7 @@ new #[Title('Profile settings')] class extends Component {
 
     public string $name = '';
     public string $email = '';
+    public string $whatsapp_number = '';
 
     /**
      * Mount the component.
@@ -21,6 +22,7 @@ new #[Title('Profile settings')] class extends Component {
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->whatsapp_number = Auth::user()->whatsapp_number ?? '';
     }
 
     /**
@@ -31,6 +33,8 @@ new #[Title('Profile settings')] class extends Component {
         $user = Auth::user();
 
         $validated = $this->validate($this->profileRules($user->id));
+
+        $validated['whatsapp_number'] = $user->normalizedWhatsappNumber($validated['whatsapp_number'] ?? null);
 
         $user->fill($validated);
 
@@ -80,7 +84,7 @@ new #[Title('Profile settings')] class extends Component {
 
     <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
 
-    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name, email address, and WhatsApp contact')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
@@ -99,6 +103,19 @@ new #[Title('Profile settings')] class extends Component {
 
                     </div>
                 @endif
+            </div>
+
+            <div>
+                <flux:input
+                    wire:model="whatsapp_number"
+                    :label="'Nomor WhatsApp'"
+                    type="text"
+                    autocomplete="tel"
+                    placeholder="628123456789"
+                />
+                <flux:text class="mt-2 text-sm text-zinc-500">
+                    Nomor ini digunakan sebagai kontak pereferral jika Anda aktif sebagai EPI Channel.
+                </flux:text>
             </div>
 
             <div class="flex items-center gap-4">

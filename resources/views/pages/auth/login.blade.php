@@ -33,7 +33,7 @@
                 />
 
                 @if (Route::has('password.request'))
-                    <flux:link class="epi-auth-link absolute top-0 text-sm font-semibold tracking-wide uppercase end-0" :href="route('password.request')" wire:navigate>
+                    <flux:link class="epi-auth-link absolute top-0 text-sm font-semibold tracking-wide uppercase end-0" :href="route('password.request')">
                         Lupa Password?
                     </flux:link>
                 @endif
@@ -52,7 +52,7 @@
         @if (Route::has('register'))
             <div class="mx-auto w-full border-t border-slate-200 pt-7 text-center text-sm text-slate-500">
                 <span class="uppercase tracking-wide">Belum punya akun?</span>
-                <flux:link class="epi-auth-link ml-1 font-semibold uppercase tracking-wide" :href="route('register')" wire:navigate>Daftar Akun Baru</flux:link>
+                <flux:link class="epi-auth-link ml-1 font-semibold uppercase tracking-wide" :href="route('register')">Daftar Akun Baru</flux:link>
             </div>
         @endif
     </div>

@@ -24,7 +24,118 @@ test('non-affiliate membuka epi-channel melihat inactive state', function () {
     $this->actingAs($user)
         ->get(route('epi-channel.dashboard'))
         ->assertOk()
-        ->assertSee('Status EPI Channel Anda belum aktif. Aktivasi dilakukan melalui OMS/Admin.');
+        ->assertSee('Buka Akses Anda ke Ekosistem EPI Channel')
+        ->assertSee('Kontak pereferral belum tersedia');
+});
+
+test('non-epi user dengan sponsor yang punya whatsapp melihat tombol whatsapp', function () {
+    $sponsorUser = User::factory()->create([
+        'name' => 'Sponsor Hebat',
+        'whatsapp_number' => '0812 3456 789',
+    ]);
+
+    EpiChannel::query()->create([
+        'user_id' => $sponsorUser->id,
+        'epic_code' => 'SPONSOR-001',
+        'store_name' => 'Store Sponsor',
+        'status' => EpiChannelStatus::Active,
+        'source' => 'oms',
+        'activated_at' => now(),
+    ]);
+
+    $user = User::factory()->create();
+
+    EpiChannel::query()->create([
+        'user_id' => $user->id,
+        'epic_code' => 'LEAD-001',
+        'store_name' => 'Store Lead',
+        'sponsor_epic_code' => 'SPONSOR-001',
+        'sponsor_name' => 'Sponsor Hebat',
+        'status' => EpiChannelStatus::Prospect,
+        'source' => 'oms',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('epi-channel.dashboard'))
+        ->assertOk()
+        ->assertSee('Hubungi Pereferral via WhatsApp')
+        ->assertSee('Sponsor Hebat')
+        ->assertSee('SPONSOR-001')
+        ->assertSee('https://wa.me/628123456789', false);
+});
+
+test('non-epi user dengan sponsor tanpa whatsapp melihat fallback', function () {
+    $sponsorUser = User::factory()->create([
+        'name' => 'Sponsor Tanpa WA',
+        'whatsapp_number' => null,
+    ]);
+
+    EpiChannel::query()->create([
+        'user_id' => $sponsorUser->id,
+        'epic_code' => 'SPONSOR-002',
+        'store_name' => 'Store Sponsor 2',
+        'status' => EpiChannelStatus::Active,
+        'source' => 'oms',
+        'activated_at' => now(),
+    ]);
+
+    $user = User::factory()->create();
+
+    EpiChannel::query()->create([
+        'user_id' => $user->id,
+        'epic_code' => 'LEAD-002',
+        'store_name' => 'Store Lead 2',
+        'sponsor_epic_code' => 'SPONSOR-002',
+        'sponsor_name' => 'Sponsor Tanpa WA',
+        'status' => EpiChannelStatus::Inactive,
+        'source' => 'oms',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('epi-channel.dashboard'))
+        ->assertOk()
+        ->assertSee('Kontak pereferral belum tersedia')
+        ->assertDontSee('Hubungi Pereferral via WhatsApp');
+});
+
+test('non-epi user tanpa sponsor melihat fallback', function () {
+    $user = User::factory()->create();
+
+    EpiChannel::query()->create([
+        'user_id' => $user->id,
+        'epic_code' => 'LEAD-003',
+        'store_name' => 'Store Lead 3',
+        'status' => EpiChannelStatus::Qualified,
+        'source' => 'oms',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('epi-channel.dashboard'))
+        ->assertOk()
+        ->assertSee('Kontak pereferral belum tersedia')
+        ->assertDontSee('Hubungi Pereferral via WhatsApp');
+});
+
+test('epi channel dashboard tidak memakai env whatsapp support', function () {
+    $previousWhatsapp = getenv('EPICHUB_EPI_SUPPORT_WHATSAPP');
+    $previousName = getenv('EPICHUB_EPI_SUPPORT_NAME');
+
+    putenv('EPICHUB_EPI_SUPPORT_WHATSAPP=628111111111');
+    putenv('EPICHUB_EPI_SUPPORT_NAME=Support Env');
+
+    $user = User::factory()->create();
+
+    try {
+        $this->actingAs($user)
+            ->get(route('epi-channel.dashboard'))
+            ->assertOk()
+            ->assertSee('Kontak pereferral belum tersedia')
+            ->assertDontSee('628111111111')
+            ->assertDontSee('Support Env');
+    } finally {
+        putenv($previousWhatsapp === false ? 'EPICHUB_EPI_SUPPORT_WHATSAPP' : "EPICHUB_EPI_SUPPORT_WHATSAPP={$previousWhatsapp}");
+        putenv($previousName === false ? 'EPICHUB_EPI_SUPPORT_NAME' : "EPICHUB_EPI_SUPPORT_NAME={$previousName}");
+    }
 });
 
 test('non-affiliate membuka commissions diarahkan ke dashboard epi-channel', function () {
@@ -51,6 +162,48 @@ test('active epi channel bisa membuka dashboard', function () {
         ->assertOk()
         ->assertSee($channel->epic_code)
         ->assertSee('Dashboard EPI Channel');
+});
+
+test('active epi channel dengan whatsapp kosong melihat reminder lengkapi whatsapp', function () {
+    $user = User::factory()->create([
+        'whatsapp_number' => null,
+    ]);
+
+    EpiChannel::query()->create([
+        'user_id' => $user->id,
+        'epic_code' => 'EPI-WA-REMINDER',
+        'store_name' => 'Channel Reminder',
+        'status' => EpiChannelStatus::Active,
+        'source' => 'oms',
+        'activated_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('epi-channel.dashboard'))
+        ->assertOk()
+        ->assertSee('Lengkapi nomor WhatsApp Anda')
+        ->assertSee(route('profile.edit'), false);
+});
+
+test('active epi channel tetap melihat dashboard aktif bukan inactive state', function () {
+    $user = User::factory()->create([
+        'whatsapp_number' => '628123456789',
+    ]);
+
+    EpiChannel::query()->create([
+        'user_id' => $user->id,
+        'epic_code' => 'EPI-ACTIVE-001',
+        'store_name' => 'Channel Aktif Sekali',
+        'status' => EpiChannelStatus::Active,
+        'source' => 'oms',
+        'activated_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('epi-channel.dashboard'))
+        ->assertOk()
+        ->assertSee('Dashboard EPI Channel')
+        ->assertDontSee('EPI Channel Belum Aktif');
 });
 
 test('active epi channel hanya melihat komisi miliknya', function () {

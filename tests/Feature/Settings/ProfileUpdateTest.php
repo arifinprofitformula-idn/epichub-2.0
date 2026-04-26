@@ -17,6 +17,7 @@ test('profile information can be updated', function () {
     $response = Livewire::test('pages::settings.profile')
         ->set('name', 'Test User')
         ->set('email', 'test@example.com')
+        ->set('whatsapp_number', '0812 3456 789')
         ->call('updateProfileInformation');
 
     $response->assertHasNoErrors();
@@ -25,7 +26,26 @@ test('profile information can be updated', function () {
 
     expect($user->name)->toEqual('Test User');
     expect($user->email)->toEqual('test@example.com');
+    expect($user->whatsapp_number)->toEqual('628123456789');
     expect($user->email_verified_at)->toBeNull();
+});
+
+test('whatsapp number can be left empty on profile update', function () {
+    $user = User::factory()->create([
+        'whatsapp_number' => '628123456789',
+    ]);
+
+    $this->actingAs($user);
+
+    $response = Livewire::test('pages::settings.profile')
+        ->set('name', 'Test User')
+        ->set('email', $user->email)
+        ->set('whatsapp_number', '')
+        ->call('updateProfileInformation');
+
+    $response->assertHasNoErrors();
+
+    expect($user->refresh()->whatsapp_number)->toBeNull();
 });
 
 test('email verification status is unchanged when email address is unchanged', function () {

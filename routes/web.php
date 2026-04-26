@@ -46,6 +46,11 @@ Route::middleware([CaptureReferralFromRequest::class])->prefix('events')->name('
 
 Route::get('/r/{epicCode}', [ReferralController::class, 'redirect'])->name('referral.redirect');
 
+Route::middleware([CaptureReferralFromRequest::class])->prefix('checkout')->name('checkout.')->group(function () {
+    Route::get('/{product:slug}', [CheckoutController::class, 'show'])->name('show');
+    Route::post('/{product:slug}', [CheckoutController::class, 'store'])->name('store');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 });
@@ -93,11 +98,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{eventRegistration}', [MyEventController::class, 'show'])->name('show');
         Route::get('/{eventRegistration}/join', [MyEventAccessController::class, 'join'])->name('join');
         Route::get('/{eventRegistration}/replay', [MyEventAccessController::class, 'replay'])->name('replay');
-    });
-
-    Route::prefix('checkout')->name('checkout.')->group(function () {
-        Route::get('/{product:slug}', [CheckoutController::class, 'show'])->name('show');
-        Route::post('/{product:slug}', [CheckoutController::class, 'store'])->name('store');
     });
 
     Route::prefix('orders')->name('orders.')->group(function () {

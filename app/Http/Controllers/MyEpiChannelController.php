@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Affiliates\ResolveReferrerContactAction;
 use App\Enums\CommissionStatus;
 use App\Enums\PayoutStatus;
 use App\Models\Commission;
@@ -19,6 +20,10 @@ use Illuminate\View\View;
 
 class MyEpiChannelController extends Controller
 {
+    public function __construct(
+        protected ResolveReferrerContactAction $resolveReferrerContact,
+    ) {}
+
     public function dashboard(Request $request): View
     {
         $user = $request->user();
@@ -76,7 +81,9 @@ class MyEpiChannelController extends Controller
             'recentCommissions' => $recentCommissions,
             'topProductsByClick' => $topProductsByClick,
             'featuredProducts' => $featuredProducts,
+            'whatsappReminderNeeded' => blank($user->whatsapp_number_for_url),
             'mainReferralLink' => route('referral.redirect', ['epicCode' => $channel->epic_code], absolute: true),
+            'referrerContact' => null,
         ]);
     }
 
@@ -275,15 +282,18 @@ class MyEpiChannelController extends Controller
 
     protected function inactiveView(Request $request): View
     {
-        $request->user()->loadMissing('epiChannel');
+        $user = $request->user();
+        $user->loadMissing('epiChannel');
 
         return view('epi-channel.index', [
-            'channel' => $request->user()->epiChannel,
+            'channel' => $user->epiChannel,
             'stats' => null,
             'recentCommissions' => collect(),
             'topProductsByClick' => collect(),
             'featuredProducts' => collect(),
+            'whatsappReminderNeeded' => false,
             'mainReferralLink' => null,
+            'referrerContact' => $this->resolveReferrerContact->execute($user),
         ]);
     }
 
