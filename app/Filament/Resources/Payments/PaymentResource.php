@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Payments;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\Payments\Pages\EditPayment;
 use App\Filament\Resources\Payments\Pages\ListPayments;
 use App\Filament\Resources\Payments\Schemas\PaymentForm;
@@ -22,9 +23,11 @@ class PaymentResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'payment_number';
 
-    protected static ?string $navigationLabel = 'Payments';
+    protected static ?string $navigationLabel = 'Pembayaran';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Commerce';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Operasional;
+
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {
@@ -44,4 +47,3 @@ class PaymentResource extends Resource
         ];
     }
 }
-

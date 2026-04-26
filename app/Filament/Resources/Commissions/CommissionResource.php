@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Commissions;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\Commissions\Pages\ListCommissions;
 use App\Filament\Resources\Commissions\Tables\CommissionsTable;
 use App\Models\Commission;
@@ -18,9 +19,11 @@ class CommissionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
 
-    protected static ?string $navigationLabel = 'Commissions';
+    protected static ?string $navigationLabel = 'Komisi';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Affiliate';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Afiliasi;
+
+    protected static ?int $navigationSort = 40;
 
     public static function form(Schema $schema): Schema
     {

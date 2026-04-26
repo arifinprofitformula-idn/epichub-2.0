@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
@@ -27,7 +28,9 @@ class ProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Produk';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Catalog';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Katalog;
+
+    protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
     {

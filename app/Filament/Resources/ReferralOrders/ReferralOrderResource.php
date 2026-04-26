@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ReferralOrders;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\ReferralOrders\Pages\ListReferralOrders;
 use App\Filament\Resources\ReferralOrders\Tables\ReferralOrdersTable;
 use App\Models\ReferralOrder;
@@ -19,9 +20,11 @@ class ReferralOrderResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
-    protected static ?string $navigationLabel = 'Referral Orders';
+    protected static ?string $navigationLabel = 'Order Referral';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Affiliate';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Afiliasi;
+
+    protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
     {
@@ -60,4 +63,3 @@ class ReferralOrderResource extends Resource
         return parent::getEloquentQuery()->with(['epiChannel', 'buyer', 'order']);
     }
 }
-

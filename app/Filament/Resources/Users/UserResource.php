@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
@@ -35,7 +36,9 @@ class UserResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Pengguna';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Administrasi';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Administrasi;
+
+    protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
     {

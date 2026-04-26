@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CommissionPayouts;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\CommissionPayouts\Pages\ListCommissionPayouts;
 use App\Filament\Resources\CommissionPayouts\Tables\CommissionPayoutsTable;
 use App\Models\CommissionPayout;
@@ -18,9 +19,11 @@ class CommissionPayoutResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
-    protected static ?string $navigationLabel = 'Commission Payouts';
+    protected static ?string $navigationLabel = 'Pencairan Komisi';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Affiliate';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Afiliasi;
+
+    protected static ?int $navigationSort = 50;
 
     public static function form(Schema $schema): Schema
     {

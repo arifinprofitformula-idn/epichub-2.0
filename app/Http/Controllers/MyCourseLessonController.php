@@ -20,7 +20,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -33,8 +35,7 @@ class MyCourseLessonController extends Controller
         protected DownloadLessonAttachmentAction $downloadLessonAttachment,
         protected DownloadCourseLessonAttachmentAction $downloadCourseLessonAttachment,
         protected LogAccessAction $logAccess,
-    ) {
-    }
+    ) {}
 
     public function show(Request $request, UserProduct $userProduct, CourseLesson $courseLesson): View|RedirectResponse
     {
@@ -109,6 +110,23 @@ class MyCourseLessonController extends Controller
             ],
         );
 
+        if ($lesson->hasVideo() && $lesson->isYoutubeVideo() && filled($lesson->video_id)) {
+            $this->logAccess->execute(
+                action: AccessLogAction::LessonVideoViewed,
+                user: $request->user(),
+                userProduct: $userProduct,
+                actor: $request->user(),
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent(),
+                metadata: array_filter([
+                    'course_lesson_id' => $lesson->id,
+                    'user_product_id' => $userProduct->id,
+                    'video_provider' => $lesson->video_provider ?? 'youtube',
+                    'video_id' => $lesson->video_id,
+                ], fn ($v) => $v !== null && $v !== ''),
+            );
+        }
+
         $currentLessonIndex = $resolved['lessons']->search(fn (CourseLesson $row) => $row->id === $lesson->id);
         $currentProgressStatus = $resolved['progressByLessonId'][$lesson->id] ?? LessonProgressStatus::InProgress;
         $navigationLessons = $this->navigableLessons($resolved['visibleLessons'], $resolved['lessonAccessByLessonId']);
@@ -133,8 +151,8 @@ class MyCourseLessonController extends Controller
             $legacySize = null;
 
             try {
-                if (\Illuminate\Support\Facades\Storage::disk('local')->exists($lesson->attachment_path)) {
-                    $legacySize = \Illuminate\Support\Facades\Storage::disk('local')->size($lesson->attachment_path);
+                if (Storage::disk('local')->exists($lesson->attachment_path)) {
+                    $legacySize = Storage::disk('local')->size($lesson->attachment_path);
                 }
             } catch (\Throwable) {
                 $legacySize = null;
@@ -342,7 +360,7 @@ class MyCourseLessonController extends Controller
     }
 
     /**
-     * @param  array{reason: string|null, message?: string|null, available_from: \Illuminate\Support\Carbon|null}  $lessonAccess
+     * @param  array{reason: string|null, message?: string|null, available_from: Carbon|null}  $lessonAccess
      */
     protected function redirectLockedLesson(UserProduct $userProduct, array $lessonAccess): RedirectResponse
     {
@@ -354,7 +372,7 @@ class MyCourseLessonController extends Controller
     }
 
     /**
-     * @param  array{reason: string|null, available_from: \Illuminate\Support\Carbon|null}  $lessonAccess
+     * @param  array{reason: string|null, available_from: Carbon|null}  $lessonAccess
      */
     protected function lockedLessonMessage(array $lessonAccess): string
     {

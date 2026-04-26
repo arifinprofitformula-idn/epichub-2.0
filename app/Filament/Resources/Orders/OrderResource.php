@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\Orders\Pages\EditOrder;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Orders\Schemas\OrderForm;
@@ -22,9 +23,11 @@ class OrderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'order_number';
 
-    protected static ?string $navigationLabel = 'Orders';
+    protected static ?string $navigationLabel = 'Pesanan';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Commerce';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Operasional;
+
+    protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
     {
@@ -44,4 +47,3 @@ class OrderResource extends Resource
         ];
     }
 }
-

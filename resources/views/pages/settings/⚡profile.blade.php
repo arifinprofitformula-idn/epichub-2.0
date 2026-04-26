@@ -1,19 +1,26 @@
 <?php
 
 use App\Concerns\ProfileValidationRules;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Flux\Flux;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
-new #[Title('Profile settings')] class extends Component {
-    use ProfileValidationRules;
+new #[Title('Profile settings')] class extends Component
+{
+    use ProfileValidationRules, WithFileUploads;
 
     public string $name = '';
+
     public string $email = '';
+
     public string $whatsapp_number = '';
+
+    public $profile_photo = null;
 
     /**
      * Mount the component.
@@ -32,17 +39,29 @@ new #[Title('Profile settings')] class extends Component {
     {
         $user = Auth::user();
 
-        $validated = $this->validate($this->profileRules($user->id));
+        $validated = $this->validate([
+            'name' => $this->nameRules(),
+            'whatsapp_number' => $this->whatsappNumberRules(),
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
 
         $validated['whatsapp_number'] = $user->normalizedWhatsappNumber($validated['whatsapp_number'] ?? null);
 
-        $user->fill($validated);
+        if ($this->profile_photo !== null) {
+            $newProfilePhotoPath = $this->profile_photo->store('profile-photos', 'public');
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+            if (filled($user->profile_photo_path)) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+
+            $validated['profile_photo_path'] = $newProfilePhotoPath;
         }
 
+        unset($validated['profile_photo']);
+
+        $user->fill($validated);
         $user->save();
+        $this->profile_photo = null;
 
         Flux::toast(variant: 'success', text: __('Profile updated.'));
     }
@@ -77,6 +96,16 @@ new #[Title('Profile settings')] class extends Component {
         return ! Auth::user() instanceof MustVerifyEmail
             || (Auth::user() instanceof MustVerifyEmail && Auth::user()->hasVerifiedEmail());
     }
+
+    #[Computed]
+    public function profilePhotoPreviewUrl(): ?string
+    {
+        if ($this->profile_photo !== null) {
+            return $this->profile_photo->temporaryUrl();
+        }
+
+        return Auth::user()?->profile_photo_url;
+    }
 }; ?>
 
 <section class="w-full">
@@ -84,12 +113,50 @@ new #[Title('Profile settings')] class extends Component {
 
     <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
 
-    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name, email address, and WhatsApp contact')">
+    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Perbarui nama, foto profil, dan kontak WhatsApp Anda. Email akun dikunci dan tidak dapat diubah.')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
+            <div class="space-y-4 rounded-[1.5rem] border border-zinc-200/80 bg-zinc-50/80 p-5 dark:border-zinc-700 dark:bg-zinc-900/60">
+                <div class="flex items-start gap-4">
+                    <flux:avatar
+                        :name="Auth::user()->name"
+                        :initials="Auth::user()->initials()"
+                        :src="$this->profilePhotoPreviewUrl"
+                        size="xl"
+                    />
+
+                    <div class="min-w-0 flex-1 space-y-3">
+                        <div>
+                            <flux:heading size="lg">Foto Profil</flux:heading>
+                            <flux:text class="mt-1 text-sm text-zinc-500">
+                                Upload foto JPG, PNG, atau WEBP dengan ukuran maksimal 2MB.
+                            </flux:text>
+                        </div>
+
+                        <div>
+                            <input
+                                wire:model="profile_photo"
+                                type="file"
+                                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                class="block w-full rounded-[1rem] border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-700 file:me-4 file:rounded-full file:border-0 file:bg-zinc-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-zinc-800 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:file:bg-white dark:file:text-zinc-900 dark:hover:file:bg-zinc-200"
+                            />
+                            @error('profile_photo')
+                                <p class="mt-2 text-sm font-medium text-rose-600">{{ $message }}</p>
+                            @enderror
+                            <div wire:loading wire:target="profile_photo" class="mt-2 text-sm text-zinc-500">
+                                Mengunggah pratinjau foto...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                <flux:input wire:model="email" :label="__('Email')" type="email" readonly disabled autocomplete="email" />
+                <flux:text class="mt-2 text-sm text-zinc-500">
+                    Email akun dikunci oleh sistem dan tidak bisa diubah dari halaman profil.
+                </flux:text>
 
                 @if ($this->hasUnverifiedEmail)
                     <div>

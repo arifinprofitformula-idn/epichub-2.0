@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 test('profile page is displayed', function () {
@@ -16,7 +18,7 @@ test('profile information can be updated', function () {
 
     $response = Livewire::test('pages::settings.profile')
         ->set('name', 'Test User')
-        ->set('email', 'test@example.com')
+        ->set('email', 'hacker@example.com')
         ->set('whatsapp_number', '0812 3456 789')
         ->call('updateProfileInformation');
 
@@ -25,9 +27,9 @@ test('profile information can be updated', function () {
     $user->refresh();
 
     expect($user->name)->toEqual('Test User');
-    expect($user->email)->toEqual('test@example.com');
+    expect($user->email)->not->toEqual('hacker@example.com');
     expect($user->whatsapp_number)->toEqual('628123456789');
-    expect($user->email_verified_at)->toBeNull();
+    expect($user->email_verified_at)->not->toBeNull();
 });
 
 test('whatsapp number can be left empty on profile update', function () {
@@ -61,6 +63,49 @@ test('email verification status is unchanged when email address is unchanged', f
     $response->assertHasNoErrors();
 
     expect($user->refresh()->email_verified_at)->not->toBeNull();
+});
+
+test('profile photo can be uploaded with maximum size 2mb', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    $photo = UploadedFile::fake()->image('avatar.png', 300, 300)->size(1024);
+
+    $response = Livewire::test('pages::settings.profile')
+        ->set('name', 'Test User')
+        ->set('email', $user->email)
+        ->set('profile_photo', $photo)
+        ->call('updateProfileInformation');
+
+    $response->assertHasNoErrors();
+
+    $user->refresh();
+
+    expect($user->profile_photo_path)->not->toBeNull();
+    Storage::disk('public')->assertExists($user->profile_photo_path);
+});
+
+test('profile photo must not exceed 2mb', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    $photo = UploadedFile::fake()->image('avatar.png')->size(2049);
+
+    $response = Livewire::test('pages::settings.profile')
+        ->set('name', 'Test User')
+        ->set('email', $user->email)
+        ->set('profile_photo', $photo)
+        ->call('updateProfileInformation');
+
+    $response->assertHasErrors(['profile_photo']);
+
+    expect($user->refresh()->profile_photo_path)->toBeNull();
 });
 
 test('user can delete their account', function () {

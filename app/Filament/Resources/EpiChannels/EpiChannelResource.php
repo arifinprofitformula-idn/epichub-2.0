@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\EpiChannels;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\EpiChannels\Pages\CreateEpiChannel;
 use App\Filament\Resources\EpiChannels\Pages\EditEpiChannel;
 use App\Filament\Resources\EpiChannels\Pages\ListEpiChannels;
@@ -25,9 +26,11 @@ class EpiChannelResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'epic_code';
 
-    protected static ?string $navigationLabel = 'EPI Channels';
+    protected static ?string $navigationLabel = 'Channel EPI';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Affiliate';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Afiliasi;
+
+    protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
     {
@@ -56,4 +59,3 @@ class EpiChannelResource extends Resource
             ]);
     }
 }
-

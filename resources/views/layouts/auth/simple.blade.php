@@ -15,35 +15,38 @@
             .epi-auth-shell {
                 --body-font: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
                 --heading-font: "Sora", "Plus Jakarta Sans", sans-serif;
-                --auth-field-width: 27rem;
-                --card-pad-x: 2.5rem;
-                --card-pad-y: 2.75rem;
-                --shell-bg: #e8ebf0;
-                --card-bg: rgba(255, 255, 255, 0.92);
-                --card-border: #dfe4ea;
-                --label-color: #7f8ea3;
+                --auth-field-width: 26rem;
+                --card-pad-x: 2.25rem;
+                --card-pad-y: 2.5rem;
+                --shell-bg: #dde4f0;
+                --card-bg: rgba(255, 255, 255, 0.88);
+                --card-border: rgba(255,255,255,0.7);
+                --label-color: #334155;
                 --title-color: #0f2748;
                 --body-color: #64748b;
                 --link-color: #2563eb;
                 --btn-grad-start: #4f8bff;
                 --btn-grad-mid: #2563eb;
-                --btn-grad-end: #1e4ed8;
-                --btn-shadow-main: rgba(37, 99, 235, 0.3);
+                --btn-grad-end: #1e40af;
+                --btn-shadow-main: rgba(37, 99, 235, 0.35);
                 --btn-shadow-base: #1d4ed8;
-                background:
-                    radial-gradient(1000px 500px at 20% -10%, rgba(255, 255, 255, 0.92), transparent 60%),
-                    radial-gradient(900px 450px at 100% 120%, rgba(59, 130, 246, 0.08), transparent 60%),
-                    var(--shell-bg);
+                --tab-active-text: #2563eb;
+                --tab-border: rgba(99,149,245,0.45);
                 font-family: var(--body-font);
+                background:
+                    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(255,255,255,0.85), transparent 55%),
+                    radial-gradient(ellipse 70% 55% at 95% 100%, rgba(99,149,245,0.18), transparent 60%),
+                    linear-gradient(160deg, #cdd8ee 0%, #d9e2f0 40%, #c8d4ec 100%);
+                min-height: 100vh;
             }
 
             .epi-auth-shell.epi-style-marketing {
                 --body-font: "Outfit", "Plus Jakarta Sans", Arial, sans-serif;
                 --heading-font: "Outfit", "Sora", sans-serif;
                 --shell-bg: #fff2e2;
-                --card-bg: rgba(255, 255, 255, 0.95);
-                --card-border: #ffe0bf;
-                --label-color: #9a6d46;
+                --card-bg: rgba(255, 255, 255, 0.92);
+                --card-border: rgba(255,224,191,0.7);
+                --label-color: #7c4a1e;
                 --title-color: #2f1e0d;
                 --body-color: #7b6655;
                 --link-color: #e85d04;
@@ -52,29 +55,102 @@
                 --btn-grad-end: #ea580c;
                 --btn-shadow-main: rgba(234, 88, 12, 0.34);
                 --btn-shadow-base: #c2410c;
+                --tab-active-text: #ea580c;
+                --tab-border: rgba(234,88,12,0.35);
                 background:
-                    radial-gradient(1050px 520px at 18% -12%, rgba(255, 255, 255, 0.9), transparent 58%),
-                    radial-gradient(880px 440px at 104% 112%, rgba(251, 146, 60, 0.2), transparent 62%),
-                    var(--shell-bg);
+                    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(255,255,255,0.88), transparent 55%),
+                    radial-gradient(ellipse 70% 55% at 95% 100%, rgba(251,146,60,0.22), transparent 60%),
+                    linear-gradient(160deg, #fde8cc 0%, #fdf0e0 40%, #fce3c2 100%);
+            }
+
+            /* Decorative glowing lines */
+            .epi-auth-shell::before,
+            .epi-auth-shell::after {
+                content: '';
+                position: fixed;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .epi-auth-shell::before {
+                top: -10%;
+                left: -5%;
+                width: 55%;
+                height: 75%;
+                background: linear-gradient(135deg, rgba(99,149,245,0.13) 0%, transparent 60%);
+                border-right: 1.5px solid rgba(130,170,255,0.18);
+                border-bottom: 1.5px solid rgba(130,170,255,0.13);
+                border-radius: 0 0 60% 0;
+                transform: rotate(-8deg);
+            }
+
+            .epi-auth-shell::after {
+                bottom: -8%;
+                right: -4%;
+                width: 50%;
+                height: 70%;
+                background: linear-gradient(315deg, rgba(59,130,246,0.1) 0%, transparent 58%);
+                border-left: 1.5px solid rgba(99,149,245,0.18);
+                border-top: 1.5px solid rgba(99,149,245,0.12);
+                border-radius: 60% 0 0 0;
+                transform: rotate(-6deg);
             }
 
             .epi-auth-wrap {
                 width: min(100%, calc(var(--auth-field-width) + (var(--card-pad-x) * 2)));
                 margin-inline: auto;
+                position: relative;
+                z-index: 1;
             }
 
             .epi-auth-shell {
                 color: var(--body-color);
             }
 
+            /* Tab switcher pill container */
+            .epi-auth-tabs {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255,255,255,0.55);
+                border: 1.5px solid var(--tab-border);
+                border-radius: 9999px;
+                padding: 4px;
+                gap: 2px;
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                width: fit-content;
+                margin-inline: auto;
+            }
+
+            .epi-auth-tab {
+                border-radius: 9999px;
+                padding: 7px 22px;
+                font-size: 0.72rem;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                transition: all .2s ease;
+                text-decoration: none;
+                color: #94a3b8;
+            }
+
+            .epi-auth-tab.active {
+                background: white;
+                color: var(--tab-active-text);
+                box-shadow: 0 2px 8px rgba(15,23,42,0.10);
+            }
+
             .epi-auth-card {
-                border-radius: 2rem;
+                border-radius: 2.25rem;
                 border: 1px solid var(--card-border);
                 background: var(--card-bg);
                 padding: var(--card-pad-y) var(--card-pad-x);
                 box-shadow:
-                    0 20px 40px rgba(15, 23, 42, 0.08),
-                    0 1px 0 rgba(255, 255, 255, 0.85) inset;
+                    0 24px 48px rgba(15, 23, 42, 0.10),
+                    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
             }
 
             .epi-auth-inner {
@@ -89,15 +165,14 @@
             }
 
             .epi-auth-inner label {
-                font-size: .78rem;
-                font-weight: 700;
-                letter-spacing: .08em;
-                text-transform: uppercase;
+                font-size: .82rem;
+                font-weight: 600;
+                letter-spacing: .01em;
                 color: var(--label-color);
             }
 
             .epi-auth-inner :is(input, select, textarea) {
-                font-size: 1.03rem !important;
+                font-size: 1rem !important;
                 color: #334155 !important;
             }
 
@@ -107,36 +182,45 @@
 
             .epi-auth-card :is(input, select, textarea) {
                 border-radius: 1rem !important;
+                background: rgba(241,245,249,0.7) !important;
+                border-color: rgba(203,213,225,0.6) !important;
             }
 
             .epi-auth-btn {
                 border: none !important;
-                border-radius: 1rem !important;
+                border-radius: 9999px !important;
                 color: #fff !important;
-                letter-spacing: .05em;
+                letter-spacing: .04em;
                 font-weight: 700 !important;
+                font-size: 1rem !important;
+                padding-top: 0.85rem !important;
+                padding-bottom: 0.85rem !important;
                 transform: translateY(0);
                 transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
                 background: linear-gradient(180deg, var(--btn-grad-start) 0%, var(--btn-grad-mid) 62%, var(--btn-grad-end) 100%) !important;
                 box-shadow:
-                    0 14px 24px var(--btn-shadow-main),
+                    0 14px 28px var(--btn-shadow-main),
                     0 4px 0 var(--btn-shadow-base),
-                    0 1px 0 rgba(255, 255, 255, 0.35) inset !important;
+                    0 1px 0 rgba(255, 255, 255, 0.3) inset !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.5rem !important;
             }
 
             .epi-auth-btn:hover {
-                filter: brightness(1.03);
+                filter: brightness(1.05);
                 transform: translateY(-2px);
                 box-shadow:
-                    0 18px 26px var(--btn-shadow-main),
+                    0 20px 32px var(--btn-shadow-main),
                     0 5px 0 var(--btn-shadow-base),
-                    0 1px 0 rgba(255, 255, 255, 0.35) inset !important;
+                    0 1px 0 rgba(255, 255, 255, 0.3) inset !important;
             }
 
             .epi-auth-btn:active {
                 transform: translateY(3px);
                 box-shadow:
-                    0 8px 14px var(--btn-shadow-main),
+                    0 6px 12px var(--btn-shadow-main),
                     0 1px 0 var(--btn-shadow-base),
                     0 1px 0 rgba(255, 255, 255, 0.22) inset !important;
             }
@@ -145,32 +229,57 @@
                 color: var(--link-color) !important;
             }
 
+            /* Dot indicator between card and footer */
+            .epi-auth-dot-indicator {
+                display: flex;
+                justify-content: center;
+                gap: 5px;
+                padding: 6px 0 2px;
+            }
+
+            .epi-auth-dot-indicator span {
+                width: 6px;
+                height: 6px;
+                border-radius: 9999px;
+                background: rgba(99,149,245,0.55);
+            }
+
+            .epi-auth-dot-indicator span.active {
+                width: 18px;
+                background: rgba(99,149,245,0.75);
+            }
+
             @media (max-width: 768px) {
                 .epi-auth-shell {
                     --auth-field-width: 100%;
-                    --card-pad-x: 1.35rem;
-                    --card-pad-y: 1.75rem;
+                    --card-pad-x: 1.5rem;
+                    --card-pad-y: 2rem;
                 }
             }
 
             @media (min-width: 1024px) {
                 .epi-auth-card {
-                    border-radius: 2.35rem;
+                    border-radius: 2.5rem;
                 }
             }
         </style>
     </head>
     <body class="min-h-screen antialiased epi-auth-shell epi-style-{{ $authStyle }}">
-        <div class="flex min-h-svh flex-col items-center justify-center gap-6 p-5 md:p-10">
-            <div class="epi-auth-wrap flex flex-col gap-2">
-                <div class="mb-1 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    <a href="{{ request()->fullUrlWithQuery(['auth_style' => 'corporate']) }}" class="rounded-full px-3 py-1 {{ $authStyle === 'corporate' ? 'bg-white/80 text-slate-700 shadow-sm' : 'text-slate-500' }}">Corporate</a>
-                    <a href="{{ request()->fullUrlWithQuery(['auth_style' => 'marketing']) }}" class="rounded-full px-3 py-1 {{ $authStyle === 'marketing' ? 'bg-white/80 text-slate-700 shadow-sm' : 'text-slate-500' }}">Marketing</a>
+        <div class="flex min-h-svh flex-col items-center justify-center gap-4 p-5 md:p-10">
+            <div class="epi-auth-wrap flex flex-col gap-4">
+                <div class="epi-auth-tabs">
+                    <a href="{{ request()->fullUrlWithQuery(['auth_style' => 'corporate']) }}" class="epi-auth-tab {{ $authStyle === 'corporate' ? 'active' : '' }}">Corporate</a>
+                    <a href="{{ request()->fullUrlWithQuery(['auth_style' => 'marketing']) }}" class="epi-auth-tab {{ $authStyle === 'marketing' ? 'active' : '' }}">Marketing</a>
                 </div>
                 <div class="epi-auth-card flex flex-col gap-6">
                     <div class="epi-auth-inner">
                         {{ $slot }}
                     </div>
+                </div>
+                <div class="epi-auth-dot-indicator">
+                    <span class="active"></span>
+                    <span></span>
+                    <span></span>
                 </div>
             </div>
         </div>

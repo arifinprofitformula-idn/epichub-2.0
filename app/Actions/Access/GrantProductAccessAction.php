@@ -13,13 +13,13 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\UserProduct;
+use Illuminate\Support\Carbon;
 
 class GrantProductAccessAction
 {
     public function __construct(
         protected RegisterUserForEventAction $registerUserForEvent,
-    ) {
-    }
+    ) {}
 
     public function execute(
         User $user,
@@ -30,6 +30,7 @@ class GrantProductAccessAction
         ?User $actor = null,
         AccessLogAction $logAction = AccessLogAction::ManualGrant,
         array $metadata = [],
+        ?Carbon $grantedAt = null,
     ): UserProduct {
         if ($order === null) {
             $existingManual = UserProduct::query()
@@ -46,7 +47,7 @@ class GrantProductAccessAction
             }
         }
 
-        $now = now();
+        $now = $grantedAt ?? now();
 
         $userProduct = UserProduct::query()->firstOrCreate(
             [
@@ -65,9 +66,10 @@ class GrantProductAccessAction
             ],
         );
 
-        if ($userProduct->status !== UserProductStatus::Active) {
+        if ($userProduct->status !== UserProductStatus::Active || $userProduct->isExpired() || $userProduct->revoked_at !== null) {
             $userProduct->update([
                 'status' => UserProductStatus::Active,
+                'expires_at' => null,
                 'revoked_by' => null,
                 'revoked_at' => null,
                 'revoke_reason' => null,
@@ -84,6 +86,7 @@ class GrantProductAccessAction
             order: $order,
             actor: $actor,
             metadata: $metadata,
+            createdAt: $now,
         );
 
         $this->maybeRegisterEvent($user, $product, $userProduct, $sourceProduct, $actor, $order);
@@ -99,6 +102,7 @@ class GrantProductAccessAction
         ?Order $order,
         ?User $actor,
         array $metadata,
+        Carbon $createdAt,
     ): void {
         AccessLog::query()->create([
             'user_id' => $user->id,
@@ -108,7 +112,7 @@ class GrantProductAccessAction
             'action' => $action,
             'actor_id' => $actor?->id,
             'metadata' => $metadata,
-            'created_at' => now(),
+            'created_at' => $createdAt,
         ]);
     }
 
@@ -160,4 +164,3 @@ class GrantProductAccessAction
         );
     }
 }
-

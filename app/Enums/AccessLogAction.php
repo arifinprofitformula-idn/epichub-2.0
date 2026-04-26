@@ -7,6 +7,7 @@ enum AccessLogAction: string
     case OrderPaidGrant = 'order_paid_grant';
     case BundleChildGrant = 'bundle_child_grant';
     case ManualGrant = 'manual_grant';
+    case ImportedGrant = 'imported_grant';
     case ManualRevoke = 'manual_revoke';
     case AccessViewed = 'access_viewed';
     case BundleAccessed = 'bundle_accessed';
@@ -18,6 +19,7 @@ enum AccessLogAction: string
     case LessonCompleted = 'lesson_completed';
     case LessonAttachmentDownloaded = 'lesson_attachment_downloaded';
     case LessonAttachmentExternalOpened = 'lesson_attachment_external_opened';
+    case LessonVideoViewed = 'lesson_video_viewed';
     case EventRegistered = 'event_registered';
     case EventAccessed = 'event_accessed';
     case EventJoinClicked = 'event_join_clicked';
@@ -31,6 +33,7 @@ enum AccessLogAction: string
             self::OrderPaidGrant => 'Grant dari order paid',
             self::BundleChildGrant => 'Grant child dari bundle',
             self::ManualGrant => 'Grant manual',
+            self::ImportedGrant => 'Grant dari import',
             self::ManualRevoke => 'Revoke manual',
             self::AccessViewed => 'Akses dibuka',
             self::BundleAccessed => 'Bundle dibuka',
@@ -42,6 +45,7 @@ enum AccessLogAction: string
             self::LessonCompleted => 'Lesson selesai',
             self::LessonAttachmentDownloaded => 'Attachment lesson diunduh',
             self::LessonAttachmentExternalOpened => 'Link attachment lesson dibuka',
+            self::LessonVideoViewed => 'Video lesson dibuka',
             self::EventRegistered => 'Registrasi event',
             self::EventAccessed => 'Event dibuka',
             self::EventJoinClicked => 'Klik join event',
@@ -51,4 +55,3 @@ enum AccessLogAction: string
         };
     }
 }
-

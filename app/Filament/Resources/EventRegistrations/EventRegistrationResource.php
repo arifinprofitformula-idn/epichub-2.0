@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\EventRegistrations;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\EventRegistrations\Pages\CreateEventRegistration;
 use App\Filament\Resources\EventRegistrations\Pages\EditEventRegistration;
 use App\Filament\Resources\EventRegistrations\Pages\ListEventRegistrations;
@@ -25,9 +26,11 @@ class EventRegistrationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    protected static ?string $navigationLabel = 'Event Registrations';
+    protected static ?string $navigationLabel = 'Peserta Event';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Learning';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Program;
+
+    protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
     {
@@ -56,4 +59,3 @@ class EventRegistrationResource extends Resource
             ]);
     }
 }
-

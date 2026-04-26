@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources\UserProducts;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\UserProducts\Pages\ListUserProducts;
 use App\Filament\Resources\UserProducts\Tables\UserProductsTable;
 use App\Models\UserProduct;
 use BackedEnum;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
 use UnitEnum;
 
 class UserProductResource extends Resource
@@ -19,9 +20,11 @@ class UserProductResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    protected static ?string $navigationLabel = 'Entitlements';
+    protected static ?string $navigationLabel = 'Hak Akses Produk';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Access';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Operasional;
+
+    protected static ?int $navigationSort = 30;
 
     public static function table(Table $table): Table
     {
@@ -35,4 +38,3 @@ class UserProductResource extends Resource
         ];
     }
 }
-

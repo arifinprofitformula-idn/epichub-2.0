@@ -16,11 +16,12 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'whatsapp_number', 'referrer_epi_channel_id', 'referral_locked_at', 'referral_source'])]
+#[Fillable(['name', 'email', 'email_verified_at', 'password', 'profile_photo_path', 'whatsapp_number', 'referrer_epi_channel_id', 'referral_locked_at', 'referral_source'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -51,6 +52,15 @@ class User extends Authenticatable implements FilamentUser
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        if (blank($this->profile_photo_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->profile_photo_path);
     }
 
     public function normalizedWhatsappNumber(?string $value = null): ?string

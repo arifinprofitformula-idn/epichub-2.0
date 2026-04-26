@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ReferralVisits;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\ReferralVisits\Pages\ListReferralVisits;
 use App\Filament\Resources\ReferralVisits\Tables\ReferralVisitsTable;
 use App\Models\ReferralVisit;
@@ -19,9 +20,11 @@ class ReferralVisitResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
-    protected static ?string $navigationLabel = 'Referral Visits';
+    protected static ?string $navigationLabel = 'Kunjungan Referral';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Affiliate';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Afiliasi;
+
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {
@@ -60,4 +63,3 @@ class ReferralVisitResource extends Resource
         return parent::getEloquentQuery()->with(['epiChannel', 'product']);
     }
 }
-

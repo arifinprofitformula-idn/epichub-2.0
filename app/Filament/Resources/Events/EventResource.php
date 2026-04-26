@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Events;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Events\Pages\EditEvent;
 use App\Filament\Resources\Events\Pages\ListEvents;
@@ -25,9 +26,11 @@ class EventResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static ?string $navigationLabel = 'Events';
+    protected static ?string $navigationLabel = 'Event';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Learning';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Program;
+
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {
@@ -61,4 +64,3 @@ class EventResource extends Resource
             ]);
     }
 }
-

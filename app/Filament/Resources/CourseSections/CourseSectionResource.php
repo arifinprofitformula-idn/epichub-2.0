@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CourseSections;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Filament\Resources\CourseSections\Pages\CreateCourseSection;
 use App\Filament\Resources\CourseSections\Pages\EditCourseSection;
 use App\Filament\Resources\CourseSections\Pages\ListCourseSections;
@@ -25,9 +26,9 @@ class CourseSectionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static ?string $navigationLabel = 'Course Sections';
+    protected static ?string $navigationLabel = 'Bagian Kelas';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Learning';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Program;
 
     public static function form(Schema $schema): Schema
     {
@@ -48,4 +49,3 @@ class CourseSectionResource extends Resource
         ];
     }
 }
-

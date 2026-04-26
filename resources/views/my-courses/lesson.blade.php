@@ -418,6 +418,25 @@
 
                 {{-- Main content --}}
                 <main class="min-w-0 space-y-4">
+
+                    {{-- Video Materi (show_video=true, non video_embed) --}}
+                    @if ($lesson->show_video && $type !== 'video_embed')
+                        @php($videoPlayerEmbedUrl = $lesson->youtube_embed_url)
+                        @if ($videoPlayerEmbedUrl)
+                            <x-learning.youtube-player
+                                :embedUrl="$videoPlayerEmbedUrl"
+                                :title="$lesson->video_title"
+                                :description="$lesson->video_description"
+                            />
+                        @else
+                            <div class="overflow-hidden rounded-2xl border border-zinc-200/70 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.07)]">
+                                <x-ui.alert variant="warning" title="Video Belum Tersedia">
+                                    URL video belum valid atau video ID tidak dapat diekstrak.
+                                </x-ui.alert>
+                            </div>
+                        @endif
+                    @endif
+
                     <div class="overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.07)]">
 
                         {{-- Lesson header --}}

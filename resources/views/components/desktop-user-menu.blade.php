@@ -1,5 +1,6 @@
 <flux:dropdown position="bottom" align="start">
     <flux:sidebar.profile
+        :avatar="auth()->user()->profile_photo_url"
         :name="auth()->user()->name"
         :initials="auth()->user()->initials()"
         icon:trailing="chevrons-up-down"
@@ -11,6 +12,7 @@
             <flux:avatar
                 :name="auth()->user()->name"
                 :initials="auth()->user()->initials()"
+                :src="auth()->user()->profile_photo_url"
             />
             <div class="grid flex-1 text-start text-sm leading-tight">
                 <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>

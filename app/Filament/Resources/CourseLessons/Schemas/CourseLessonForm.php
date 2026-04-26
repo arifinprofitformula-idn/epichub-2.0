@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\CourseLessons\Schemas;
 
 use App\Enums\CourseLessonType;
-use App\Models\CourseLessonAttachment;
 use App\Models\Course;
+use App\Models\CourseLesson;
+use App\Models\CourseLessonAttachment;
 use App\Models\CourseSection;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -16,6 +17,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -27,7 +29,7 @@ use Illuminate\Support\Str;
 class CourseLessonForm
 {
     /**
-     * @return array<int, \Filament\Schemas\Components\Component>
+     * @return array<int, Component>
      */
     public static function getComponents(array $options = []): array
     {
@@ -105,14 +107,6 @@ class CourseLessonForm
                         ->nullable()
                         ->hidden(fn (Get $get): bool => ($get('lesson_type') ?? null) !== CourseLessonType::Article->value)
                         ->columnSpanFull(),
-
-                    TextInput::make('video_url')
-                        ->label('Video URL')
-                        ->helperText('Bisa gunakan link YouTube, Vimeo, Loom, atau URL embed langsung.')
-                        ->url()
-                        ->maxLength(255)
-                        ->nullable()
-                        ->hidden(fn (Get $get): bool => ($get('lesson_type') ?? null) !== CourseLessonType::VideoEmbed->value),
 
                     FileUpload::make('attachment_path')
                         ->label('Attachment (private)')
@@ -347,6 +341,89 @@ class CourseLessonForm
                         })
                         ->columnSpanFull(),
                 ])->columnSpanFull(),
+
+                Section::make('Video Materi')
+                    ->description('Tampilkan video YouTube langsung di halaman materi tanpa mengarahkan user keluar.')
+                    ->schema([
+                        Toggle::make('show_video')
+                            ->label('Tampilkan Video Materi')
+                            ->helperText('Aktifkan untuk menyematkan video YouTube di halaman materi. Untuk lesson tipe Video Embed, video ditampilkan otomatis jika URL diisi.')
+                            ->default(false)
+                            ->live(),
+
+                        Select::make('video_provider')
+                            ->label('Sumber Video')
+                            ->options(['youtube' => 'YouTube'])
+                            ->default('youtube')
+                            ->required(fn (Get $get): bool => (bool) $get('show_video'))
+                            ->visible(fn (Get $get): bool => (bool) $get('show_video')),
+
+                        TextInput::make('video_url')
+                            ->label('URL YouTube')
+                            ->helperText('Contoh: https://www.youtube.com/watch?v=xxxxx atau https://youtu.be/xxxxx')
+                            ->placeholder('https://www.youtube.com/watch?v=...')
+                            ->maxLength(2048)
+                            ->nullable()
+                            ->visible(fn (Get $get): bool => (bool) $get('show_video') || ($get('lesson_type') ?? null) === CourseLessonType::VideoEmbed->value)
+                            ->required(fn (Get $get): bool => (bool) $get('show_video'))
+                            ->rule(function (Get $get) {
+                                return function (string $attribute, $value, \Closure $fail) use ($get): void {
+                                    if (! (bool) $get('show_video')) {
+                                        return;
+                                    }
+
+                                    if (! is_string($value) || blank($value)) {
+                                        $fail('URL YouTube wajib diisi saat video aktif.');
+
+                                        return;
+                                    }
+
+                                    $scheme = strtolower((string) parse_url($value, PHP_URL_SCHEME));
+
+                                    if (in_array($scheme, ['javascript', 'data', 'file'], true)) {
+                                        $fail('Skema URL tidak diperbolehkan.');
+
+                                        return;
+                                    }
+
+                                    if (! filter_var($value, FILTER_VALIDATE_URL)) {
+                                        $fail('URL YouTube tidak valid.');
+
+                                        return;
+                                    }
+
+                                    $host = strtolower((string) parse_url($value, PHP_URL_HOST));
+                                    $allowed = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'];
+
+                                    if (! in_array($host, $allowed, true)) {
+                                        $fail('URL YouTube tidak valid. Hanya domain YouTube yang diperbolehkan.');
+
+                                        return;
+                                    }
+
+                                    $videoId = CourseLesson::parseYoutubeVideoId($value);
+
+                                    if (blank($videoId)) {
+                                        $fail('URL YouTube tidak valid. Tidak dapat mengekstrak video ID.');
+                                    }
+                                };
+                            }),
+
+                        TextInput::make('video_title')
+                            ->label('Judul Video')
+                            ->maxLength(255)
+                            ->nullable()
+                            ->visible(fn (Get $get): bool => (bool) $get('show_video')),
+
+                        Textarea::make('video_description')
+                            ->label('Deskripsi Video')
+                            ->rows(3)
+                            ->nullable()
+                            ->columnSpanFull()
+                            ->visible(fn (Get $get): bool => (bool) $get('show_video')),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
             ]),
         ];
     }
@@ -356,4 +433,3 @@ class CourseLessonForm
         return $schema->components(static::getComponents($options));
     }
 }
-
