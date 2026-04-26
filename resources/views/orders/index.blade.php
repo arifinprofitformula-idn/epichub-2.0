@@ -1,199 +1,244 @@
-<x-layouts::app title="Invoice">
-    <div class="mx-auto flex min-h-[calc(100vh-1rem)] w-full max-w-[min(1520px,calc(100vw-40px))] flex-col px-0 pb-6 pt-0 md:min-h-screen md:pb-8">
-        <section class="sticky top-0 z-20 mb-[10px] hidden flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 bg-white/95 px-1 py-5 backdrop-blur md:-mt-8 md:-mx-6 md:px-0 md:flex lg:-mx-8">
-            <div class="flex items-center gap-3 md:pl-6 lg:pl-8">
-                <flux:sidebar.toggle
-                    class="hidden lg:inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-cyan-300 hover:text-cyan-700"
-                    icon="bars-2"
-                    inset="left"
-                />
-            </div>
+@component('layouts::app', ['title' => 'Riwayat Pesanan'])
+    <div class="mx-auto flex min-h-[calc(100vh-1rem)] w-full max-w-[min(1520px,calc(100vw-40px))] flex-col px-0 pb-0 pt-0 md:min-h-screen md:pb-0">
+        @include('partials.user-dashboard-header')
 
-            <div class="flex items-center gap-4 md:pr-6 lg:pr-8">
-                <div class="text-right">
-                    <div class="text-sm font-semibold text-slate-900">
-                        {{ auth()->user()->name }}
-                    </div>
-                    <div class="mt-0.5 text-xs font-medium text-slate-500">
-                        {{ auth()->user()->hasVerifiedEmail() ? 'Pengguna terverifikasi' : 'Menunggu verifikasi' }}
-                    </div>
+        <section class="px-1 py-8 md:px-6 lg:px-8">
+
+            {{-- Page header --}}
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <div class="text-[11px] font-semibold uppercase tracking-[0.20em] text-slate-400">INVOICE CENTER</div>
+                    <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">Riwayat Pesanan</h1>
                 </div>
-
                 <a
-                    href="{{ route('profile.edit') }}"
-                    class="group inline-flex size-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] text-sm font-semibold text-white shadow-[0_12px_25px_rgba(37,99,235,0.18)] transition hover:brightness-110"
-                    aria-label="Buka profil pengguna"
+                    href="{{ route('dashboard') }}"
+                    class="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] px-3 py-1.5 text-sm font-semibold text-slate-500 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.97]"
                 >
-                    <span class="group-hover:scale-105 transition">
-                        {{ auth()->user()->initials() }}
-                    </span>
+                    <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M5.75 12H18.25M10.25 6.75L4.75 12L10.25 17.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Dashboard
                 </a>
-            </div>
-        </section>
-
-        <section class="rounded-[1.75rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)] px-4 py-5 shadow-[0_18px_45px_rgba(148,163,184,0.10)] md:rounded-[2rem] md:px-8 md:py-8">
-            <div>
-                <div class="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-slate-400 md:text-[0.72rem] md:tracking-[0.28em]">Invoice Center</div>
-                <h1 class="mt-2 text-[2rem] font-semibold tracking-tight text-slate-900 md:text-3xl">Riwayat Pesanan</h1>
-                <p class="mt-1 max-w-xl text-sm leading-6 text-slate-500 md:text-base">Pantau status pembayaran dan akses pembelian Anda.</p>
             </div>
 
             @if ($orders->count() === 0)
-                <div class="mt-6">
+                <div class="mt-8">
                     <x-ui.empty-state
-                        title="Belum ada invoice"
+                        title="Belum ada pesanan"
                         description="Mulai dari katalog produk untuk membuat pesanan pertama Anda."
-                    >
-                        <x-slot:action>
-                            <x-ui.button variant="primary" :href="route('catalog.products.index')">
-                                Jelajahi produk
-                            </x-ui.button>
-                        </x-slot:action>
-                    </x-ui.empty-state>
+                        action-label="Jelajahi Produk"
+                        :action-href="route('marketplace.index')"
+                    />
                 </div>
             @else
-                <div class="mt-5 grid grid-cols-2 gap-3 md:mt-6 md:gap-4 lg:grid-cols-2">
-                    <div class="rounded-[1.4rem] border border-slate-200/80 bg-white px-4 py-4 shadow-[0_10px_24px_rgba(148,163,184,0.07)] md:rounded-[1.75rem] md:px-5 md:py-6">
-                        <div class="flex flex-col items-center text-center md:flex-row md:items-center md:gap-4 md:text-left">
-                            <div class="flex size-14 items-center justify-center rounded-[1.15rem] bg-blue-50 text-blue-600 md:size-16 md:rounded-[1.35rem]">
-                                <svg viewBox="0 0 24 24" fill="none" class="size-7 md:size-8" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M8 7V6a4 4 0 1 1 8 0v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                    <path d="M6.5 8.5h11l-.72 8.26a2 2 0 0 1-1.99 1.82H9.21a2 2 0 0 1-1.99-1.82L6.5 8.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <div class="mt-3 md:mt-0">
-                                <div class="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-slate-400 md:text-xs md:tracking-[0.18em]">Total pesanan</div>
-                                <div class="mt-1 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">{{ $invoiceSummary['total_orders'] }}</div>
-                            </div>
+                {{-- Summary stat cards --}}
+                <div class="mt-5 grid grid-cols-2 gap-3">
+                    <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                        <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M8 7V6a4 4 0 1 1 8 0v1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                <path d="M6.5 8.5h11l-.72 8.26a2 2 0 0 1-1.99 1.82H9.21a2 2 0 0 1-1.99-1.82L6.5 8.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] text-slate-400">Total Pesanan</div>
+                            <div class="mt-0.5 text-xl font-bold leading-none tracking-tight text-slate-900">{{ $invoiceSummary['total_orders'] }}</div>
                         </div>
                     </div>
 
-                    <div class="rounded-[1.4rem] border border-slate-200/80 bg-white px-4 py-4 shadow-[0_10px_24px_rgba(148,163,184,0.07)] md:rounded-[1.75rem] md:px-5 md:py-6">
-                        <div class="flex flex-col items-center text-center md:flex-row md:items-center md:gap-4 md:text-left">
-                            <div class="flex size-14 items-center justify-center rounded-[1.15rem] bg-amber-50 text-amber-600 md:size-16 md:rounded-[1.35rem]">
-                                <svg viewBox="0 0 24 24" fill="none" class="size-7 md:size-8" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="8.25" stroke="currentColor" stroke-width="1.8"/>
-                                    <path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <div class="mt-3 md:mt-0">
-                                <div class="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-slate-400 md:text-xs md:tracking-[0.18em]">Belum bayar</div>
-                                <div class="mt-1 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">{{ $invoiceSummary['unpaid_orders'] }}</div>
-                            </div>
+                    <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                        <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-50">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-4 text-amber-600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="12" cy="12" r="8.25" stroke="currentColor" stroke-width="1.7"/>
+                                <path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] text-slate-400">Belum Bayar</div>
+                            <div class="mt-0.5 text-xl font-bold leading-none tracking-tight text-slate-900">{{ $invoiceSummary['unpaid_orders'] }}</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white shadow-[0_18px_40px_rgba(148,163,184,0.08)] md:mt-6 md:rounded-[2rem]">
-                    <div class="hidden grid-cols-[1.25fr_2.4fr_1.25fr_0.8fr_0.5fr] gap-6 border-b border-slate-200/80 px-8 py-5 text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 lg:grid">
-                        <div>Invoice / Tanggal</div>
-                        <div>Item Kursus</div>
-                        <div>Rincian Biaya</div>
-                        <div>Status</div>
-                        <div class="text-right">Aksi</div>
+                {{-- Orders table --}}
+                <div class="mt-6 overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
+
+                    {{-- Desktop table header --}}
+                    <div class="hidden grid-cols-[1.5fr_2.2fr_1.3fr_0.85fr_auto] items-center gap-5 border-b border-slate-100 bg-slate-50/80 px-6 py-4 lg:grid">
+                        <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.20em] text-slate-500">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-3.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <rect x="4.75" y="4.75" width="14.5" height="14.5" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M8.75 9.75h6.5M8.75 12h6.5M8.75 14.25h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                            </svg>
+                            Invoice
+                        </div>
+                        <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.20em] text-slate-500">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-3.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.4"/>
+                                <circle cx="8.5" cy="10" r="1.5" fill="currentColor"/>
+                                <path d="M3 15L8 10L11 13L15 9L21 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Item Produk
+                        </div>
+                        <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.20em] text-slate-500">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-3.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M12 4.75v14.5M8.75 8.25c0-1.1.895-2 2-2h2.5a2 2 0 0 1 0 4h-2.5a2 2 0 0 0 0 4h2.5a2 2 0 0 1 0 4h-2.5a2 2 0 0 1-2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                            Biaya
+                        </div>
+                        <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.20em] text-slate-500">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-3.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="12" cy="12" r="8.25" stroke="currentColor" stroke-width="1.5"/>
+                                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Status
+                        </div>
+                        <div class="text-right text-[11px] font-semibold uppercase tracking-[0.20em] text-slate-500">Aksi</div>
                     </div>
 
-                    <div class="space-y-3 p-3 md:space-y-0 md:p-0 lg:divide-y lg:divide-slate-200/80">
+                    {{-- Rows --}}
+                    <div class="divide-y divide-slate-100 p-3 md:p-0">
                         @foreach ($orders as $order)
                             @php
-                                $firstItem = $order->items->first();
+                                $firstItem     = $order->items->first();
                                 $latestPayment = $order->latestPayment();
-                                $statusClasses = match ($order->status->value) {
-                                    'paid' => 'bg-emerald-100 text-emerald-700',
-                                    'cancelled', 'failed' => 'bg-rose-100 text-rose-700',
-                                    default => 'bg-amber-100 text-amber-700',
+                                $statusValue   = $order->status->value;
+                                $statusLabel   = $order->status->label();
+
+                                [$statusPill, $statusDot, $statusBorder] = match ($statusValue) {
+                                    'paid'                   => ['bg-emerald-100 text-emerald-700', 'bg-emerald-500', 'border-l-emerald-400'],
+                                    'cancelled', 'failed'    => ['bg-rose-100 text-rose-700',       'bg-rose-500',    'border-l-rose-400'],
+                                    'refunded'               => ['bg-violet-100 text-violet-700',   'bg-violet-500',  'border-l-violet-400'],
+                                    default                  => ['bg-amber-100 text-amber-700',     'bg-amber-500',   'border-l-amber-400'],
                                 };
+
+                                $thumbnailSrc = filled($firstItem?->product?->thumbnail)
+                                    ? asset('storage/' . $firstItem->product->thumbnail)
+                                    : null;
                             @endphp
-                            <div class="rounded-[1.25rem] border border-slate-200/70 bg-slate-50/70 p-4 shadow-[0_10px_24px_rgba(148,163,184,0.05)] md:px-6 md:py-4.5 lg:grid lg:rounded-none lg:border-0 lg:bg-transparent lg:p-5 lg:shadow-none lg:grid-cols-[1.25fr_2.4fr_1.25fr_0.8fr_0.5fr] lg:items-center lg:gap-5">
-                                <div class="flex items-start justify-between gap-3 lg:block">
-                                    <div>
-                                        <div class="mb-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-400 lg:hidden">Invoice / Tanggal</div>
-                                        <a href="{{ route('orders.show', $order) }}" class="text-[0.95rem] font-semibold tracking-tight text-blue-600 transition hover:text-blue-700">
-                                            {{ strtoupper(str_replace('ORD', 'INV', $order->order_number)) }}
-                                        </a>
-                                        <div class="mt-0.5 text-[0.72rem] font-medium text-slate-400">
-                                            {{ $order->created_at?->translatedFormat('d M Y, H:i') }}
+
+                            {{-- Mobile card --}}
+                            <div class="group overflow-hidden rounded-[1.25rem] border border-slate-200/70 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.04)] transition-all duration-150 hover:shadow-[0_8px_24px_rgba(15,23,42,0.09)] border-l-4 {{ $statusBorder }} lg:hidden">
+                                <div class="p-4">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            {{-- Thumbnail --}}
+                                            <div class="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100">
+                                                @if ($thumbnailSrc)
+                                                    <img src="{{ $thumbnailSrc }}" alt="{{ $firstItem->product_title }}" class="h-full w-full object-cover"/>
+                                                @else
+                                                    <svg viewBox="0 0 24 24" fill="none" class="size-5 text-slate-300" xmlns="http://www.w3.org/2000/svg">
+                                                        <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.4"/>
+                                                        <circle cx="8.5" cy="10" r="1.5" fill="currentColor"/>
+                                                        <path d="M3 15L8 10L11 13L15 9L21 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                @endif
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="truncate text-sm font-semibold leading-snug text-slate-900">{{ $firstItem?->product_title ?? 'Produk digital' }}</p>
+                                                @if ($order->items->count() > 1)
+                                                    <p class="mt-0.5 text-[11px] font-medium text-slate-400">+ {{ $order->items->count() - 1 }} item lain</p>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <span class="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $statusPill }}">
+                                            <span class="size-1.5 rounded-full {{ $statusDot }}"></span>
+                                            {{ $statusLabel }}
+                                        </span>
+                                    </div>
+
+                                    <div class="mt-3 flex items-center justify-between gap-3">
+                                        <div>
+                                            <a href="{{ route('orders.show', $order) }}" class="text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700">
+                                                {{ strtoupper(str_replace('ORD', 'INV', $order->order_number)) }}
+                                            </a>
+                                            <p class="mt-0.5 text-[11px] text-slate-400">{{ $order->created_at?->translatedFormat('d M Y, H:i') }}</p>
+                                        </div>
+
+                                        <div class="text-right">
+                                            <p class="text-base font-bold tracking-tight text-slate-900">{{ $order->formatted_total }}</p>
+                                            <p class="mt-0.5 text-[11px] font-medium text-slate-400">{{ $latestPayment?->payment_method?->label() ?? '—' }}</p>
                                         </div>
                                     </div>
 
-                                    <div class="flex flex-col items-end gap-2 lg:hidden">
-                                        <span class="inline-flex rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.06em] {{ $statusClasses }}">
-                                            {{ $order->status->label() }}
-                                        </span>
+                                    <div class="mt-3 flex items-center gap-2">
                                         <a
                                             href="{{ route('orders.show', $order) }}"
-                                            class="inline-flex h-8 items-center justify-center gap-1 rounded-full bg-blue-50 px-3 text-[0.72rem] font-semibold text-blue-600 transition hover:bg-blue-100 hover:text-blue-700"
-                                            aria-label="Lihat detail invoice {{ $order->order_number }}"
+                                            class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-[0.875rem] bg-blue-50 py-2.5 text-sm font-semibold text-blue-600 transition-all duration-150 hover:bg-blue-100 hover:text-blue-700 active:scale-[0.97]"
                                         >
-                                            Detail
-                                            <svg viewBox="0 0 24 24" fill="none" class="size-3.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                                <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                <path d="M4.75 6.75L9.25 12L4.75 17.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M11.75 6.75L16.25 12L11.75 17.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
                                             </svg>
+                                            Lihat Invoice
                                         </a>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="mt-3 flex items-center gap-3 lg:mt-0">
-                                    <div class="flex h-11 w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-[0.58rem] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                                        @if (filled($firstItem?->product?->thumbnail))
+                            {{-- Desktop row --}}
+                            <div class="group hidden grid-cols-[1.5fr_2.2fr_1.3fr_0.85fr_auto] items-center gap-5 border-l-4 px-6 py-4 transition-all duration-150 hover:bg-slate-50/70 {{ $statusBorder }} lg:grid">
+
+                                {{-- Invoice / Date --}}
+                                <div>
+                                    <a
+                                        href="{{ route('orders.show', $order) }}"
+                                        class="text-sm font-semibold tracking-tight text-blue-600 transition-colors duration-150 hover:text-blue-700"
+                                    >
+                                        {{ strtoupper(str_replace('ORD', 'INV', $order->order_number)) }}
+                                    </a>
+                                    <p class="mt-0.5 text-[11px] font-medium text-slate-400">{{ $order->created_at?->translatedFormat('d M Y, H:i') }}</p>
+                                </div>
+
+                                {{-- Item Produk --}}
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="flex h-10 w-[3.5rem] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100">
+                                        @if ($thumbnailSrc)
                                             <img
-                                                src="{{ asset('storage/'.$firstItem->product->thumbnail) }}"
+                                                src="{{ $thumbnailSrc }}"
                                                 alt="{{ $firstItem->product_title }}"
                                                 class="h-full w-full object-cover"
-                                            >
+                                                loading="lazy"
+                                            />
                                         @else
-                                            <span>Item</span>
+                                            <svg viewBox="0 0 24 24" fill="none" class="size-5 text-slate-300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.4"/>
+                                                <circle cx="8.5" cy="10" r="1.5" fill="currentColor"/>
+                                                <path d="M3 15L8 10L11 13L15 9L21 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
                                         @endif
                                     </div>
-
                                     <div class="min-w-0">
-                                        <div class="mb-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-400 lg:hidden">Item Kursus</div>
-                                        <div class="truncate text-[0.88rem] font-semibold leading-snug tracking-tight text-slate-900">
+                                        <p class="truncate text-sm font-semibold leading-snug text-slate-900">
                                             {{ $firstItem?->product_title ?? 'Produk digital' }}
-                                        </div>
+                                        </p>
                                         @if ($order->items->count() > 1)
-                                            <div class="mt-0.5 text-[0.72rem] font-medium text-slate-400">
-                                                + {{ $order->items->count() - 1 }} item tambahan
-                                            </div>
+                                            <p class="mt-0.5 text-[11px] font-medium text-slate-400">+ {{ $order->items->count() - 1 }} item lain</p>
                                         @endif
                                     </div>
                                 </div>
 
-                                <div class="mt-3 grid grid-cols-2 gap-3 rounded-xl border border-slate-200/70 bg-white px-3 py-3 lg:mt-0 lg:block lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0">
-                                    <div class="lg:hidden">
-                                        <div class="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-400">Total</div>
-                                        <div class="mt-1 text-[0.95rem] font-semibold tracking-tight text-slate-900">{{ $order->formatted_total }}</div>
-                                    </div>
-                                    <div class="lg:hidden">
-                                        <div class="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-400">Metode</div>
-                                        <div class="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-slate-500">
-                                            {{ $latestPayment?->payment_method?->label() ?? 'Belum ada metode bayar' }}
-                                        </div>
-                                    </div>
-
-                                    <div class="hidden lg:block">
-                                        <div class="mb-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-400 lg:hidden">Rincian Biaya</div>
-                                        <div class="text-[0.64rem] font-semibold uppercase tracking-[0.14em] text-blue-600">Biaya registrasi</div>
-                                        <div class="mt-1 text-[1.05rem] font-semibold tracking-tight text-slate-900">{{ $order->formatted_total }}</div>
-                                        <div class="mt-0.5 text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-slate-400">
-                                            {{ $latestPayment?->payment_method?->label() ?? 'Belum ada metode bayar' }}
-                                        </div>
-                                    </div>
+                                {{-- Biaya --}}
+                                <div>
+                                    <p class="text-base font-bold tracking-tight text-slate-900">{{ $order->formatted_total }}</p>
+                                    <p class="mt-0.5 text-[11px] font-medium text-slate-400">{{ $latestPayment?->payment_method?->label() ?? '—' }}</p>
                                 </div>
 
-                                <div class="hidden lg:block">
-                                    <div class="mb-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-400 lg:hidden">Status</div>
-                                    <span class="inline-flex rounded-full px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.06em] {{ $statusClasses }}">
-                                        {{ $order->status->label() }}
+                                {{-- Status --}}
+                                <div>
+                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $statusPill }}">
+                                        <span class="size-1.5 rounded-full {{ $statusDot }}"></span>
+                                        {{ $statusLabel }}
                                     </span>
                                 </div>
 
-                                <div class="hidden lg:flex lg:flex-col lg:gap-1 lg:items-end">
-                                    <div class="mb-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-slate-400 lg:hidden">Aksi</div>
+                                {{-- Aksi --}}
+                                <div class="flex justify-end">
                                     <a
                                         href="{{ route('orders.show', $order) }}"
-                                        class="inline-flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition hover:bg-blue-100 hover:text-blue-700"
-                                        aria-label="Lihat detail invoice {{ $order->order_number }}"
+                                        class="inline-flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-all duration-150 hover:bg-blue-100 hover:text-blue-700 hover:shadow-[0_4px_12px_rgba(37,99,235,0.18)] active:scale-[0.94]"
+                                        aria-label="Lihat invoice {{ $order->order_number }}"
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                             <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
@@ -210,5 +255,7 @@
                 </div>
             @endif
         </section>
+
+        @include('partials.user-dashboard-footer')
     </div>
-</x-layouts::app>
+@endcomponent

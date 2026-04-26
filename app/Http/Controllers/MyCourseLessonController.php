@@ -84,16 +84,23 @@ class MyCourseLessonController extends Controller
 
         $nextLessonId = $resolved['lessons']->firstWhere('sort_order', '>', $lesson->sort_order)?->id;
         $prevLessonId = $resolved['lessons']->where('sort_order', '<', $lesson->sort_order)->sortByDesc('sort_order')->first()?->id;
+        $currentLessonIndex = $resolved['lessons']->search(fn (CourseLesson $row) => $row->id === $lesson->id);
+        $currentProgressStatus = $resolved['progressByLessonId'][$lesson->id] ?? LessonProgressStatus::InProgress;
 
         return view('my-courses.lesson', [
             'userProduct' => $userProduct,
             'course' => $course,
             'lesson' => $lesson,
+            'sections' => $resolved['sections'],
+            'lessons' => $resolved['lessons'],
+            'progressByLessonId' => $resolved['progressByLessonId'],
             'progressPercent' => $resolved['progressPercent'],
             'completedLessons' => $resolved['completedLessons'],
             'totalLessons' => $resolved['totalLessons'],
             'prevLessonId' => $prevLessonId,
             'nextLessonId' => $nextLessonId,
+            'currentLessonIndex' => $currentLessonIndex === false ? 0 : ($currentLessonIndex + 1),
+            'currentProgressStatus' => $currentProgressStatus,
         ]);
     }
 

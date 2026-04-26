@@ -1,4 +1,4 @@
-<x-layouts::app :title="'Invoice '.$order->order_number">
+@component('layouts::app', ['title' => 'Invoice ' . $order->order_number])
     @php
         $latestPayment = $order->latestPayment();
         $statusClasses = match ($order->status->value) {
@@ -115,54 +115,27 @@
     </style>
 
     <div data-print-root class="mx-auto flex min-h-[calc(100vh-1rem)] w-full max-w-[min(1520px,calc(100vw-40px))] flex-col px-0 pb-6 pt-0 md:min-h-screen md:pb-8">
-        <section data-print-hide class="sticky top-0 z-20 mb-[10px] hidden flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 bg-white/95 px-1 py-5 backdrop-blur md:-mt-8 md:-mx-6 md:px-0 md:flex lg:-mx-8">
-            <div class="flex items-center gap-3 md:pl-6 lg:pl-8">
-                <flux:sidebar.toggle
-                    class="hidden lg:inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-cyan-300 hover:text-cyan-700"
-                    icon="bars-2"
-                    inset="left"
-                />
-            </div>
-
-            <div class="flex items-center gap-4 md:pr-6 lg:pr-8">
-                <div class="text-right">
-                    <div class="text-sm font-semibold text-slate-900">
-                        {{ auth()->user()->name }}
-                    </div>
-                    <div class="mt-0.5 text-xs font-medium text-slate-500">
-                        {{ auth()->user()->hasVerifiedEmail() ? 'Pengguna terverifikasi' : 'Menunggu verifikasi' }}
-                    </div>
-                </div>
-
-                <a
-                    href="{{ route('profile.edit') }}"
-                    class="group inline-flex size-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] text-sm font-semibold text-white shadow-[0_12px_25px_rgba(37,99,235,0.18)] transition hover:brightness-110"
-                    aria-label="Buka profil pengguna"
-                >
-                    <span class="group-hover:scale-105 transition">
-                        {{ auth()->user()->initials() }}
-                    </span>
-                </a>
-            </div>
-        </section>
+        <div data-print-hide>
+            @include('partials.user-dashboard-header')
+        </div>
 
         <section data-print-shell class="rounded-[1.75rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)] px-4 py-5 shadow-[0_18px_45px_rgba(148,163,184,0.10)] md:rounded-[2rem] md:px-8 md:py-8">
             <div class="mx-auto w-full max-w-[940px] print:max-w-none">
                 <div data-print-hide class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <a
                         href="{{ route('orders.index') }}"
-                        class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
+                        class="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] px-3 py-1.5 text-sm font-semibold text-slate-500 transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 active:scale-[0.97]"
                     >
                         <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M5.75 12H18.25M10.25 6.75L4.75 12L10.25 17.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        Kembali ke Daftar
+                        Riwayat Pesanan
                     </a>
 
                     <button
                         type="button"
                         onclick="window.print()"
-                        class="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.22)] transition hover:bg-blue-700"
+                        class="inline-flex items-center justify-center gap-2 rounded-[1rem] bg-[linear-gradient(135deg,#2563eb,#1d4ed8)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.22)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 hover:shadow-[0_16px_32px_rgba(37,99,235,0.30)] active:scale-[0.97] active:translate-y-0"
                     >
                         <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <path d="M7 17H6.75C5.7835 17 5 16.2165 5 15.25V7.75C5 6.7835 5.7835 6 6.75 6H14.25C15.2165 6 16 6.7835 16 7.75V8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -281,17 +254,31 @@
 
                     <div data-print-hide class="mt-6 flex flex-wrap items-center gap-3">
                         @if ($latestPayment)
-                            <x-ui.button variant="secondary" :href="route('payments.show', $latestPayment)">
+                            <a
+                                href="{{ route('payments.show', $latestPayment) }}"
+                                class="inline-flex items-center gap-2 rounded-[1rem] border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)] active:scale-[0.97] active:translate-y-0"
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <rect x="3.75" y="6.75" width="16.5" height="12.5" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M3.75 10.75h16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    <path d="M7.75 14.25h2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
                                 Lihat Pembayaran
-                            </x-ui.button>
+                            </a>
                         @endif
 
                         @if ($order->status->value !== 'paid')
                             <form method="POST" action="{{ route('orders.cancel', $order) }}">
                                 @csrf
-                                <x-ui.button variant="danger" size="sm" type="submit">
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-2 rounded-[1rem] bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-600 transition-all duration-150 hover:-translate-y-0.5 hover:bg-rose-100 hover:shadow-[0_8px_20px_rgba(239,68,68,0.14)] active:scale-[0.97] active:translate-y-0"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="M17.25 6.75L6.75 17.25M6.75 6.75L17.25 17.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                    </svg>
                                     Batalkan Order
-                                </x-ui.button>
+                                </button>
                             </form>
                         @endif
                     </div>
@@ -300,4 +287,4 @@
             </div>
         </section>
     </div>
-</x-layouts::app>
+@endcomponent
