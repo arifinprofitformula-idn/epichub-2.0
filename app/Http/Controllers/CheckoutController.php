@@ -46,7 +46,7 @@ class CheckoutController extends Controller
             }
         }
 
-        return view('checkout.show', [
+        return view($request->user() ? 'checkout.show-app' : 'checkout.show-public', [
             'product' => $product,
             'isEligible' => $isEligible,
             'eligibilityMessage' => $eligibilityMessage,

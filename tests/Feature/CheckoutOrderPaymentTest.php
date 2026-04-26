@@ -35,7 +35,8 @@ test('guest can open checkout page', function () {
     $this->get(route('checkout.show', $product->slug))
         ->assertOk()
         ->assertSee('Informasi Akun & Kontak')
-        ->assertSee('Selesaikan Pesanan');
+        ->assertSee('Selesaikan Pesanan')
+        ->assertDontSee('Checkout Produk');
 });
 
 test('guest checkout with new email and whatsapp creates user order and payment', function () {
@@ -194,6 +195,8 @@ test('authenticated user can view checkout without password field', function () 
     $this->actingAs($user)
         ->get(route('checkout.show', $product->slug))
         ->assertOk()
+        ->assertSee('Checkout Produk')
+        ->assertSee('Kembali ke marketplace')
         ->assertSee('Akun yang digunakan')
         ->assertSee($user->email)
         ->assertDontSee('Password Akun Baru');
