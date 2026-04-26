@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -76,6 +77,38 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * @return HasMany<Order, $this>
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * @return HasManyThrough<Payment, Order, $this>
+     */
+    public function payments(): HasManyThrough
+    {
+        return $this->hasManyThrough(Payment::class, Order::class, 'user_id', 'order_id');
+    }
+
+    /**
+     * @return HasMany<LessonProgress, $this>
+     */
+    public function lessonProgress(): HasMany
+    {
+        return $this->hasMany(LessonProgress::class);
+    }
+
+    /**
+     * @return HasMany<AccessLog, $this>
+     */
+    public function accessLogs(): HasMany
+    {
+        return $this->hasMany(AccessLog::class);
+    }
+
+    /**
      * @return HasOne<EpiChannel, $this>
      */
     public function epiChannel(): HasOne
@@ -92,10 +125,52 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * @return HasMany<ReferralOrder, $this>
+     */
+    public function referralOrders(): HasMany
+    {
+        return $this->hasMany(ReferralOrder::class, 'buyer_user_id');
+    }
+
+    /**
+     * @return HasMany<Commission, $this>
+     */
+    public function commissionsAsBuyer(): HasMany
+    {
+        return $this->hasMany(Commission::class, 'buyer_user_id');
+    }
+
+    /**
+     * @return HasMany<OmsIntegrationLog, $this>
+     */
+    public function omsIntegrationLogsByEmail(): HasMany
+    {
+        return $this->hasMany(OmsIntegrationLog::class, 'email', 'email');
+    }
+
+    /**
      * @return HasMany<EventRegistration, $this>
      */
     public function eventRegistrations(): HasMany
     {
         return $this->hasMany(EventRegistration::class);
+    }
+
+    public function hasLockedReferrer(): bool
+    {
+        return $this->referrer_epi_channel_id !== null;
+    }
+
+    public function referralLockStatusLabel(): string
+    {
+        if (! $this->hasLockedReferrer()) {
+            return 'Perlu dicek';
+        }
+
+        if ($this->referrerEpiChannel?->isHouseChannel()) {
+            return 'House Channel';
+        }
+
+        return 'Locked';
     }
 }

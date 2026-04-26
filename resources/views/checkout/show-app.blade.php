@@ -2,20 +2,49 @@
     <div class="mx-auto flex min-h-[calc(100vh-1rem)] w-full max-w-[min(1520px,calc(100vw-40px))] flex-col px-0 pb-0 pt-0 md:min-h-screen md:pb-0">
         @include('partials.user-dashboard-header')
 
-        <section class="px-1 py-8 md:px-6 lg:px-8">
-            <x-ui.section-header
-                eyebrow="Checkout"
-                title="Checkout Produk"
-                :description="'Selesaikan pembelian tanpa keluar dari member area dashboard.'"
-            >
-                <x-ui.button variant="ghost" size="sm" :href="route('marketplace.index')">
-                    Kembali ke marketplace
-                </x-ui.button>
-            </x-ui.section-header>
+        <section class="px-1 py-6 md:px-6 lg:px-8">
 
-            <div class="mt-6">
-                @include('checkout.partials.content')
+            {{-- Top bar --}}
+            <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <a
+                    href="{{ route('marketplace.index') }}"
+                    style="box-shadow: 0 4px 0 0 #d4d4d8, 0 6px 12px rgba(0,0,0,0.07); transition: transform 0.1s ease, box-shadow 0.1s ease;"
+                    class="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 0 0 #d4d4d8, 0 10px 16px rgba(0,0,0,0.1)';"
+                    onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 0 0 #d4d4d8, 0 6px 12px rgba(0,0,0,0.07)';"
+                    onmousedown="this.style.transform='translateY(3px)'; this.style.boxShadow='0 1px 0 0 #d4d4d8';"
+                    onmouseup="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 0 0 #d4d4d8, 0 10px 16px rgba(0,0,0,0.1)';"
+                >
+                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M17 10a.75.75 0 0 1-.75.75H5.612l4.158 3.96a.75.75 0 1 1-1.04 1.08l-5.5-5.25a.75.75 0 0 1 0-1.08l5.5-5.25a.75.75 0 1 1 1.04 1.08L5.612 9.25H16.25A.75.75 0 0 1 17 10Z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="hidden sm:inline">Marketplace</span>
+                </a>
+
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+                        <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd"/></svg>
+                        Checkout Aman
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-semibold text-zinc-600">
+                        <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3a65.25 65.25 0 0 1 13.36 1.412.75.75 0 0 1 .58.875 48.645 48.645 0 0 1-1.618 6.2.75.75 0 0 1-.712.513H6a2.503 2.503 0 0 0-2.292 1.5H17.25a.75.75 0 0 1 0 1.5H2.76a.75.75 0 0 1-.748-.807 4.002 4.002 0 0 1 2.716-3.486L3.626 2.716a.25.25 0 0 0-.248-.216H1.75A.75.75 0 0 1 1 1.75Z" clip-rule="evenodd"/></svg>
+                        Member Checkout
+                    </span>
+                </div>
             </div>
+
+            {{-- Page title --}}
+            <div class="mb-5">
+                <div class="flex flex-wrap items-center gap-1.5 text-xs text-zinc-400">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 1.75A.75.75 0 0 1 1.75 1h1.628a1.75 1.75 0 0 1 1.734 1.51L5.18 3a65.25 65.25 0 0 1 13.36 1.412.75.75 0 0 1 .58.875 48.645 48.645 0 0 1-1.618 6.2.75.75 0 0 1-.712.513H6a2.503 2.503 0 0 0-2.292 1.5H17.25a.75.75 0 0 1 0 1.5H2.76a.75.75 0 0 1-.748-.807 4.002 4.002 0 0 1 2.716-3.486L3.626 2.716a.25.25 0 0 0-.248-.216H1.75A.75.75 0 0 1 1 1.75Z" clip-rule="evenodd"/></svg>
+                    <span class="font-semibold text-zinc-900">Checkout Produk</span>
+                    <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+                    <span class="truncate max-w-xs text-zinc-500">{{ $product->title }}</span>
+                </div>
+                <p class="mt-1 text-xs text-zinc-400">Selesaikan pembelian tanpa keluar dari member area dashboard.</p>
+            </div>
+
+            @include('checkout.partials.content')
         </section>
 
         @include('partials.user-dashboard-footer')
