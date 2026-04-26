@@ -41,6 +41,10 @@
                 viewable
             />
 
+            <div class="-mt-3 text-sm text-slate-500">
+                Password harus minimal 8 karakter dan mengandung huruf besar, huruf kecil, angka, serta simbol.
+            </div>
+
             <!-- Confirm Password -->
             <flux:input
                 name="password_confirmation"
