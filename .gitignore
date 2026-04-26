@@ -4,6 +4,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/tests
 /vendor
 .env
 .env.backup
