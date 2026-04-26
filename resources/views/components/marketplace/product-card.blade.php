@@ -45,7 +45,7 @@
             <div class="min-w-0">
                 <div class="text-lg font-semibold tracking-tight text-slate-900">{{ $product->title }}</div>
                 <p class="mt-2 line-clamp-3 text-sm text-slate-500">
-                    {{ $product->short_description ?: 'Produk pilihan EPIC Hub untuk kebutuhan belajar dan digital delivery kamu.' }}
+                    {{ $product->short_description ?: 'Produk pilihan EPIC HUB untuk kebutuhan belajar dan digital delivery kamu.' }}
                 </p>
             </div>
         </div>

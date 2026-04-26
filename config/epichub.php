@@ -5,7 +5,7 @@ return [
         'manual_bank_transfer' => [
             'bank_name' => env('EPICHUB_BANK_NAME', 'BCA'),
             'account_number' => env('EPICHUB_BANK_ACCOUNT_NUMBER', '1234567890'),
-            'account_name' => env('EPICHUB_BANK_ACCOUNT_NAME', 'EPIC Hub Premium'),
+            'account_name' => env('EPICHUB_BANK_ACCOUNT_NAME', 'EPIC HUB'),
         ],
     ],
     'oms' => [

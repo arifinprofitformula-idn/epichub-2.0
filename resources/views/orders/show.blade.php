@@ -66,12 +66,12 @@
             }
 
             [data-print-title] {
-                font-size: 24pt !important;
+                font-size: 21pt !important;
                 margin-top: 0.5rem !important;
             }
 
             [data-print-subtitle] {
-                font-size: 13pt !important;
+                font-size: 11pt !important;
                 margin-top: 0.25rem !important;
             }
 
@@ -90,11 +90,11 @@
             }
 
             [data-print-item-title] {
-                font-size: 12pt !important;
+                font-size: 10.5pt !important;
             }
 
             [data-print-item-price] {
-                font-size: 13pt !important;
+                font-size: 11pt !important;
             }
 
             [data-print-total] {
@@ -181,16 +181,25 @@
                 <div data-print-card-inner class="px-5 py-6 md:px-8 md:py-8">
                     <div class="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
                         <div>
-                            <div class="inline-flex size-16 items-center justify-center rounded-[1.25rem] bg-blue-50 text-blue-600">
-                                <x-app-logo-icon class="size-8 fill-current text-blue-600" />
+                            <div class="inline-flex items-center gap-3 rounded-[1.25rem] border border-slate-200/80 bg-slate-50/80 px-4 py-3">
+                                <img
+                                    src="{{ asset('epic-hub-auth-logo.png') }}"
+                                    alt="EPIC HUB"
+                                    class="h-[60px] w-[60px] object-contain"
+                                />
+                                <div class="text-left">
+                                    <div class="text-sm font-extrabold tracking-[0.18em] text-slate-900">EPIC HUB</div>
+                                    <div class="mt-1 text-[0.5rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Connect Grow Impact</div>
+                                </div>
                             </div>
-                            <div data-print-title class="mt-4 text-4xl font-semibold tracking-tight text-blue-600 md:text-5xl">INVOICE</div>
-                            <div data-print-subtitle class="mt-2 text-xl font-semibold tracking-tight text-slate-900 md:text-2xl">{{ strtoupper(str_replace('ORD', 'INV', $order->order_number)) }}</div>
-                            <div data-print-meta class="mt-1.5 text-sm text-slate-400 md:text-base">Tanggal Pesan: {{ $order->created_at?->translatedFormat('d F Y') }}</div>
+                            <div data-print-title class="mt-4 text-[1.8rem] font-semibold tracking-tight text-blue-600 md:text-[2.2rem]">INVOICE</div>
+                            <div data-print-subtitle class="mt-2 text-base font-semibold tracking-tight text-slate-900 md:text-lg">{{ strtoupper(str_replace('ORD', 'INV', $order->order_number)) }}</div>
+                            <div data-print-meta class="mt-1.5 text-xs text-slate-400 md:text-sm">Tanggal Pesan: {{ $order->created_at?->translatedFormat('d F Y') }}</div>
                         </div>
 
                         <div class="text-left lg:text-right">
-                            <div class="text-xl font-semibold tracking-tight text-slate-900 md:text-3xl">{{ config('app.name') }}</div>
+                            <div class="text-lg font-semibold tracking-tight text-slate-900 md:text-2xl">EPIC HUB</div>
+                            <div class="mt-1 text-[0.5rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Connect Grow Impact</div>
                             <div class="mt-2 space-y-1 text-[0.72rem] text-slate-500 md:text-sm">
                                 <div>Email: {{ config('mail.from.address', $order->customer_email ?: auth()->user()->email) }}</div>
                                 <div>Bank: {{ $bankConfig['bank_name'] ?? '-' }}</div>
@@ -246,14 +255,14 @@
                             @foreach ($order->items as $item)
                                 <div data-print-item-row class="grid grid-cols-[1fr_auto] gap-4 px-5 py-3.5 md:px-6">
                                     <div class="min-w-0">
-                                        <div data-print-item-title class="text-base font-semibold tracking-tight text-slate-900 md:text-xl">{{ $item->product_title }}</div>
+                                        <div data-print-item-title class="text-sm font-semibold tracking-tight text-slate-900 md:text-base">{{ $item->product_title }}</div>
                                         <div class="mt-1 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-blue-600 md:text-[0.72rem]">
                                             {{ strtoupper($item->product_type ?: 'Produk digital') }}
                                         </div>
                                         <div class="mt-1 text-xs text-slate-400 md:text-sm">Qty {{ $item->quantity }}</div>
                                     </div>
 
-                                    <div data-print-item-price class="text-right text-lg font-semibold tracking-tight text-slate-900 md:text-2xl">
+                                    <div data-print-item-price class="text-right text-sm font-semibold tracking-tight text-slate-900 md:text-lg">
                                         Rp {{ number_format((float) $item->subtotal_amount, 0, ',', '.') }}
                                     </div>
                                 </div>

@@ -7,11 +7,13 @@
         <div class="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
             <div class="flex w-full max-w-md flex-col gap-6">
                 <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-                    <span class="flex h-9 w-9 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
-                    </span>
-
-                    <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
+                    <img
+                        src="{{ asset('epic-hub-auth-logo.png') }}"
+                        alt="EPIC HUB"
+                        class="h-[60px] w-[60px] object-contain"
+                    />
+                    <span class="text-sm font-extrabold tracking-[0.18em] text-slate-900 dark:text-white">EPIC HUB</span>
+                    <span class="text-[0.5rem] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-zinc-400">Connect Grow Impact</span>
                 </a>
 
                 <div class="flex flex-col gap-6">

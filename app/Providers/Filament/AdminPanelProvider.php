@@ -28,6 +28,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('EPIC HUB')
+            ->brandLogo(asset('epic-hub-auth-logo.png'))
+            ->brandLogoHeight('3.75rem')
             ->colors([
                 'primary' => Color::Amber,
                 'success' => Color::Amber,

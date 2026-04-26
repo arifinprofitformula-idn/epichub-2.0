@@ -1,4 +1,4 @@
-<x-layouts::public title="EPIC Hub Premium">
+<x-layouts::public title="EPIC HUB">
     <section class="mx-auto max-w-[var(--container-5xl)] px-4 py-8 md:py-10">
         <div class="rounded-[2rem] border border-slate-200 bg-white/90 p-8 shadow-[0_20px_50px_rgba(15,23,42,0.09)] md:p-12">
             <div class="grid gap-10 md:grid-cols-2 md:items-center">
@@ -8,7 +8,7 @@
                         Pusat Produk Digital Premium, Kelas, Event, dan Peluang Penghasilan
                     </h1>
                     <p class="mt-4 text-base leading-relaxed text-slate-600">
-                        Satu platform untuk belajar, membeli produk digital, mengikuti event, dan bertumbuh bersama ekosistem EPIC Hub Premium.
+                        Satu platform untuk belajar, membeli produk digital, mengikuti event, dan bertumbuh bersama ekosistem EPIC HUB.
                     </p>
 
                     <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -222,7 +222,7 @@
         <div class="mt-8 grid gap-4 md:grid-cols-3">
             <x-ui.card class="p-6">
                 <div class="text-sm font-semibold text-zinc-900 dark:text-white">Apakah ini platform belajar?</div>
-                <div class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Ya. Kamu bisa akses kelas dan materi yang disediakan di EPIC Hub Premium.</div>
+                <div class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">Ya. Kamu bisa akses kelas dan materi yang disediakan di EPIC HUB.</div>
             </x-ui.card>
             <x-ui.card class="p-6">
                 <div class="text-sm font-semibold text-zinc-900 dark:text-white">Apakah produk langsung bisa diakses setelah pembayaran?</div>

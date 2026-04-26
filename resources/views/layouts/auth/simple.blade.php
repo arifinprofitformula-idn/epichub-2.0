@@ -163,12 +163,6 @@
     <body class="min-h-screen antialiased epi-auth-shell epi-style-{{ $authStyle }}">
         <div class="flex min-h-svh flex-col items-center justify-center gap-6 p-5 md:p-10">
             <div class="epi-auth-wrap flex flex-col gap-2">
-                <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-                    <span class="mb-2 flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
-                        <x-app-logo-icon class="size-10 fill-current text-amber-700" />
-                    </span>
-                    <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
-                </a>
                 <div class="mb-1 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                     <a href="{{ request()->fullUrlWithQuery(['auth_style' => 'corporate']) }}" class="rounded-full px-3 py-1 {{ $authStyle === 'corporate' ? 'bg-white/80 text-slate-700 shadow-sm' : 'text-slate-500' }}">Corporate</a>
                     <a href="{{ request()->fullUrlWithQuery(['auth_style' => 'marketing']) }}" class="rounded-full px-3 py-1 {{ $authStyle === 'marketing' ? 'bg-white/80 text-slate-700 shadow-sm' : 'text-slate-500' }}">Marketing</a>

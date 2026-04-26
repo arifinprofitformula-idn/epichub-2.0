@@ -6,7 +6,7 @@
             <x-ui.section-header
                 eyebrow="Marketplace"
                 title="Marketplace"
-                description="Temukan produk digital, kelas, event, dan bundle pilihan EPIC Hub."
+                description="Temukan produk digital, kelas, event, dan bundle pilihan EPIC HUB."
             >
                 <x-ui.button variant="ghost" size="sm" :href="route('dashboard')">
                     Kembali ke dashboard

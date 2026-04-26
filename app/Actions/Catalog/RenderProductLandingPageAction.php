@@ -64,9 +64,9 @@ class RenderProductLandingPageAction
      */
     protected function buildShortcodes(Product $product, ?EpiChannel $channel): array
     {
-        $affiliateName = $channel?->user?->name ?: 'EPIC Hub';
+        $affiliateName = $channel?->user?->name ?: 'EPIC HUB';
         $affiliateCode = $channel?->epic_code ?? '';
-        $affiliateStoreName = $channel?->store_name ?: 'EPIC Hub';
+        $affiliateStoreName = $channel?->store_name ?: 'EPIC HUB';
 
         $catalogUrl = route('catalog.products.show', $product->slug);
         $checkoutUrl = route('checkout.show', $product->slug);

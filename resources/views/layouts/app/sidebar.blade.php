@@ -24,6 +24,9 @@
                     <flux:sidebar.item icon="squares-2x2" :href="route('my-products.index')" :current="request()->routeIs('my-products.*') || request()->routeIs('my-courses.*') || request()->routeIs('my-events.*')" wire:navigate>
                         Produk Saya
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" :href="route('orders.index')" :current="request()->routeIs('orders.*')" wire:navigate>
+                        Invoice
+                    </flux:sidebar.item>
                     <flux:sidebar.item icon="cog-6-tooth" :href="route('profile.edit')" :current="request()->routeIs('profile.edit') || request()->routeIs('settings.*')" wire:navigate>
                         Pengaturan
                     </flux:sidebar.item>
@@ -123,6 +126,9 @@
                         </flux:menu.item>
                         <flux:menu.item :href="route('my-products.index')" icon="squares-2x2" wire:navigate>
                             Produk Saya
+                        </flux:menu.item>
+                        <flux:menu.item :href="route('orders.index')" icon="document-text" wire:navigate>
+                            Invoice
                         </flux:menu.item>
                         <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
                             Pengaturan

@@ -8,10 +8,15 @@
             <div class="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-e dark:border-neutral-800">
                 <div class="absolute inset-0 bg-neutral-900"></div>
                 <a href="{{ route('home') }}" class="relative z-20 flex items-center text-lg font-medium" wire:navigate>
-                    <span class="flex h-10 w-10 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="me-2 h-7 fill-current text-white" />
+                    <img
+                        src="{{ asset('epic-hub-auth-logo.png') }}"
+                        alt="EPIC HUB"
+                        class="me-3 h-[60px] w-[60px] object-contain"
+                    />
+                    <span class="flex flex-col leading-tight">
+                        <span class="text-sm font-extrabold tracking-[0.22em] text-white">EPIC HUB</span>
+                        <span class="mt-1 text-[0.5rem] font-semibold uppercase tracking-[0.12em] text-white/75">Connect Grow Impact</span>
                     </span>
-                    {{ config('app.name', 'Laravel') }}
                 </a>
 
                 @php
@@ -28,11 +33,13 @@
             <div class="w-full lg:p-8">
                 <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
                     <a href="{{ route('home') }}" class="z-20 flex flex-col items-center gap-2 font-medium lg:hidden" wire:navigate>
-                        <span class="flex h-9 w-9 items-center justify-center rounded-md">
-                            <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
-                        </span>
-
-                        <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
+                        <img
+                            src="{{ asset('epic-hub-auth-logo.png') }}"
+                            alt="EPIC HUB"
+                            class="h-[60px] w-[60px] object-contain"
+                        />
+                        <span class="text-sm font-extrabold tracking-[0.18em] text-slate-900 dark:text-white">EPIC HUB</span>
+                        <span class="text-[0.5rem] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-zinc-400">Connect Grow Impact</span>
                     </a>
                     {{ $slot }}
                 </div>
