@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\PromoAsset;
 use App\Models\ReferralOrder;
 use App\Models\ReferralVisit;
+use App\Models\UserProduct;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -96,10 +97,20 @@ class MyEpiChannelController extends Controller
         }
 
         $products = $this->affiliateProductsQuery()->paginate(12);
+        $ownedUserProducts = UserProduct::query()
+            ->where('user_id', $request->user()->id)
+            ->whereIn('product_id', $products->getCollection()->pluck('id'))
+            ->whereNull('revoked_at')
+            ->active()
+            ->latest('granted_at')
+            ->get()
+            ->unique('product_id')
+            ->keyBy('product_id');
 
         return view('epi-channel.links', [
             'channel' => $channel,
             'products' => $products,
+            'ownedUserProducts' => $ownedUserProducts,
             'mainReferralLink' => route('referral.redirect', ['epicCode' => $channel->epic_code], absolute: true),
         ]);
     }

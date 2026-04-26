@@ -15,6 +15,12 @@
                 @include('epi-channel.partials.inactive-state', ['channel' => $channel, 'referrerContact' => $referrerContact])
             </div>
         @else
+            @php
+                $totalCommissionAmount = (float) $stats['commission_pending_amount']
+                    + (float) $stats['commission_approved_amount']
+                    + (float) $stats['commission_paid_amount'];
+            @endphp
+
             {{-- WhatsApp reminder --}}
             @if ($whatsappReminderNeeded)
                 <div class="mt-6 rounded-[1.5rem] border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900 shadow-[0_10px_24px_rgba(245,158,11,0.08)]">
@@ -134,14 +140,14 @@
                 <x-ui.card class="p-5">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
-                            <div class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Komisi Disetujui</div>
-                            <div class="mt-1 text-xl font-semibold tracking-tight text-zinc-900 dark:text-white">Rp&nbsp;{{ number_format((float) $stats['commission_approved_amount'], 0, ',', '.') }}</div>
-                            <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Siap dibayarkan</div>
+                            <div class="text-xs font-medium text-zinc-500 dark:text-zinc-400">Total Komisi</div>
+                            <div class="mt-1 text-xl font-semibold tracking-tight text-zinc-900 dark:text-white">Rp&nbsp;{{ number_format($totalCommissionAmount, 0, ',', '.') }}</div>
+                            <div class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Pending, approved, dan paid</div>
                         </div>
                         <div class="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                             <svg viewBox="0 0 24 24" fill="none" class="size-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <circle cx="12" cy="12" r="8.25" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.5"/>
-                                <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 4.75V19.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                <path d="M16 8.25C16 6.73122 14.2091 5.5 12 5.5C9.79086 5.5 8 6.73122 8 8.25C8 9.76878 9.79086 11 12 11C14.2091 11 16 12.2312 16 13.75C16 15.2688 14.2091 16.5 12 16.5C9.79086 16.5 8 15.2688 8 13.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                             </svg>
                         </div>
                     </div>

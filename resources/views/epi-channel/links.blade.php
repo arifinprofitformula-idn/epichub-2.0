@@ -84,6 +84,7 @@
                     @php($productLink = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code)
                     @php($landingLink = $product->landing_page_enabled ? route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]) : null)
                     @php($checkoutLink = route('checkout.show', $product->slug).'?ref='.$channel->epic_code)
+                    @php($ownedUserProduct = $ownedUserProducts->get($product->id))
                     @php($productPalette = $colorSets[$loop->index % count($colorSets)])
 
                     <div class="group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 {{ $productPalette['shadow'] }}">
@@ -211,16 +212,30 @@
                                     </a>
                                 @endif
 
-                                <a href="{{ $checkoutLink }}" target="_blank"
-                                   class="group inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow active:scale-[0.97] dark:border-emerald-700/50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40">
-                                    <svg viewBox="0 0 24 24" fill="none" class="size-3.5 transition-transform duration-200 group-hover:scale-110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                        <path d="M5.5 7.5H18.5L17 17.5H7L5.5 7.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                                        <path d="M5.5 7.5L4.5 4.5H2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <circle cx="9" cy="20.25" r="1.25" fill="currentColor"/>
-                                        <circle cx="15.5" cy="20.25" r="1.25" fill="currentColor"/>
-                                    </svg>
-                                    Beli Sekarang
-                                </a>
+                                @if ($ownedUserProduct)
+                                    @php($productTypeValue = $product->product_type?->value ?? (string) $product->product_type)
+                                    @php($accessLink = $productTypeValue === \App\Enums\ProductType::Course->value ? route('my-courses.show', $ownedUserProduct) : ($productTypeValue === \App\Enums\ProductType::Event->value ? route('my-events.index') : route('my-products.show', $ownedUserProduct)))
+
+                                    <a href="{{ $accessLink }}"
+                                       class="group inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2 text-xs font-semibold text-sky-700 shadow-sm transition-all duration-200 hover:border-sky-300 hover:bg-sky-100 hover:shadow active:scale-[0.97] dark:border-sky-700/50 dark:bg-sky-900/20 dark:text-sky-400 dark:hover:bg-sky-900/40">
+                                        <svg viewBox="0 0 24 24" fill="none" class="size-3.5 transition-transform duration-200 group-hover:scale-110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path d="M4.75 6.75C4.75 5.64543 5.64543 4.75 6.75 4.75H17.25C18.3546 4.75 19.25 5.64543 19.25 6.75V17.25C19.25 18.3546 18.3546 19.25 17.25 19.25H6.75C5.64543 19.25 4.75 18.3546 4.75 17.25V6.75Z" stroke="currentColor" stroke-width="1.5"/>
+                                            <path d="M9.75 12H14.25M14.25 12L12 9.75M14.25 12L12 14.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        Akses Produk
+                                    </a>
+                                @else
+                                    <a href="{{ $checkoutLink }}" target="_blank"
+                                       class="group inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow active:scale-[0.97] dark:border-emerald-700/50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40">
+                                        <svg viewBox="0 0 24 24" fill="none" class="size-3.5 transition-transform duration-200 group-hover:scale-110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path d="M5.5 7.5H18.5L17 17.5H7L5.5 7.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                            <path d="M5.5 7.5L4.5 4.5H2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <circle cx="9" cy="20.25" r="1.25" fill="currentColor"/>
+                                            <circle cx="15.5" cy="20.25" r="1.25" fill="currentColor"/>
+                                        </svg>
+                                        Beli Sekarang
+                                    </a>
+                                @endif
 
                                 {{-- Share button --}}
                                 <button

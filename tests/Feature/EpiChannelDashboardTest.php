@@ -8,6 +8,7 @@ use App\Enums\PayoutStatus;
 use App\Enums\ProductAccessType;
 use App\Enums\ProductStatus;
 use App\Enums\ProductType;
+use App\Enums\UserProductStatus;
 use App\Enums\ProductVisibility;
 use App\Models\Commission;
 use App\Models\CommissionPayout;
@@ -16,6 +17,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ReferralVisit;
 use App\Models\User;
+use App\Models\UserProduct;
 use Illuminate\Support\Str;
 
 test('non-affiliate membuka epi-channel melihat inactive state', function () {
@@ -292,6 +294,32 @@ test('links page menampilkan landing page affiliate link jika landing page enabl
         ->assertSee(route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]), false);
 });
 
+test('links page mengganti tombol beli sekarang menjadi akses produk jika user sudah punya akses', function () {
+    $user = User::factory()->create();
+    EpiChannel::query()->create([
+        'user_id' => $user->id,
+        'epic_code' => 'EPI-LINK-003',
+        'status' => EpiChannelStatus::Active,
+        'source' => 'oms',
+        'activated_at' => now(),
+    ]);
+    $product = epiDashboardTestCreateAffiliateProduct('epi-links-owned-product');
+    $userProduct = UserProduct::query()->create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'access_type' => $product->access_type,
+        'status' => UserProductStatus::Active,
+        'granted_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('epi-channel.links'))
+        ->assertOk()
+        ->assertSee('Akses Produk')
+        ->assertSee(route('my-products.show', $userProduct), false)
+        ->assertDontSee('Beli Sekarang');
+});
+
 test('payout page hanya menampilkan payout miliknya', function () {
     $viewer = User::factory()->create();
     $other = User::factory()->create();
@@ -385,6 +413,43 @@ test('visits page hanya menampilkan visits miliknya', function () {
         ->assertOk()
         ->assertSee('landing-own')
         ->assertDontSee('landing-other');
+});
+
+test('visits page menampilkan domisili dan label device yang ringkas', function () {
+    $user = User::factory()->create();
+    $product = epiDashboardTestCreateAffiliateProduct('epi-visits-device-product');
+    $channel = EpiChannel::query()->create([
+        'user_id' => $user->id,
+        'epic_code' => 'EPI-VISIT-DEVICE',
+        'status' => EpiChannelStatus::Active,
+        'source' => 'oms',
+        'activated_at' => now(),
+    ]);
+
+    ReferralVisit::query()->create([
+        'epi_channel_id' => $channel->id,
+        'product_id' => $product->id,
+        'referral_code' => $channel->epic_code,
+        'landing_url' => 'https://example.test/landing-device',
+        'source_url' => 'https://google.com/search?q=epi',
+        'visitor_id' => 'visitor-device',
+        'session_id' => 'session-device',
+        'ip_address' => '103.10.10.10',
+        'user_agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148',
+        'clicked_at' => now(),
+        'metadata' => [
+            'city' => 'Bandung',
+            'region' => 'Jawa Barat',
+            'country' => 'Indonesia',
+        ],
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('epi-channel.visits'))
+        ->assertOk()
+        ->assertSee('Domisili')
+        ->assertSee('Bandung, Jawa Barat, Indonesia')
+        ->assertSee('Mobile');
 });
 
 function epiDashboardTestCreateAffiliateProduct(string $slug, array $overrides = []): Product
