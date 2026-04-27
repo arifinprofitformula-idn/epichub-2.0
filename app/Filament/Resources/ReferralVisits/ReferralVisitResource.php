@@ -18,7 +18,7 @@ class ReferralVisitResource extends Resource
 {
     protected static ?string $model = ReferralVisit::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCursorArrowRays;
 
     protected static ?string $navigationLabel = 'Kunjungan Referral';
 

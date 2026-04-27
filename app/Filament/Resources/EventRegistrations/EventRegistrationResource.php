@@ -22,7 +22,7 @@ class EventRegistrationResource extends Resource
 {
     protected static ?string $model = EventRegistration::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
     protected static ?string $recordTitleAttribute = 'id';
 

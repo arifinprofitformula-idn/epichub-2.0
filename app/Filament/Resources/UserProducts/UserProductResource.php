@@ -16,7 +16,7 @@ class UserProductResource extends Resource
 {
     protected static ?string $model = UserProduct::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquare3Stack3d;
 
     protected static ?string $recordTitleAttribute = 'id';
 

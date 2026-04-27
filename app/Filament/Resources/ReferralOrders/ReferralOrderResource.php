@@ -18,7 +18,7 @@ class ReferralOrderResource extends Resource
 {
     protected static ?string $model = ReferralOrder::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
     protected static ?string $navigationLabel = 'Order Referral';
 

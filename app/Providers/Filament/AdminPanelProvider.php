@@ -60,6 +60,10 @@ class AdminPanelProvider extends PanelProvider
                 fn (): string => view('filament.admin.topbar-user-summary')->render(),
             )
             ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn (): string => view('filament.admin.login-form-note')->render(),
+            )
+            ->renderHook(
                 PanelsRenderHook::FOOTER,
                 fn (): string => view('filament.admin.footer')->render(),
             )

@@ -4,6 +4,12 @@
 @source '../../../../vendor/filament';
 
 /* ===== 1. PAGE BACKGROUND / LAYOUT ===== */
+html:has(.fi-simple-layout),
+body:has(.fi-simple-layout) {
+    height: 100%;
+    overflow: hidden;
+}
+
 .fi-body {
     background-color: #f1f5f9;
 }
@@ -21,6 +27,8 @@
 /* Background login futuristik seperti referensi */
 .fi-simple-layout {
     position: relative;
+    min-height: 100dvh;
+    height: 100dvh;
     overflow: hidden;
     isolation: isolate;
     background:
@@ -89,9 +97,25 @@
     z-index: 1;
 }
 
+.fi-simple-main-ctn {
+    display: flex;
+    min-height: 100dvh;
+    height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem !important;
+}
+
+.fi-simple-layout .fi-admin-footer-shell {
+    display: none !important;
+}
+
 /* Login card tetap rapi dan menyatu dengan background */
 .fi-simple-main {
     position: relative;
+    width: min(100%, 45rem);
+    max-height: calc(100dvh - 2.5rem);
+    overflow: hidden;
     border-radius: 1.25rem !important;
     border: 1px solid rgba(255, 255, 255, 0.5) !important;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(236, 243, 255, 0.48) 100%) !important;
@@ -100,6 +124,10 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.7),
         0 0 0 1px rgba(255, 255, 255, 0.14) !important;
     backdrop-filter: blur(18px);
+}
+
+.fi-simple-page {
+    width: 100%;
 }
 
 /* Header/logo khusus halaman login & simple auth pages */
@@ -116,7 +144,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem;
+    gap: 0.55rem;
     padding: 0;
     color: #14295f;
     text-align: center;
@@ -137,27 +165,122 @@
 
 .fi-simple-page .fi-admin-brand-copy {
     align-items: center;
+    gap: 0.15rem;
 }
 
 .fi-simple-page .fi-admin-brand-title {
-    font-size: 0.9rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
+    font-size: 1.3rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.08em;
     color: #14295f;
 }
 
 .fi-simple-page .fi-admin-brand-tagline {
-    display: none;
+    display: block;
+    margin-top: 0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1.15;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform: none;
+    opacity: 0.72;
+    color: #415b93;
 }
 
-.fi-simple-layout .fi-admin-footer {
-    border-top-color: rgba(255, 255, 255, 0.18);
-    color: rgba(255, 255, 255, 0.92);
+.fi-simple-page .fi-simple-header-heading {
+    margin-top: 0.8rem;
+    color: #14295f;
+    font-size: clamp(2rem, 3vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
 }
 
-.fi-simple-layout .fi-admin-footer-link,
-.fi-simple-layout .fi-admin-footer-divider {
-    color: inherit;
+.fi-simple-page .fi-simple-header-heading::after {
+    content: '';
+    display: block;
+    width: 2.65rem;
+    height: 0.18rem;
+    margin: 0.95rem auto 0;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, rgba(244, 179, 34, 0), rgba(244, 179, 34, 0.95) 50%, rgba(244, 179, 34, 0));
+    box-shadow: 0 0 18px rgba(244, 179, 34, 0.45);
+}
+
+.fi-simple-page .fi-btn[type='submit'] {
+    position: relative;
+    min-height: 4rem;
+    overflow: hidden;
+    border-radius: 1rem !important;
+    border: 1px solid rgba(255, 214, 102, 0.78) !important;
+    background: linear-gradient(180deg, #ffd45c 0%, #f4b322 52%, #d98b08 100%) !important;
+    color: #10265f !important;
+    font-size: 1.02rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 248, 216, 0.9),
+        inset 0 -3px 0 rgba(166, 99, 0, 0.26),
+        0 12px 24px rgba(243, 179, 34, 0.32),
+        0 4px 0 rgba(170, 107, 6, 0.65) !important;
+    transition:
+        transform 150ms ease,
+        box-shadow 150ms ease,
+        filter 150ms ease !important;
+}
+
+.fi-simple-page .fi-btn[type='submit']::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(115deg, transparent 28%, rgba(255, 255, 255, 0.72) 42%, transparent 56%);
+    transform: translateX(-135%);
+    animation: fi-admin-login-shimmer 3.2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.fi-simple-page .fi-btn[type='submit']:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.02);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 248, 216, 0.95),
+        inset 0 -3px 0 rgba(166, 99, 0, 0.28),
+        0 16px 30px rgba(243, 179, 34, 0.38),
+        0 4px 0 rgba(170, 107, 6, 0.7) !important;
+}
+
+.fi-simple-page .fi-btn[type='submit']:active {
+    transform: translateY(1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 248, 216, 0.92),
+        inset 0 -2px 0 rgba(166, 99, 0, 0.22),
+        0 9px 18px rgba(243, 179, 34, 0.25),
+        0 2px 0 rgba(170, 107, 6, 0.58) !important;
+}
+
+.fi-admin-login-note {
+    margin-top: 1rem;
+    text-align: center;
+    color: rgba(20, 41, 95, 0.72);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+@keyframes fi-admin-login-shimmer {
+    0%,
+    100% {
+        transform: translateX(-135%);
+    }
+
+    45%,
+    55% {
+        transform: translateX(135%);
+    }
 }
 
 /* ===== 2. TOPBAR ===== */
@@ -336,17 +459,17 @@
 
 .fi-admin-brand {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
-    gap: 0.75rem;
+    gap: 0.9rem;
     padding: 0.25rem 0;
     color: rgba(255, 255, 255, 0.96);
 }
 
 .fi-admin-brand-icon {
     display: flex;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 60px;
+    height: 60px;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
@@ -366,24 +489,27 @@
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
+    justify-content: center;
+    gap: 0.2rem;
+    min-height: 60px;
     line-height: 1;
 }
 
 .fi-admin-brand-title {
-    font-size: 0.95rem;
-    font-weight: 800;
-    letter-spacing: 0.18em;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
     color: inherit;
 }
 
 .fi-admin-brand-tagline {
-    margin-top: 0.22rem;
-    font-size: 0.5rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    margin-top: 0;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.11em;
     white-space: nowrap;
-    transform: scaleX(0.9);
-    transform-origin: left center;
+    line-height: 1.15;
+    transform: none;
     opacity: 0.78;
     color: inherit;
 }
@@ -555,6 +681,12 @@
 
 .fi-no {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.fi-no[role='status']:empty,
+.fi-no[role='status']:not(:has(.fi-no-notification)) {
+    display: none !important;
+    box-shadow: none !important;
 }
 
 /* ===== 5. FORMS / MODALS / DROPDOWNS ===== */
@@ -759,6 +891,61 @@
 }
 
 @media (max-width: 767px) {
+    .fi-simple-layout,
+    .fi-simple-main-ctn {
+        min-height: 100dvh;
+        height: 100dvh;
+    }
+
+    .fi-simple-main-ctn {
+        padding: 0.625rem !important;
+    }
+
+    .fi-simple-main {
+        width: 100%;
+        max-height: calc(100dvh - 1.25rem);
+        border-radius: 1rem !important;
+    }
+
+    .fi-simple-page .fi-simple-main {
+        padding: 1.25rem !important;
+    }
+
+    .fi-simple-page .fi-simple-header .fi-logo {
+        margin-bottom: 0.35rem !important;
+    }
+
+    .fi-simple-page .fi-admin-brand-icon {
+        width: 4.5rem;
+        height: 4.5rem;
+    }
+
+    .fi-simple-page .fi-admin-brand-title {
+        font-size: 1.08rem;
+        letter-spacing: 0.07em;
+    }
+
+    .fi-simple-page .fi-admin-brand-tagline {
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+    }
+
+    .fi-simple-page .fi-simple-header-heading {
+        margin-top: 0.45rem;
+        font-size: 1.8rem;
+    }
+
+    .fi-simple-page .fi-btn[type='submit'] {
+        min-height: 3.5rem;
+        font-size: 0.92rem !important;
+    }
+
+    .fi-admin-login-note {
+        margin-top: 0.75rem;
+        font-size: 0.66rem;
+        line-height: 1.45;
+    }
+
     .fi-main {
         padding-left: 0.75rem !important;
         padding-right: 0.75rem !important;

@@ -22,7 +22,7 @@ class EpiChannelResource extends Resource
 {
     protected static ?string $model = EpiChannel::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
 
     protected static ?string $recordTitleAttribute = 'epic_code';
 
