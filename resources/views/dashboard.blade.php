@@ -268,7 +268,7 @@
                                             <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                                 <path d="M5 12L10 17L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                             </svg>
-                                            Tinjau Kembali
+                                            Pelajari Kembali
                                         @else
                                             <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                                 <path d="M7 4.75L19.25 12L7 19.25V4.75Z" fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
@@ -311,9 +311,6 @@
                     @forelse ($catalogCourses as $catalogItem)
                         @php($product = $catalogItem['product'])
                         @php($course = $product->course)
-                        @php($ownedUserProduct = $catalogItem['ownedUserProduct'])
-                        @php($progress = $catalogItem['progress'])
-                        @php($owned = $ownedUserProduct !== null)
 
                         <article class="group overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(15,23,42,0.09)]">
                             <div class="flex gap-3.5">
@@ -332,9 +329,7 @@
 
                                 <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center gap-1.5">
-                                        <x-ui.badge variant="{{ $owned ? 'info' : 'warning' }}">
-                                            {{ $owned ? 'Dimiliki' : 'Belum Beli' }}
-                                        </x-ui.badge>
+                                        <x-ui.badge variant="warning">Belum Beli</x-ui.badge>
                                         @if ($product->has_discount)
                                             <x-ui.badge variant="danger">Promo</x-ui.badge>
                                         @endif
@@ -343,61 +338,37 @@
                                         {{ $course?->title ?? $product->title }}
                                     </div>
 
-                                    @if ($owned)
-                                        <div class="mt-2">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-[11px] font-semibold text-slate-400">Progress</span>
-                                                <span class="text-[11px] font-semibold text-cyan-600">{{ $progress['percent'] }}%</span>
-                                            </div>
-                                            <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                                                <div class="h-full rounded-full bg-[linear-gradient(90deg,#06b6d4,#2563eb)]" style="width: {{ max(4, $progress['percent']) }}%"></div>
-                                            </div>
+                                    <div class="mt-2 flex items-end justify-between gap-2">
+                                        <div>
+                                            @if ($product->has_discount)
+                                                <div class="text-[11px] text-slate-400 line-through">Rp {{ number_format((float) $product->price, 0, ',', '.') }}</div>
+                                            @endif
+                                            <div class="text-sm font-semibold text-slate-900">Rp {{ number_format((float) $product->effective_price, 0, ',', '.') }}</div>
                                         </div>
-                                    @else
-                                        <div class="mt-2 flex items-end justify-between gap-2">
-                                            <div>
-                                                @if ($product->has_discount)
-                                                    <div class="text-[11px] text-slate-400 line-through">Rp {{ number_format((float) $product->price, 0, ',', '.') }}</div>
-                                                @endif
-                                                <div class="text-sm font-semibold text-slate-900">Rp {{ number_format((float) $product->effective_price, 0, ',', '.') }}</div>
-                                            </div>
-                                            <div class="shrink-0 text-[11px] text-slate-400">{{ $product->category?->name ?? 'LMS' }}</div>
-                                        </div>
-                                    @endif
+                                        <div class="shrink-0 text-[11px] text-slate-400">{{ $product->category?->name ?? 'LMS' }}</div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="mt-3.5">
-                                @if ($owned)
-                                    <a
-                                        href="{{ route('my-courses.show', $ownedUserProduct) }}"
-                                        class="inline-flex w-full items-center justify-center gap-2 rounded-[1rem] bg-[linear-gradient(135deg,#2563eb,#1d4ed8)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.18)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 hover:shadow-[0_16px_32px_rgba(37,99,235,0.26)] active:scale-[0.97] active:translate-y-0"
-                                    >
-                                        <svg viewBox="0 0 24 24" fill="none" class="size-3.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                            <path d="M7 4.75L19.25 12L7 19.25V4.75Z" fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                                        </svg>
-                                        Akses Kelas
-                                    </a>
-                                @else
-                                    <a
-                                        href="{{ route('checkout.show', $product->slug) }}"
-                                        class="inline-flex w-full items-center justify-center gap-2 rounded-[1rem] bg-[linear-gradient(135deg,#f59e0b,#f97316)] px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_24px_rgba(245,158,11,0.20)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-95 hover:shadow-[0_16px_32px_rgba(245,158,11,0.28)] active:scale-[0.97] active:translate-y-0"
-                                    >
-                                        <svg viewBox="0 0 24 24" fill="none" class="size-3.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                            <path d="M5.5 7.5H18.5L17 17.5H7L5.5 7.5Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                                            <path d="M5.5 7.5L4.5 4.5H2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <circle cx="9.5" cy="19.75" r="1.25" fill="currentColor"/>
-                                            <circle cx="15.5" cy="19.75" r="1.25" fill="currentColor"/>
-                                        </svg>
-                                        Beli Sekarang
-                                    </a>
-                                @endif
+                                <a
+                                    href="{{ route('checkout.show', $product->slug) }}"
+                                    class="inline-flex w-full items-center justify-center gap-2 rounded-[1rem] bg-[linear-gradient(135deg,#f59e0b,#f97316)] px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_10px_24px_rgba(245,158,11,0.20)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-95 hover:shadow-[0_16px_32px_rgba(245,158,11,0.28)] active:scale-[0.97] active:translate-y-0"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" class="size-3.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="M5.5 7.5H18.5L17 17.5H7L5.5 7.5Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                        <path d="M5.5 7.5L4.5 4.5H2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="9.5" cy="19.75" r="1.25" fill="currentColor"/>
+                                        <circle cx="15.5" cy="19.75" r="1.25" fill="currentColor"/>
+                                    </svg>
+                                    Beli Sekarang
+                                </a>
                             </div>
                         </article>
                     @empty
                         <div class="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50/80 p-8 text-center">
-                            <div class="text-sm font-semibold text-slate-900">Katalog segera hadir</div>
-                            <div class="mt-1 text-sm text-slate-500">Produk yang dipublish akan tampil di sini.</div>
+                            <div class="text-sm font-semibold text-slate-900">Semua katalog course sudah kamu miliki</div>
+                            <div class="mt-1 text-sm text-slate-500">Produk baru yang belum dimiliki akan tampil di sini.</div>
                         </div>
                     @endforelse
                 </div>

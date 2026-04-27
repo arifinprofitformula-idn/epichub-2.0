@@ -18,5 +18,15 @@ enum CommissionStatus: string
             self::Rejected => 'Rejected',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Paid => 'success',
+            self::Approved => 'info',
+            self::Pending => 'warning',
+            self::Rejected => 'danger',
+        };
+    }
 }
 

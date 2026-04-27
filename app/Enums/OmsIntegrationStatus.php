@@ -14,5 +14,13 @@ enum OmsIntegrationStatus: string
             self::Failed => 'Failed',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Success => 'success',
+            self::Failed => 'danger',
+        };
+    }
 }
 

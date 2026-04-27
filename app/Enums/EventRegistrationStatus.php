@@ -16,5 +16,14 @@ enum EventRegistrationStatus: string
             self::Cancelled => 'Cancelled',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Attended => 'success',
+            self::Registered => 'info',
+            self::Cancelled => 'danger',
+        };
+    }
 }
 

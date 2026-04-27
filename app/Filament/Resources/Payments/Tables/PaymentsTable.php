@@ -42,6 +42,7 @@ class PaymentsTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (PaymentStatus|string|null $state): string => $state instanceof PaymentStatus ? $state->label() : (string) $state)
+                    ->color(fn (PaymentStatus|string|null $state): string => $state instanceof PaymentStatus ? $state->getColor() : (PaymentStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('amount')

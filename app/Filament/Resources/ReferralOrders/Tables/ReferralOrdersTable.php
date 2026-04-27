@@ -33,6 +33,7 @@ class ReferralOrdersTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (ReferralOrderStatus|string|null $state): string => $state instanceof ReferralOrderStatus ? $state->label() : (string) $state)
+                    ->color(fn (ReferralOrderStatus|string|null $state): string => $state instanceof ReferralOrderStatus ? $state->getColor() : (ReferralOrderStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('attributed_at')

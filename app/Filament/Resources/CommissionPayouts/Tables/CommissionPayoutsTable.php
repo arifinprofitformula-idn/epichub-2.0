@@ -33,6 +33,7 @@ class CommissionPayoutsTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (PayoutStatus|string|null $state): string => $state instanceof PayoutStatus ? $state->label() : (string) $state)
+                    ->color(fn (PayoutStatus|string|null $state): string => $state instanceof PayoutStatus ? $state->getColor() : (PayoutStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
                 TextColumn::make('commissions_count')
                     ->label('Komisi')

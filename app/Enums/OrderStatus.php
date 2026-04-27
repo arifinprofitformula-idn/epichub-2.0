@@ -22,4 +22,14 @@ enum OrderStatus: string
             self::Refunded => 'Dikembalikan',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Paid => 'success',
+            self::Pending, self::Unpaid => 'warning',
+            self::Failed, self::Cancelled => 'danger',
+            self::Refunded => 'info',
+        };
+    }
 }

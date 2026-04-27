@@ -20,4 +20,14 @@ enum PaymentStatus: string
             self::Refunded => 'Dikembalikan',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Success => 'success',
+            self::Pending => 'warning',
+            self::Failed, self::Expired => 'danger',
+            self::Refunded => 'info',
+        };
+    }
 }

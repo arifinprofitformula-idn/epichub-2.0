@@ -18,5 +18,15 @@ enum ReferralOrderStatus: string
             self::Refunded => 'Refunded',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Converted => 'success',
+            self::Pending => 'warning',
+            self::Cancelled => 'danger',
+            self::Refunded => 'info',
+        };
+    }
 }
 

@@ -38,6 +38,7 @@ class UserProductsTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (UserProductStatus|string|null $state): string => $state instanceof UserProductStatus ? $state->label() : (string) $state)
+                    ->color(fn (UserProductStatus|string|null $state): string => $state instanceof UserProductStatus ? $state->getColor() : (UserProductStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('order.order_number')

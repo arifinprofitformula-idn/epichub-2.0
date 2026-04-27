@@ -41,6 +41,7 @@ class EpiChannelsTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (EpiChannelStatus|string|null $state): string => $state instanceof EpiChannelStatus ? $state->label() : (string) $state)
+                    ->color(fn (EpiChannelStatus|string|null $state): string => $state instanceof EpiChannelStatus ? $state->getColor() : (EpiChannelStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('source')

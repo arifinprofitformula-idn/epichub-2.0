@@ -18,5 +18,15 @@ enum PayoutStatus: string
             self::Cancelled => 'Cancelled',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Paid => 'success',
+            self::Processing => 'info',
+            self::Draft => 'warning',
+            self::Cancelled => 'danger',
+        };
+    }
 }
 

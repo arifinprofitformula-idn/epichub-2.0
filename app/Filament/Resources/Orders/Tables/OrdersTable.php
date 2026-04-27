@@ -32,6 +32,7 @@ class OrdersTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (OrderStatus|string|null $state): string => $state instanceof OrderStatus ? $state->label() : (string) $state)
+                    ->color(fn (OrderStatus|string|null $state): string => $state instanceof OrderStatus ? $state->getColor() : (OrderStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('total_amount')

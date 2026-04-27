@@ -66,6 +66,7 @@ class EventsTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (EventStatus|string|null $state): string => $state instanceof EventStatus ? $state->label() : (string) $state)
+                    ->color(fn (EventStatus|string|null $state): string => $state instanceof EventStatus ? $state->getColor() : (EventStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('published_at')

@@ -37,6 +37,7 @@ class EventRegistrationsTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (EventRegistrationStatus|string|null $state): string => $state instanceof EventRegistrationStatus ? $state->label() : (string) $state)
+                    ->color(fn (EventRegistrationStatus|string|null $state): string => $state instanceof EventRegistrationStatus ? $state->getColor() : (EventRegistrationStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('registered_at')

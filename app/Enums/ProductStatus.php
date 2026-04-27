@@ -16,4 +16,13 @@ enum ProductStatus: string
             self::Archived => 'Archived',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Published => 'success',
+            self::Draft => 'warning',
+            self::Archived => 'gray',
+        };
+    }
 }

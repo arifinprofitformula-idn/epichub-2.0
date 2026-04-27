@@ -20,5 +20,15 @@ enum EventStatus: string
             self::Completed => 'Completed',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Published, self::Completed => 'success',
+            self::Ongoing => 'info',
+            self::Draft => 'warning',
+            self::Closed => 'gray',
+        };
+    }
 }
 

@@ -42,6 +42,7 @@ class CommissionsTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (CommissionStatus|string|null $state): string => $state instanceof CommissionStatus ? $state->label() : (string) $state)
+                    ->color(fn (CommissionStatus|string|null $state): string => $state instanceof CommissionStatus ? $state->getColor() : (CommissionStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Dibuat')

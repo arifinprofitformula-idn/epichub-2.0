@@ -1,0 +1,796 @@
+@import 'tailwindcss';
+@import '../../../../vendor/filament/filament/resources/css/index.css';
+
+@source '../../../../vendor/filament';
+
+/* ===== 1. PAGE BACKGROUND / LAYOUT ===== */
+.fi-body {
+    background-color: #f1f5f9;
+}
+
+/* Hilangkan panel besar pembungkus halaman login dan dashboard */
+.fi-layout,
+.fi-main-ctn,
+.fi-simple-layout,
+.fi-simple-main-ctn {
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Background login futuristik seperti referensi */
+.fi-simple-layout {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.98) 0%, rgba(226, 236, 251, 0.94) 18%, rgba(167, 191, 231, 0.78) 38%, rgba(57, 91, 156, 0.62) 68%, rgba(7, 24, 67, 0.98) 100%) !important;
+}
+
+.fi-simple-layout::before,
+.fi-simple-layout::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.fi-simple-layout::before {
+    z-index: -2;
+    opacity: 0.95;
+    background:
+        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.92), transparent 26%),
+        radial-gradient(circle at 12% 86%, rgba(75, 142, 255, 0.34), transparent 18%),
+        radial-gradient(circle at 85% 82%, rgba(29, 78, 216, 0.34), transparent 22%),
+        radial-gradient(circle at 8% 38%, rgba(255, 207, 120, 0.28), transparent 20%),
+        radial-gradient(circle at 92% 34%, rgba(255, 255, 255, 0.26), transparent 18%);
+}
+
+.fi-simple-layout::after {
+    z-index: -1;
+    opacity: 0.9;
+    background:
+        radial-gradient(circle at 50% 32%, transparent 0 35%, rgba(255, 255, 255, 0.34) 35.2% 35.5%, transparent 35.8% 100%),
+        radial-gradient(circle at 14% 56%, transparent 0 42%, rgba(255, 228, 179, 0.5) 42.2% 42.5%, transparent 42.8% 100%),
+        radial-gradient(circle at 86% 58%, transparent 0 40%, rgba(190, 222, 255, 0.3) 40.2% 40.45%, transparent 40.75% 100%),
+        radial-gradient(circle at 82% 26%, rgba(255, 255, 255, 0.95) 0 0.18rem, transparent 0.22rem),
+        radial-gradient(circle at 6% 92%, rgba(130, 193, 255, 0.9) 0 0.18rem, transparent 0.22rem),
+        radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.52) 0 0.1rem, transparent 0.14rem),
+        linear-gradient(125deg, transparent 14%, rgba(255, 227, 177, 0.58) 15%, transparent 32%),
+        linear-gradient(305deg, transparent 58%, rgba(255, 255, 255, 0.22) 59%, transparent 78%),
+        radial-gradient(circle, rgba(255, 255, 255, 0.28) 0 1px, transparent 1.8px);
+    background-size:
+        auto,
+        auto,
+        auto,
+        auto,
+        auto,
+        auto,
+        100% 100%,
+        100% 100%,
+        18px 18px;
+    background-position:
+        center,
+        center,
+        center,
+        94% 10%,
+        2% 88%,
+        15% 20%,
+        center,
+        center,
+        82% 26%;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.75) 72%, rgba(0, 0, 0, 0.95));
+}
+
+.fi-simple-main-ctn,
+.fi-simple-layout .fi-admin-footer-shell {
+    position: relative;
+    z-index: 1;
+}
+
+/* Login card tetap rapi dan menyatu dengan background */
+.fi-simple-main {
+    position: relative;
+    border-radius: 1.25rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(236, 243, 255, 0.48) 100%) !important;
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.14) !important;
+    backdrop-filter: blur(18px);
+}
+
+/* Header/logo khusus halaman login & simple auth pages */
+.fi-simple-page .fi-simple-header {
+    gap: 0.25rem;
+}
+
+.fi-simple-page .fi-simple-header .fi-logo {
+    margin-bottom: 0.75rem !important;
+    height: auto !important;
+}
+
+.fi-simple-page .fi-admin-brand {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0;
+    color: #14295f;
+    text-align: center;
+}
+
+.fi-simple-page .fi-admin-brand-icon {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+}
+
+.fi-simple-page .fi-admin-brand-icon img {
+    filter: drop-shadow(0 8px 20px rgba(15, 35, 84, 0.08));
+}
+
+.fi-simple-page .fi-admin-brand-copy {
+    align-items: center;
+}
+
+.fi-simple-page .fi-admin-brand-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #14295f;
+}
+
+.fi-simple-page .fi-admin-brand-tagline {
+    display: none;
+}
+
+.fi-simple-layout .fi-admin-footer {
+    border-top-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.fi-simple-layout .fi-admin-footer-link,
+.fi-simple-layout .fi-admin-footer-divider {
+    color: inherit;
+}
+
+/* ===== 2. TOPBAR ===== */
+.fi-topbar {
+    min-height: auto !important;
+    padding: 0.875rem 1.5rem !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.fi-topbar-ctn {
+    width: 100%;
+    z-index: 20 !important;
+}
+
+.fi-topbar-start {
+    gap: 0.75rem !important;
+    margin-inline-end: 0.75rem !important;
+}
+
+.fi-topbar-end {
+    gap: 0.75rem !important;
+}
+
+.fi-admin-topbar-user {
+    display: none;
+    align-items: center;
+}
+
+.fi-admin-topbar-user-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.fi-admin-topbar-user-name {
+    color: #0f172a;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.fi-admin-topbar-user-status {
+    margin-top: 0.125rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    line-height: 1.25;
+}
+
+.fi-topbar .fi-user-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #0f172a, #1d4ed8);
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.2);
+    transition:
+        transform 150ms ease,
+        filter 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.fi-topbar .fi-user-menu-trigger:hover {
+    transform: scale(1.04);
+    filter: brightness(1.08);
+}
+
+.fi-topbar .fi-user-avatar {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    border-radius: 9999px !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.fi-topbar .fi-dropdown-panel {
+    border-radius: 1rem !important;
+}
+
+/* Logo brand sudah ada di sidebar */
+.fi-topbar-start .fi-logo,
+.fi-topbar-start > a:has(.fi-logo) {
+    display: none !important;
+}
+
+.fi-topbar-open-sidebar-btn,
+.fi-topbar-close-sidebar-btn,
+.fi-topbar-open-collapse-sidebar-btn,
+.fi-topbar-close-collapse-sidebar-btn {
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgb(226, 232, 240);
+    background: #ffffff;
+    color: #334155;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition:
+        border-color 150ms ease,
+        color 150ms ease,
+        transform 150ms ease;
+}
+
+.fi-topbar-open-sidebar-btn:hover,
+.fi-topbar-close-sidebar-btn:hover,
+.fi-topbar-open-collapse-sidebar-btn:hover,
+.fi-topbar-close-collapse-sidebar-btn:hover {
+    border-color: #67e8f9;
+    color: #0e7490;
+}
+
+.fi-topbar-open-sidebar-btn:active,
+.fi-topbar-close-sidebar-btn:active,
+.fi-topbar-open-collapse-sidebar-btn:active,
+.fi-topbar-close-collapse-sidebar-btn:active {
+    transform: scale(0.95);
+}
+
+/* ===== 3. SIDEBAR ===== */
+.fi-sidebar {
+    background:
+        radial-gradient(circle at top, rgba(251, 191, 36, 0.14), transparent 30%),
+        linear-gradient(180deg, #18181b 0%, #09090b 100%);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.96);
+    z-index: 50 !important;
+}
+
+.fi-body-has-topbar .fi-sidebar {
+    top: 0 !important;
+    height: 100dvh !important;
+}
+
+.fi-body-has-topbar .fi-sidebar-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    min-height: auto !important;
+    height: auto !important;
+    padding: 1.25rem 1.25rem 1rem !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.fi-sidebar .fi-logo {
+    height: auto !important;
+    flex: 1;
+}
+
+.fi-sidebar-header-logo-ctn {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.fi-sidebar-header-logo-ctn > a {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    color: inherit;
+    text-decoration: none;
+}
+
+.fi-admin-brand {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+    color: rgba(255, 255, 255, 0.96);
+}
+
+.fi-admin-brand-icon {
+    display: flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.875rem;
+    background: #ffffff;
+    padding: 0.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.fi-admin-brand-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.fi-admin-brand-copy {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1;
+}
+
+.fi-admin-brand-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: inherit;
+}
+
+.fi-admin-brand-tagline {
+    margin-top: 0.22rem;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+    transform: scaleX(0.9);
+    transform-origin: left center;
+    opacity: 0.78;
+    color: inherit;
+}
+
+.fi-sidebar-nav {
+    padding: 1rem 0.75rem;
+    gap: 0.35rem;
+}
+
+.fi-sidebar-nav-groups {
+    gap: 1.5rem;
+}
+
+.fi-sidebar-group-items {
+    gap: 0.35rem;
+}
+
+.fi-sidebar-group-label {
+    color: rgba(255, 255, 255, 0.55) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+}
+
+.fi-sidebar-group-btn .fi-icon {
+    color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.fi-sidebar-item-btn {
+    min-height: 2rem;
+    border-radius: 1rem !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: none !important;
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease,
+        color 180ms ease !important;
+}
+
+.fi-sidebar-item-btn > .fi-icon,
+.fi-sidebar-item-label {
+    color: inherit !important;
+}
+
+.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover {
+    transform: translateX(4px) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #fff !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 10px 20px rgba(0, 0, 0, 0.16) !important;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    transform: translateX(6px) !important;
+    color: #fff !important;
+    border-color: rgba(251, 191, 36, 0.52) !important;
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.18) 0%, rgba(251, 191, 36, 0.06) 100%) !important;
+    box-shadow: inset 3px 0 0 rgba(251, 191, 36, 0.95) !important;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
+    font-weight: 600 !important;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn .fi-sidebar-item-grouped-border-part {
+    background-color: rgba(251, 191, 36, 0.95) !important;
+}
+
+.fi-sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.fi-sidebar-footer * {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.fi-admin-sidebar-logout-wrap {
+    padding: 0 0.75rem 1rem;
+}
+
+.fi-admin-sidebar-logout-form {
+    width: 100%;
+}
+
+.fi-admin-sidebar-logout-btn {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(253, 164, 175, 0.65);
+    background: linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%);
+    color: #be123c;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.96),
+        0 12px 24px rgba(190, 24, 93, 0.14);
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease,
+        filter 180ms ease;
+}
+
+.fi-admin-sidebar-logout-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(251, 113, 133, 0.9);
+    filter: brightness(0.98);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.96),
+        0 16px 28px rgba(244, 63, 94, 0.2);
+}
+
+.fi-admin-sidebar-logout-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+/* ===== 4. CARDS / TABLES / WIDGETS ===== */
+.fi-section:not(.fi-section-not-contained):not(.fi-aside) {
+    border-radius: 1rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+    --tw-ring-shadow: none !important;
+    --tw-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+.fi-section:not(.fi-section-not-contained):not(.fi-aside) > .fi-section-header {
+    padding: 1.25rem 1.5rem !important;
+}
+
+.fi-section:not(.fi-section-not-contained):not(.fi-divided) > .fi-section-content-ctn > .fi-section-content {
+    padding: 1.5rem !important;
+}
+
+.fi-ta-ctn {
+    border-radius: 1rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+.fi-ta-header,
+.fi-ta-content-header {
+    background: #f8fafc !important;
+}
+
+.fi-page-header {
+    padding-bottom: 1.25rem;
+}
+
+.fi-wi-stats-overview-stat,
+.fi-no {
+    border-radius: 1rem !important;
+}
+
+.fi-no {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ===== 5. FORMS / MODALS / DROPDOWNS ===== */
+.fi-input-wrp,
+.fi-select-input {
+    border-radius: 0.625rem !important;
+}
+
+.fi-modal-window {
+    border-radius: 1.25rem !important;
+}
+
+.fi-dropdown-panel {
+    border-radius: 0.875rem !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ===== 6. BADGES / PAGINATION / TABS ===== */
+.fi-badge {
+    border-radius: 9999px !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    padding-left: 0.625rem !important;
+    padding-right: 0.625rem !important;
+}
+
+.fi-pagination {
+    padding: 0.75rem 1rem !important;
+}
+
+.fi-tabs-tab {
+    border-radius: 0.5rem !important;
+}
+
+/* ===== 7. FOOTER ===== */
+[x-cloak] {
+    display: none !important;
+}
+
+.fi-admin-footer-shell {
+    width: 100%;
+    padding-bottom: 1.5rem;
+}
+
+.fi-admin-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding: 1.5rem 0 0;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.fi-admin-footer-links {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.fi-admin-footer-link {
+    color: inherit;
+    transition: color 150ms ease;
+}
+
+.fi-admin-footer-link:hover {
+    color: #0f172a;
+}
+
+.fi-admin-footer-divider {
+    color: #cbd5e1;
+}
+
+.fi-admin-footer-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(6px);
+}
+
+.fi-admin-footer-modal {
+    width: 100%;
+    max-width: 48rem;
+}
+
+.fi-admin-footer-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+}
+
+.fi-admin-footer-modal-title {
+    color: #0f172a;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.fi-admin-footer-modal-subtitle {
+    margin-top: 0.5rem;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.fi-admin-footer-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: #475569;
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+
+.fi-admin-footer-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.fi-admin-footer-modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1rem;
+    border-radius: 1rem;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition:
+        transform 150ms ease,
+        background-color 150ms ease;
+}
+
+.fi-admin-footer-modal-close:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+}
+
+/* ===== 8. RESPONSIVE ===== */
+@media (min-width: 768px) {
+    .fi-admin-footer {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+@media (min-width: 1024px) {
+    .fi-body-has-topbar:not(.fi-body-has-top-navigation) .fi-topbar-ctn {
+        position: fixed !important;
+        inset-block-start: 0 !important;
+        inset-inline-start: 0 !important;
+        inset-inline-end: 0 !important;
+        width: 100% !important;
+        margin-inline-start: 0 !important;
+        z-index: 40 !important;
+    }
+
+    .fi-body-has-topbar:not(.fi-body-has-top-navigation) .fi-topbar {
+        padding-inline-start: 1.5rem !important;
+        padding-inline-end: 1.5rem !important;
+    }
+
+    .fi-body-has-topbar.fi-body-has-sidebar-fully-collapsible-on-desktop:not(.fi-body-has-top-navigation):has(.fi-main-sidebar.fi-sidebar-open) .fi-topbar {
+        padding-inline-start: calc(var(--sidebar-width) + 1rem) !important;
+    }
+
+    .fi-body-has-topbar .fi-main-ctn {
+        padding-top: 4.75rem !important;
+    }
+
+    .fi-body-has-topbar .fi-page-header-main-ctn {
+        padding-top: 0 !important;
+    }
+
+    .fi-admin-topbar-user {
+        display: flex;
+    }
+
+    .fi-topbar-collapse-sidebar-btn-ctn {
+        display: flex;
+        width: auto !important;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 1023px) {
+    .fi-sidebar-item-btn {
+        min-height: 2.5rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .fi-main {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .fi-section:not(.fi-section-not-contained):not(.fi-aside) > .fi-section-content-ctn > .fi-section-content {
+        padding: 1rem !important;
+    }
+
+    .fi-ta-header {
+        padding: 0.75rem 1rem !important;
+    }
+
+    .fi-page-header {
+        padding-bottom: 0.75rem;
+    }
+}
+
+/* ===== 9. SIDEBAR SCROLLBAR ===== */
+.fi-sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+}

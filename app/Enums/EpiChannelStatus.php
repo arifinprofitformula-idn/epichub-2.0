@@ -20,5 +20,15 @@ enum EpiChannelStatus: string
             self::Inactive => 'Inactive',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Active => 'success',
+            self::Qualified => 'info',
+            self::Prospect => 'warning',
+            self::Suspended, self::Inactive => 'danger',
+        };
+    }
 }
 

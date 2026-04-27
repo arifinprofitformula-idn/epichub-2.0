@@ -62,6 +62,7 @@ class ProductsTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (ProductStatus|string|null $state): string => $state instanceof ProductStatus ? $state->label() : (string) $state)
+                    ->color(fn (ProductStatus|string|null $state): string => $state instanceof ProductStatus ? $state->getColor() : (ProductStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('visibility')

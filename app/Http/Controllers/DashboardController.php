@@ -44,32 +44,21 @@ class DashboardController
             userProducts: $activeCourseUserProducts,
         );
 
-        $ownedProductsByProductId = $activeCourseUserProducts->keyBy('product_id');
-
         $catalogCourses = Product::query()
             ->published()
             ->visiblePublic()
             ->where('product_type', ProductType::Course)
             ->whereHas('course', fn (Builder $query) => $query->published())
+            ->whereDoesntHave('userProducts', fn (Builder $query) => $query->where('user_id', $request->user()->id))
             ->with(['category', 'course'])
             ->orderByDesc('is_featured')
             ->orderBy('sort_order')
             ->orderByDesc('publish_at')
             ->limit(6)
             ->get()
-            ->map(function (Product $product) use ($ownedProductsByProductId, $progressByUserProductId): array {
-                /** @var UserProduct|null $ownedUserProduct */
-                $ownedUserProduct = $ownedProductsByProductId->get($product->id);
-                $progress = $ownedUserProduct
-                    ? ($progressByUserProductId[$ownedUserProduct->id] ?? ['total' => 0, 'completed' => 0, 'percent' => 0])
-                    : ['total' => 0, 'completed' => 0, 'percent' => 0];
-
-                return [
-                    'product' => $product,
-                    'ownedUserProduct' => $ownedUserProduct,
-                    'progress' => $progress,
-                ];
-            });
+            ->map(fn (Product $product): array => [
+                'product' => $product,
+            ]);
 
         $activeEventsCount = EventRegistration::query()
             ->where('user_id', $request->user()->id)

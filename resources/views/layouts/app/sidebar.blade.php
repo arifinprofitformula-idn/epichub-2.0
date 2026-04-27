@@ -10,7 +10,26 @@
         <flux:sidebar sticky collapsible class="epic-sidebar border-e border-zinc-800/80 bg-zinc-950 text-white">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="lg:hidden" />
+                <div class="ml-auto flex items-center gap-1">
+                    {{-- Theme toggle --}}
+                    <button
+                        x-data
+                        type="button"
+                        x-on:click="$flux.appearance = $flux.appearance === 'dark' ? 'light' : 'dark'"
+                        x-tooltip.raw="Toggle tema"
+                        class="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition-colors duration-150 hover:bg-white/10 hover:text-white"
+                        aria-label="Toggle tema terang/gelap"
+                    >
+                        <svg x-show="$flux.appearance !== 'dark'" viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4.25" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M12 3.75V2.75M12 21.25V20.25M20.25 12H21.25M2.75 12H3.75M17.78 6.22L18.49 5.51M5.51 18.49L6.22 17.78M17.78 17.78L18.49 18.49M5.51 5.51L6.22 6.22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <svg x-show="$flux.appearance === 'dark'" viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+                            <path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <flux:sidebar.collapse class="lg:hidden" />
+                </div>
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
@@ -94,6 +113,23 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            {{-- Theme toggle mobile --}}
+            <button
+                x-data
+                type="button"
+                x-on:click="$flux.appearance = $flux.appearance === 'dark' ? 'light' : 'dark'"
+                class="mr-1 flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 shadow-sm transition-colors duration-150 hover:bg-zinc-50 hover:text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-zinc-200"
+                aria-label="Toggle tema terang/gelap"
+            >
+                <svg x-show="$flux.appearance !== 'dark'" viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4.25" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M12 3.75V2.75M12 21.25V20.25M20.25 12H21.25M2.75 12H3.75M17.78 6.22L18.49 5.51M5.51 18.49L6.22 17.78M17.78 17.78L18.49 18.49M5.51 5.51L6.22 6.22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <svg x-show="$flux.appearance === 'dark'" viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+                    <path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 0 0 12 21a9.003 9.003 0 0 0 8.354-5.646Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

@@ -42,6 +42,7 @@ class CoursesTable
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(fn (CourseStatus|string|null $state): string => $state instanceof CourseStatus ? $state->label() : (string) $state)
+                    ->color(fn (CourseStatus|string|null $state): string => $state instanceof CourseStatus ? $state->getColor() : (CourseStatus::tryFrom((string) $state)?->getColor() ?? 'gray'))
                     ->sortable(),
 
                 TextColumn::make('sections_count')

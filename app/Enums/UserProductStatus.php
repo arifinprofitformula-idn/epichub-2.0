@@ -16,5 +16,14 @@ enum UserProductStatus: string
             self::Expired => 'Kedaluwarsa',
         };
     }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Active => 'success',
+            self::Revoked => 'danger',
+            self::Expired => 'gray',
+        };
+    }
 }
 
