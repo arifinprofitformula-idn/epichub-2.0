@@ -26,10 +26,12 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'legacy_epic_id' => null,
             'email' => fake()->unique()->safeEmail(),
             'whatsapp_number' => null,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'must_reset_password' => false,
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,

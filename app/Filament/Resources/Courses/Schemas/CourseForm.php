@@ -25,118 +25,176 @@ class CourseForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Grid::make(2)->schema([
-                Section::make('Informasi Utama')->schema([
-                    Select::make('product_id')
-                        ->label('Product (course)')
-                        ->options(fn () => Product::query()
-                            ->where('product_type', ProductType::Course->value)
-                            ->orderBy('title')
-                            ->pluck('title', 'id'))
-                        ->searchable()
-                        ->preload()
-                        ->nullable(),
 
-                    TextInput::make('title')
-                        ->label('Judul')
-                        ->required()
-                        ->maxLength(255)
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(function (Set $set, Get $get, ?string $state): void {
-                            if (filled($get('slug'))) {
-                                return;
-                            }
+            /* ── 1. Identitas + Thumbnail ── */
+            Section::make('Identitas Kursus')
+                ->description('Judul, slug, produk terkait, status, dan gambar cover')
+                ->icon('heroicon-o-academic-cap')
+                ->iconColor('primary')
+                ->extraAttributes(['class' => 'fi-course-section-identity'])
+                ->schema([
+                    Grid::make(3)->schema([
 
-                            $set('slug', Str::slug($state ?? ''));
-                        }),
+                        /* Kiri 2/3 */
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('title')
+                                    ->label('Judul Kursus')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state): void {
+                                        if (filled($get('slug'))) {
+                                            return;
+                                        }
+                                        $set('slug', Str::slug($state ?? ''));
+                                    })
+                                    ->columnSpanFull(),
 
-                    TextInput::make('slug')
-                        ->label('Slug')
-                        ->required()
-                        ->maxLength(255)
-                        ->unique(ignoreRecord: true),
+                                TextInput::make('slug')
+                                    ->label('Slug URL')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique(ignoreRecord: true)
+                                    ->prefix('/'),
 
+                                Select::make('product_id')
+                                    ->label('Produk Terkait')
+                                    ->options(fn () => Product::query()
+                                        ->where('product_type', ProductType::Course->value)
+                                        ->orderBy('title')
+                                        ->pluck('title', 'id'))
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->helperText('Hubungkan kursus ini ke produk untuk kontrol akses'),
+
+                                Select::make('status')
+                                    ->label('Status')
+                                    ->options(collect(CourseStatus::cases())
+                                        ->mapWithKeys(fn (CourseStatus $s) => [$s->value => $s->label()])
+                                        ->all())
+                                    ->required()
+                                    ->default(CourseStatus::Draft->value)
+                                    ->native(false),
+
+                                Select::make('difficulty')
+                                    ->label('Level Kesulitan')
+                                    ->options([
+                                        'pemula'    => 'Pemula',
+                                        'menengah'  => 'Menengah',
+                                        'mahir'     => 'Mahir',
+                                    ])
+                                    ->nullable()
+                                    ->native(false)
+                                    ->placeholder('Pilih level'),
+
+                                TextInput::make('estimated_duration_minutes')
+                                    ->label('Estimasi Durasi (menit)')
+                                    ->integer()
+                                    ->minValue(0)
+                                    ->nullable()
+                                    ->suffix('menit'),
+                            ])
+                            ->columnSpan(2),
+
+                        /* Kanan 1/3 */
+                        Grid::make(1)
+                            ->schema([
+                                FileUpload::make('thumbnail')
+                                    ->label('Thumbnail')
+                                    ->disk('public')
+                                    ->directory('courses/thumbnails')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->nullable(),
+
+                                Toggle::make('is_featured')
+                                    ->label('Kursus Unggulan')
+                                    ->helperText('Tampilkan di bagian unggulan')
+                                    ->default(false),
+
+                                TextInput::make('sort_order')
+                                    ->label('Urutan Tampil')
+                                    ->integer()
+                                    ->minValue(0)
+                                    ->default(0)
+                                    ->helperText('Angka kecil = tampil lebih awal'),
+                            ])
+                            ->columnSpan(1),
+                    ]),
+                ])
+                ->columnSpanFull(),
+
+            /* ── 2. Deskripsi ── */
+            Section::make('Deskripsi')
+                ->description('Ringkasan singkat dan konten lengkap kursus')
+                ->icon('heroicon-o-document-text')
+                ->iconColor('info')
+                ->extraAttributes(['class' => 'fi-course-section-desc'])
+                ->schema([
                     Textarea::make('short_description')
-                        ->label('Deskripsi singkat (opsional)')
+                        ->label('Deskripsi Singkat')
                         ->rows(3)
                         ->nullable()
                         ->columnSpanFull(),
 
                     RichEditor::make('description')
-                        ->label('Deskripsi (opsional)')
+                        ->label('Deskripsi Lengkap')
                         ->nullable()
                         ->columnSpanFull(),
-                ])->columnSpan(1),
+                ])
+                ->columnSpanFull(),
 
-                Section::make('Pengaturan')->schema([
-                    FileUpload::make('thumbnail')
-                        ->label('Thumbnail (opsional)')
-                        ->disk('public')
-                        ->directory('courses/thumbnails')
-                        ->image()
-                        ->imageEditor()
-                        ->nullable(),
+            /* ── 3. Akses & Publish ── */
+            Section::make('Akses & Jadwal Publish')
+                ->description('Aturan akses materi dan kapan kursus tersedia untuk pelajar')
+                ->icon('heroicon-o-lock-open')
+                ->iconColor('success')
+                ->extraAttributes(['class' => 'fi-course-section-access'])
+                ->schema([
+                    Grid::make(3)->schema([
+                        Select::make('lesson_access_mode')
+                            ->label('Mode Akses Materi')
+                            ->options([
+                                'free'       => 'Bebas — Semua materi langsung terbuka',
+                                'sequential' => 'Bertahap — Wajib selesaikan materi sebelumnya',
+                            ])
+                            ->default('free')
+                            ->required()
+                            ->native(false),
 
-                    Select::make('status')
-                        ->label('Status')
-                        ->options(collect(CourseStatus::cases())->mapWithKeys(fn (CourseStatus $s) => [$s->value => $s->label()])->all())
-                        ->required()
-                        ->default(CourseStatus::Draft->value),
+                        DateTimePicker::make('published_at')
+                            ->label('Jadwal Publish')
+                            ->timezone('Asia/Jakarta')
+                            ->helperText('Kosongkan agar langsung tersedia. Waktu menggunakan zona WIB.')
+                            ->seconds(false)
+                            ->nullable(),
 
-                    TextInput::make('difficulty')
-                        ->label('Difficulty (opsional)')
-                        ->maxLength(50)
-                        ->nullable(),
+                        Toggle::make('show_locked_lessons')
+                            ->label('Tampilkan Materi Terkunci')
+                            ->helperText('Pelajar tetap melihat judul materi yang belum terbuka')
+                            ->default(true),
+                    ]),
+                ])
+                ->columnSpanFull(),
 
-                    TextInput::make('estimated_duration_minutes')
-                        ->label('Durasi estimasi (menit)')
-                        ->integer()
-                        ->minValue(0)
-                        ->nullable(),
-
-                    Toggle::make('is_featured')
-                        ->label('Featured')
-                        ->default(false),
-
-                    TextInput::make('sort_order')
-                        ->label('Urutan')
-                        ->integer()
-                        ->minValue(0)
-                        ->default(0),
-
-                    DateTimePicker::make('published_at')
-                        ->label('Published pada (opsional)')
-                        ->timezone('Asia/Jakarta')
-                        ->helperText('Kosongkan jika kelas harus langsung tersedia. Waktu input menggunakan zona Asia/Jakarta.')
-                        ->seconds(false)
-                        ->nullable(),
-
+            /* ── 4. Metadata ── */
+            Section::make('Metadata (opsional)')
+                ->description('Key-value tambahan untuk kebutuhan integrasi atau kustomisasi')
+                ->icon('heroicon-o-code-bracket')
+                ->iconColor('gray')
+                ->collapsed()
+                ->schema([
                     KeyValue::make('metadata')
-                        ->label('Metadata (opsional)')
-                        ->addButtonLabel('Tambah item')
+                        ->label('')
+                        ->addButtonLabel('+ Tambah Item')
                         ->keyLabel('Key')
                         ->valueLabel('Value')
                         ->nullable()
                         ->columnSpanFull(),
-                ])->columnSpan(1),
-
-                Section::make('Aturan Akses Materi')->schema([
-                    Select::make('lesson_access_mode')
-                        ->label('Mode akses materi')
-                        ->options([
-                            'free' => 'Bebas',
-                            'sequential' => 'Bertahap / Wajib Berurutan',
-                        ])
-                        ->default('free')
-                        ->required(),
-
-                    Toggle::make('show_locked_lessons')
-                        ->label('Tampilkan Materi Terkunci di Halaman User')
-                        ->default(true)
-                        ->helperText('Jika aktif, user tetap melihat materi terkunci beserta alasannya.'),
-                ])->columnSpanFull(),
-            ])->columns(2),
+                ])
+                ->columnSpanFull(),
         ]);
     }
 }
-

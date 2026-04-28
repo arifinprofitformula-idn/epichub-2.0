@@ -37,6 +37,7 @@ class CourseLessonForm
         $courseId = $options['course_id'] ?? null;
         $sectionSelectable = $options['section_selectable'] ?? true;
         $sectionId = $options['section_id'] ?? null;
+        $attachmentsEnabled = $options['attachments_enabled'] ?? true;
 
         $courseField = $courseSelectable
             ? Select::make('course_id')
@@ -64,6 +65,166 @@ class CourseLessonForm
             : Hidden::make('course_section_id')
                 ->default($sectionId)
                 ->dehydrated();
+
+        $attachmentsRepeater = Repeater::make('attachments')
+            ->label('Resource Materi')
+            ->relationship('attachments')
+            ->orderColumn('sort_order')
+            ->reorderable()
+            ->collapsible()
+            ->cloneable()
+            ->addActionLabel('Tambah Resource Materi')
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+            ->schema([
+                Select::make('source_type')
+                    ->label('Sumber Resource')
+                    ->options([
+                        CourseLessonAttachment::SOURCE_UPLOAD => 'Upload File',
+                        CourseLessonAttachment::SOURCE_EXTERNAL_URL => 'Link Eksternal',
+                    ])
+                    ->default(CourseLessonAttachment::SOURCE_UPLOAD)
+                    ->required()
+                    ->live(),
+
+                TextInput::make('title')
+                    ->label('Judul Resource')
+                    ->required()
+                    ->maxLength(255),
+
+                Textarea::make('description')
+                    ->label('Deskripsi Resource')
+                    ->rows(2)
+                    ->nullable()
+                    ->columnSpanFull(),
+
+                FileUpload::make('file_path')
+                    ->label('Upload File')
+                    ->disk('local')
+                    ->directory('courses/lesson-attachments')
+                    ->storeFileNamesIn('original_name')
+                    ->downloadable()
+                    ->openable()
+                    ->required(fn (Get $get): bool => ($get('source_type') ?? CourseLessonAttachment::SOURCE_UPLOAD) === CourseLessonAttachment::SOURCE_UPLOAD)
+                    ->visible(fn (Get $get): bool => ($get('source_type') ?? CourseLessonAttachment::SOURCE_UPLOAD) === CourseLessonAttachment::SOURCE_UPLOAD)
+                    ->columnSpanFull()
+                    ->afterStateUpdated(function (Set $set, Get $get, $state): void {
+                        if (! is_string($state) || blank($state)) {
+                            return;
+                        }
+
+                        $disk = $get('disk') ?: 'local';
+
+                        if (! Storage::disk($disk)->exists($state)) {
+                            return;
+                        }
+
+                        $set('mime_type', Storage::disk($disk)->mimeType($state));
+                        $set('size', Storage::disk($disk)->size($state));
+                    }),
+
+                TextInput::make('external_url')
+                    ->label('Link Eksternal')
+                    ->placeholder('https://...')
+                    ->required(fn (Get $get): bool => ($get('source_type') ?? null) === CourseLessonAttachment::SOURCE_EXTERNAL_URL)
+                    ->visible(fn (Get $get): bool => ($get('source_type') ?? null) === CourseLessonAttachment::SOURCE_EXTERNAL_URL)
+                    ->url()
+                    ->rule(function (Get $get) {
+                        return function (string $attribute, $value, \Closure $fail) use ($get): void {
+                            if (($get('source_type') ?? null) !== CourseLessonAttachment::SOURCE_EXTERNAL_URL) {
+                                return;
+                            }
+
+                            if (! is_string($value) || blank($value)) {
+                                $fail('Link eksternal wajib diisi.');
+
+                                return;
+                            }
+
+                            if (! filter_var($value, FILTER_VALIDATE_URL)) {
+                                $fail('Link eksternal harus berupa URL yang valid.');
+
+                                return;
+                            }
+
+                            $scheme = strtolower((string) parse_url($value, PHP_URL_SCHEME));
+
+                            if (! in_array($scheme, ['http', 'https'], true)) {
+                                $fail('Link eksternal hanya boleh menggunakan skema http atau https.');
+                            }
+                        };
+                    })
+                    ->helperText('Disarankan menggunakan URL https.')
+                    ->columnSpanFull(),
+
+                TextInput::make('button_label')
+                    ->label('Label Tombol')
+                    ->nullable()
+                    ->maxLength(255),
+
+                Toggle::make('open_in_new_tab')
+                    ->label('Buka di Tab Baru')
+                    ->default(true)
+                    ->visible(fn (Get $get): bool => ($get('source_type') ?? null) === CourseLessonAttachment::SOURCE_EXTERNAL_URL),
+
+                Toggle::make('is_downloadable')
+                    ->label('Tampilkan di Halaman Materi')
+                    ->default(true),
+
+                Toggle::make('is_active')
+                    ->label('Status Aktif')
+                    ->default(true),
+
+                TextInput::make('sort_order')
+                    ->label('Urutan')
+                    ->integer()
+                    ->minValue(0)
+                    ->default(0),
+
+                Hidden::make('disk')
+                    ->default('local')
+                    ->dehydrated(),
+
+                Hidden::make('original_name')
+                    ->dehydrated(),
+
+                Hidden::make('mime_type')
+                    ->dehydrated(),
+
+                Hidden::make('size')
+                    ->dehydrated(),
+            ])
+            ->columns(2)
+            ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
+                $sourceType = $data['source_type'] ?? CourseLessonAttachment::SOURCE_UPLOAD;
+
+                if ($sourceType === CourseLessonAttachment::SOURCE_EXTERNAL_URL) {
+                    $data['file_path'] = null;
+                    $data['original_name'] = null;
+                    $data['mime_type'] = null;
+                    $data['size'] = null;
+                } else {
+                    $data['external_url'] = null;
+                    $data['open_in_new_tab'] = false;
+                }
+
+                return $data;
+            })
+            ->mutateRelationshipDataBeforeSaveUsing(function (array $data): array {
+                $sourceType = $data['source_type'] ?? CourseLessonAttachment::SOURCE_UPLOAD;
+
+                if ($sourceType === CourseLessonAttachment::SOURCE_EXTERNAL_URL) {
+                    $data['file_path'] = null;
+                    $data['original_name'] = null;
+                    $data['mime_type'] = null;
+                    $data['size'] = null;
+                } else {
+                    $data['external_url'] = null;
+                    $data['open_in_new_tab'] = false;
+                }
+
+                return $data;
+            })
+            ->columnSpanFull();
 
         return [
             Grid::make(2)->schema([
@@ -180,166 +341,7 @@ class CourseLessonForm
                         ->valueLabel('Value')
                         ->nullable()
                         ->columnSpanFull(),
-
-                    Repeater::make('attachments')
-                        ->label('Resource Materi')
-                        ->relationship('attachments')
-                        ->orderColumn('sort_order')
-                        ->reorderable()
-                        ->collapsible()
-                        ->cloneable()
-                        ->addActionLabel('Tambah Resource Materi')
-                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
-                        ->schema([
-                            Select::make('source_type')
-                                ->label('Sumber Resource')
-                                ->options([
-                                    CourseLessonAttachment::SOURCE_UPLOAD => 'Upload File',
-                                    CourseLessonAttachment::SOURCE_EXTERNAL_URL => 'Link Eksternal',
-                                ])
-                                ->default(CourseLessonAttachment::SOURCE_UPLOAD)
-                                ->required()
-                                ->live(),
-
-                            TextInput::make('title')
-                                ->label('Judul Resource')
-                                ->required()
-                                ->maxLength(255),
-
-                            Textarea::make('description')
-                                ->label('Deskripsi Resource')
-                                ->rows(2)
-                                ->nullable()
-                                ->columnSpanFull(),
-
-                            FileUpload::make('file_path')
-                                ->label('Upload File')
-                                ->disk('local')
-                                ->directory('courses/lesson-attachments')
-                                ->storeFileNamesIn('original_name')
-                                ->downloadable()
-                                ->openable()
-                                ->required(fn (Get $get): bool => ($get('source_type') ?? CourseLessonAttachment::SOURCE_UPLOAD) === CourseLessonAttachment::SOURCE_UPLOAD)
-                                ->visible(fn (Get $get): bool => ($get('source_type') ?? CourseLessonAttachment::SOURCE_UPLOAD) === CourseLessonAttachment::SOURCE_UPLOAD)
-                                ->columnSpanFull()
-                                ->afterStateUpdated(function (Set $set, Get $get, $state): void {
-                                    if (! is_string($state) || blank($state)) {
-                                        return;
-                                    }
-
-                                    $disk = $get('disk') ?: 'local';
-
-                                    if (! Storage::disk($disk)->exists($state)) {
-                                        return;
-                                    }
-
-                                    $set('mime_type', Storage::disk($disk)->mimeType($state));
-                                    $set('size', Storage::disk($disk)->size($state));
-                                }),
-
-                            TextInput::make('external_url')
-                                ->label('Link Eksternal')
-                                ->placeholder('https://...')
-                                ->required(fn (Get $get): bool => ($get('source_type') ?? null) === CourseLessonAttachment::SOURCE_EXTERNAL_URL)
-                                ->visible(fn (Get $get): bool => ($get('source_type') ?? null) === CourseLessonAttachment::SOURCE_EXTERNAL_URL)
-                                ->url()
-                                ->rule(function (Get $get) {
-                                    return function (string $attribute, $value, \Closure $fail) use ($get): void {
-                                        if (($get('source_type') ?? null) !== CourseLessonAttachment::SOURCE_EXTERNAL_URL) {
-                                            return;
-                                        }
-
-                                        if (! is_string($value) || blank($value)) {
-                                            $fail('Link eksternal wajib diisi.');
-
-                                            return;
-                                        }
-
-                                        if (! filter_var($value, FILTER_VALIDATE_URL)) {
-                                            $fail('Link eksternal harus berupa URL yang valid.');
-
-                                            return;
-                                        }
-
-                                        $scheme = strtolower((string) parse_url($value, PHP_URL_SCHEME));
-
-                                        if (! in_array($scheme, ['http', 'https'], true)) {
-                                            $fail('Link eksternal hanya boleh menggunakan skema http atau https.');
-                                        }
-                                    };
-                                })
-                                ->helperText('Disarankan menggunakan URL https.')
-                                ->columnSpanFull(),
-
-                            TextInput::make('button_label')
-                                ->label('Label Tombol')
-                                ->nullable()
-                                ->maxLength(255),
-
-                            Toggle::make('open_in_new_tab')
-                                ->label('Buka di Tab Baru')
-                                ->default(true)
-                                ->visible(fn (Get $get): bool => ($get('source_type') ?? null) === CourseLessonAttachment::SOURCE_EXTERNAL_URL),
-
-                            Toggle::make('is_downloadable')
-                                ->label('Tampilkan di Halaman Materi')
-                                ->default(true),
-
-                            Toggle::make('is_active')
-                                ->label('Status Aktif')
-                                ->default(true),
-
-                            TextInput::make('sort_order')
-                                ->label('Urutan')
-                                ->integer()
-                                ->minValue(0)
-                                ->default(0),
-
-                            Hidden::make('disk')
-                                ->default('local')
-                                ->dehydrated(),
-
-                            Hidden::make('original_name')
-                                ->dehydrated(),
-
-                            Hidden::make('mime_type')
-                                ->dehydrated(),
-
-                            Hidden::make('size')
-                                ->dehydrated(),
-                        ])
-                        ->columns(2)
-                        ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
-                            $sourceType = $data['source_type'] ?? CourseLessonAttachment::SOURCE_UPLOAD;
-
-                            if ($sourceType === CourseLessonAttachment::SOURCE_EXTERNAL_URL) {
-                                $data['file_path'] = null;
-                                $data['original_name'] = null;
-                                $data['mime_type'] = null;
-                                $data['size'] = null;
-                            } else {
-                                $data['external_url'] = null;
-                                $data['open_in_new_tab'] = false;
-                            }
-
-                            return $data;
-                        })
-                        ->mutateRelationshipDataBeforeSaveUsing(function (array $data): array {
-                            $sourceType = $data['source_type'] ?? CourseLessonAttachment::SOURCE_UPLOAD;
-
-                            if ($sourceType === CourseLessonAttachment::SOURCE_EXTERNAL_URL) {
-                                $data['file_path'] = null;
-                                $data['original_name'] = null;
-                                $data['mime_type'] = null;
-                                $data['size'] = null;
-                            } else {
-                                $data['external_url'] = null;
-                                $data['open_in_new_tab'] = false;
-                            }
-
-                            return $data;
-                        })
-                        ->columnSpanFull(),
+                    ...($attachmentsEnabled ? [$attachmentsRepeater] : []),
                 ])->columnSpanFull(),
 
                 Section::make('Video Materi')

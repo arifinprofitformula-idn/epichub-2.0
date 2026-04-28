@@ -8,10 +8,13 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Enums\Width;
 
 class EditProduct extends EditRecord
 {
     protected static string $resource = ProductResource::class;
+
+    protected Width|string|null $maxContentWidth = 'full';
 
     protected ?string $originalLandingPageZipPath = null;
 

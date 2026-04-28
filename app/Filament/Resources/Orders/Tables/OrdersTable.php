@@ -14,12 +14,14 @@ class OrdersTable
         return $table
             ->columns([
                 TextColumn::make('order_number')
-                    ->label('Order No.')
+                    ->label('Nomor & Tanggal Order')
+                    ->description(fn ($record) => $record->created_at?->translatedFormat('d M Y, H:i') ?? '-')
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('user.email')
-                    ->label('Customer')
+                TextColumn::make('user.name')
+                    ->label('Nama/ Email')
+                    ->description(fn ($record) => $record->user?->email ?? '-')
                     ->placeholder('-')
                     ->searchable(),
 
@@ -40,11 +42,6 @@ class OrdersTable
                     ->formatStateUsing(fn (string|int|float|null $state): string => 'Rp '.number_format((float) ($state ?? 0), 0, ',', '.'))
                     ->sortable(),
 
-                TextColumn::make('created_at')
-                    ->label('Dibuat')
-                    ->dateTime()
-                    ->sortable(),
-
                 TextColumn::make('paid_at')
                     ->label('Paid at')
                     ->dateTime()
@@ -52,7 +49,7 @@ class OrdersTable
                     ->sortable(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('')->tooltip('Edit'),
             ]);
     }
 }

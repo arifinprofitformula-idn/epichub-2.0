@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Affiliates\ResolveReferrerContactAction;
 use App\Enums\CommissionStatus;
 use App\Enums\PayoutStatus;
+use App\Models\LegacyV1Commission;
 use App\Models\Commission;
 use App\Models\CommissionPayout;
 use App\Models\EpiChannel;
@@ -12,11 +13,14 @@ use App\Models\Product;
 use App\Models\PromoAsset;
 use App\Models\ReferralOrder;
 use App\Models\ReferralVisit;
+use App\Models\User;
 use App\Models\UserProduct;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class MyEpiChannelController extends Controller
@@ -179,34 +183,103 @@ class MyEpiChannelController extends Controller
 
     public function commissions(Request $request): View|RedirectResponse
     {
+        $user = $request->user();
         $channel = $this->resolveActiveChannel($request);
 
         if (! $channel) {
             return redirect()->route('epi-channel.dashboard');
         }
 
-        $commissions = Commission::query()
-            ->where('epi_channel_id', $channel->id)
-            ->with(['product', 'order'])
-            ->latest('id')
-            ->paginate(15);
+        $activeTab = (string) $request->string('tab', 'summary');
 
-        $summary = Commission::query()
+        if (! in_array($activeTab, ['summary', 'v2', 'legacy', 'payout'], true)) {
+            $activeTab = 'summary';
+        }
+
+        $v2Buckets = Commission::query()
             ->where('epi_channel_id', $channel->id)
             ->selectRaw('status, COUNT(*) as count, COALESCE(SUM(commission_amount), 0) as amount')
             ->groupBy('status')
             ->get()
             ->keyBy(fn (Commission $row) => (string) $row->status->value);
 
+        $legacyBuckets = $this->legacyCommissionScope(
+            LegacyV1Commission::query(),
+            $user,
+            $channel,
+        )
+            ->selectRaw('commission_status, COUNT(*) as count, COALESCE(SUM(commission_amount), 0) as amount')
+            ->groupBy('commission_status')
+            ->get()
+            ->keyBy(fn (LegacyV1Commission $row) => (string) ($row->commission_status?->value ?? $row->commission_status));
+
+        $v2Commissions = null;
+        $legacyCommissions = null;
+        $payouts = null;
+        $recentLedgerRows = collect();
+
+        if ($activeTab === 'v2') {
+            $v2Commissions = Commission::query()
+                ->where('epi_channel_id', $channel->id)
+                ->with(['product', 'order'])
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->paginate(15, ['*'], 'v2_page')
+                ->withQueryString();
+        }
+
+        if ($activeTab === 'legacy') {
+            $legacyCommissions = $this->legacyCommissionScope(
+                LegacyV1Commission::query(),
+                $user,
+                $channel,
+            )
+                ->with(['product', 'payout'])
+                ->orderByDesc('earned_at')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->paginate(15, ['*'], 'legacy_page')
+                ->withQueryString();
+        }
+
+        if ($activeTab === 'payout') {
+            $payouts = CommissionPayout::query()
+                ->where('epi_channel_id', $channel->id)
+                ->withCount('commissions')
+                ->latest('id')
+                ->paginate(15, ['*'], 'payout_page')
+                ->withQueryString();
+        }
+
+        if ($activeTab === 'summary') {
+            $recentLedgerRows = $this->buildLedgerRows(
+                Commission::query()
+                    ->where('epi_channel_id', $channel->id)
+                    ->with('product')
+                    ->latest('created_at')
+                    ->limit(6)
+                    ->get(),
+                $this->legacyCommissionScope(
+                    LegacyV1Commission::query(),
+                    $user,
+                    $channel,
+                )
+                    ->with('product')
+                    ->orderByDesc('earned_at')
+                    ->orderByDesc('created_at')
+                    ->limit(6)
+                    ->get(),
+            )->take(12)->values();
+        }
+
         return view('epi-channel.commissions', [
             'channel' => $channel,
-            'commissions' => $commissions,
-            'summary' => [
-                'pending_amount' => (string) ($summary[CommissionStatus::Pending->value]->amount ?? '0.00'),
-                'approved_amount' => (string) ($summary[CommissionStatus::Approved->value]->amount ?? '0.00'),
-                'paid_amount' => (string) ($summary[CommissionStatus::Paid->value]->amount ?? '0.00'),
-                'rejected_amount' => (string) ($summary[CommissionStatus::Rejected->value]->amount ?? '0.00'),
-            ],
+            'activeTab' => $activeTab,
+            'v2Commissions' => $v2Commissions,
+            'legacyCommissions' => $legacyCommissions,
+            'payouts' => $payouts,
+            'recentLedgerRows' => $recentLedgerRows,
+            'summary' => $this->buildCommissionLedgerSummary($v2Buckets, $legacyBuckets),
         ]);
     }
 
@@ -318,5 +391,87 @@ class MyEpiChannelController extends Controller
             ->orderByDesc('is_featured')
             ->orderBy('sort_order')
             ->orderByDesc('publish_at');
+    }
+
+    protected function legacyCommissionScope($query, User $user, ?EpiChannel $channel)
+    {
+        return $query->where(function ($legacyQuery) use ($user, $channel): void {
+            $legacyQuery->where('user_id', $user->id);
+
+            if ($channel) {
+                $legacyQuery->orWhere('epi_channel_id', $channel->id);
+            }
+        });
+    }
+
+    protected function buildCommissionLedgerSummary(Collection $v2Buckets, Collection $legacyBuckets): array
+    {
+        $v2Total = (float) $v2Buckets->sum('amount');
+        $legacyTotal = (float) $legacyBuckets->sum('amount');
+        $v2Paid = (float) ($v2Buckets[CommissionStatus::Paid->value]->amount ?? 0);
+        $legacyPaid = (float) ($legacyBuckets['paid']->amount ?? 0);
+        $v2Approved = (float) ($v2Buckets[CommissionStatus::Approved->value]->amount ?? 0);
+        $legacyApproved = (float) ($legacyBuckets['approved']->amount ?? 0);
+        $v2Pending = (float) ($v2Buckets[CommissionStatus::Pending->value]->amount ?? 0);
+        $legacyPending = (float) ($legacyBuckets['pending']->amount ?? 0);
+        $legacyCancelled = (float) ($legacyBuckets['cancelled']->amount ?? 0);
+        $legacyRejected = (float) ($legacyBuckets['rejected']->amount ?? 0);
+
+        return [
+            'legacy_total' => $legacyTotal,
+            'v2_total' => $v2Total,
+            'overall_total' => $v2Total + $legacyTotal,
+            'paid_total' => $v2Paid + $legacyPaid,
+            'approved_total' => $v2Approved + $legacyApproved,
+            'unpaid_total' => ($v2Total - $v2Paid - (float) ($v2Buckets[CommissionStatus::Rejected->value]->amount ?? 0))
+                + ($legacyTotal - $legacyPaid - $legacyRejected - $legacyCancelled),
+            'pending_total' => $v2Pending + $legacyPending,
+            'legacy_pending_total' => $legacyPending,
+            'legacy_paid_total' => $legacyPaid,
+            'legacy_approved_total' => $legacyApproved,
+            'v2_pending_total' => $v2Pending,
+            'v2_paid_total' => $v2Paid,
+            'v2_approved_total' => $v2Approved,
+        ];
+    }
+
+    protected function buildLedgerRows(Collection $v2Commissions, Collection $legacyCommissions): Collection
+    {
+        $v2Rows = $v2Commissions->map(function (Commission $commission): array {
+            $date = $commission->paid_at ?? $commission->approved_at ?? $commission->created_at;
+
+            return [
+                'date' => $date,
+                'date_label' => $date?->format('d M Y H:i') ?? '-',
+                'source' => 'EPIC HUB 2.0',
+                'product' => $commission->product?->title ?? '-',
+                'type' => $commission->commission_type?->label() ?? '-',
+                'level' => '-',
+                'status_label' => $commission->status?->label() ?? (string) $commission->status,
+                'status_color' => $commission->status?->getColor() ?? 'gray',
+                'amount' => (float) $commission->commission_amount,
+            ];
+        });
+
+        $legacyRows = $legacyCommissions->map(function (LegacyV1Commission $commission): array {
+            $date = $commission->earned_at ?? $commission->approved_at ?? $commission->paid_at ?? $commission->created_at;
+
+            return [
+                'date' => $date,
+                'date_label' => $date?->format('d M Y H:i') ?? '-',
+                'source' => 'EPIC HUB 1.0',
+                'product' => $commission->product?->title ?? $commission->legacy_product_name ?? '-',
+                'type' => filled($commission->commission_type) ? Str::headline((string) $commission->commission_type) : '-',
+                'level' => $commission->commission_level ?? '-',
+                'status_label' => $commission->commission_status?->label() ?? (string) $commission->commission_status,
+                'status_color' => $commission->commission_status?->getColor() ?? 'gray',
+                'amount' => (float) $commission->commission_amount,
+            ];
+        });
+
+        return $v2Rows
+            ->concat($legacyRows)
+            ->sortByDesc(fn (array $row) => $row['date']?->timestamp ?? 0)
+            ->values();
     }
 }

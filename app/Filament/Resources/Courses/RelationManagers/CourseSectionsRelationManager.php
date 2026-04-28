@@ -87,6 +87,7 @@ class CourseSectionsRelationManager extends RelationManager
                         'course_id' => $this->getOwnerRecord()->getKey(),
                         'section_selectable' => false,
                         'section_id' => $record->getKey(),
+                        'attachments_enabled' => false,
                     ]))
                     ->action(function (array $data, CourseSection $record): void {
                         CourseLesson::query()->create([

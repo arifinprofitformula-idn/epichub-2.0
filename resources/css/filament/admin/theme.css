@@ -962,9 +962,148 @@ body:has(.fi-simple-layout) {
     .fi-page-header {
         padding-bottom: 0.75rem;
     }
+
+    /* ── Form: 3-col identity grid collapses to 1-col on mobile ── */
+    .fi-prod-section-identity .fi-sc-grid,
+    .fi-course-section-identity .fi-sc-grid,
+    .fi-order-section-summary .fi-sc-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Table: less padding on cells */
+    .fi-ta-cell {
+        padding-left: 0.625rem !important;
+        padding-right: 0.625rem !important;
+    }
+
+    /* Proof modal meta — stack on mobile */
+    .fi-proof-modal-meta-row {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .fi-proof-modal-meta-label {
+        width: auto;
+    }
+
+    /* Order items table: hide price col on very small, keep name+subtotal */
+    .fi-order-item-price {
+        display: none;
+    }
+
+    /* Sticky form actions take full width, larger tap target */
+    .fi-sc-actions .fi-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
-/* ===== 9. SIDEBAR SCROLLBAR ===== */
+@media (max-width: 639px) {
+    /* Section headers: smaller text on tiny screens */
+    .fi-section-header-heading {
+        font-size: 0.95rem !important;
+    }
+
+    .fi-section-header-description {
+        font-size: 0.72rem !important;
+    }
+
+    /* Table record actions: icon only (no tooltip text) */
+    .fi-ta-record-action .fi-btn-label {
+        display: none !important;
+    }
+
+    /* Page header title: smaller */
+    .fi-page-header .fi-heading {
+        font-size: 1.25rem !important;
+    }
+
+    /* Proof modal image: full height */
+    .fi-proof-modal-img {
+        max-height: 16rem;
+    }
+
+    /* Order items table — compact */
+    .fi-order-item-th,
+    .fi-order-item-cell {
+        padding: 0.5rem 0.625rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* ===== 9. TABLE COLORFUL STYLING ===== */
+
+/* Table header cells — navy gradient consistent with login */
+.fi-ta-header-cell {
+    background: linear-gradient(180deg, #1e3a5f 0%, #14295f 100%) !important;
+    color: #ffffff !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    border-bottom: 2px solid rgba(251, 191, 36, 0.6) !important;
+}
+
+.fi-ta-header-cell:first-child {
+    border-radius: 0.75rem 0 0 0 !important;
+}
+
+.fi-ta-header-cell:last-child {
+    border-radius: 0 0.75rem 0 0 !important;
+}
+
+/* Sort icon color */
+.fi-ta-header-cell .fi-icon,
+.fi-ta-header-cell svg {
+    color: rgba(251, 191, 36, 0.85) !important;
+}
+
+/* Alternating row colors */
+.fi-ta-row:nth-child(odd) {
+    background-color: #ffffff !important;
+}
+
+.fi-ta-row:nth-child(even) {
+    background-color: rgba(219, 234, 254, 0.25) !important;
+}
+
+.fi-ta-row:hover {
+    background-color: rgba(219, 234, 254, 0.55) !important;
+    transition: background-color 150ms ease;
+}
+
+/* Table cell text */
+.fi-ta-cell {
+    color: #1e293b !important;
+    font-size: 0.875rem !important;
+}
+
+/* Description text (email below name) */
+.fi-ta-cell .fi-ta-col-description {
+    color: #64748b !important;
+    font-size: 0.75rem !important;
+    margin-top: 0.1rem !important;
+}
+
+/* Table container top border accent */
+.fi-ta-ctn {
+    border-top: 3px solid #14295f !important;
+    overflow: hidden;
+}
+
+/* Bulk-action / search header */
+.fi-ta-header {
+    background: linear-gradient(180deg, #f0f6ff 0%, #e8f0fe 100%) !important;
+    border-bottom: 1px solid rgba(20, 41, 95, 0.12) !important;
+}
+
+/* Pagination row */
+.fi-ta-footer {
+    background: #f8fafc !important;
+    border-top: 1px solid rgba(20, 41, 95, 0.08) !important;
+}
+
+/* ===== 10. SIDEBAR SCROLLBAR ===== */
 .fi-sidebar-nav::-webkit-scrollbar {
     width: 4px;
 }
@@ -980,4 +1119,697 @@ body:has(.fi-simple-layout) {
 
 .fi-sidebar-nav::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.35);
+}
+
+/* ===== 10. ORDER EDIT PAGE ===== */
+
+/* Section accents */
+.fi-order-section-summary > .fi-section-header {
+    background: linear-gradient(135deg, #14295f 0%, #1e3a8a 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+    color: #ffffff !important;
+}
+
+.fi-order-section-summary > .fi-section-header * {
+    color: #ffffff !important;
+}
+
+.fi-order-section-summary > .fi-section-header .fi-section-header-heading {
+    color: #fde68a !important;
+}
+
+.fi-order-section-buyer > .fi-section-header {
+    background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+
+.fi-order-section-buyer > .fi-section-header * {
+    color: #ffffff !important;
+}
+
+.fi-order-section-buyer > .fi-section-header .fi-section-header-heading {
+    color: #bae6fd !important;
+}
+
+.fi-order-section-referral > .fi-section-header {
+    background: linear-gradient(135deg, #92400e 0%, #b45309 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+
+.fi-order-section-referral > .fi-section-header * {
+    color: #ffffff !important;
+}
+
+.fi-order-section-referral > .fi-section-header .fi-section-header-heading {
+    color: #fde68a !important;
+}
+
+.fi-order-section-items > .fi-section-header {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+
+.fi-order-section-items > .fi-section-header * {
+    color: #ffffff !important;
+}
+
+.fi-order-section-items > .fi-section-header .fi-section-header-heading {
+    color: #a7f3d0 !important;
+}
+
+/* Order items table */
+.fi-order-items-wrap {
+    overflow-x: auto;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(20, 41, 95, 0.1);
+}
+
+.fi-order-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.fi-order-items-thead-row {
+    background: linear-gradient(180deg, #1e3a5f 0%, #14295f 100%);
+}
+
+.fi-order-item-th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ffffff;
+    border-bottom: 2px solid rgba(251, 191, 36, 0.6);
+}
+
+.fi-order-item-th-center { text-align: center !important; }
+.fi-order-item-th-right  { text-align: right !important; }
+
+.fi-order-item-row:nth-child(odd)  { background-color: #ffffff; }
+.fi-order-item-row:nth-child(even) { background-color: rgba(219, 234, 254, 0.25); }
+.fi-order-item-row:hover           { background-color: rgba(219, 234, 254, 0.55); transition: background-color 150ms ease; }
+
+.fi-order-item-cell {
+    padding: 0.875rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+    color: #1e293b;
+}
+
+.fi-order-item-title  { min-width: 14rem; }
+.fi-order-item-qty    { text-align: center; font-weight: 600; color: #334155; }
+.fi-order-item-price  { text-align: right; font-variant-numeric: tabular-nums; color: #475569; }
+.fi-order-item-subtotal { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; color: #14295f; }
+
+.fi-order-item-name {
+    display: block;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.fi-order-item-type {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* Meta placeholders */
+.fi-order-meta-value {
+    font-weight: 600;
+    color: #14295f;
+}
+
+.fi-order-paid {
+    color: #065f46 !important;
+}
+
+.fi-order-meta-empty {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.fi-order-no-items {
+    color: #94a3b8;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.fi-order-notes {
+    color: #334155;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+/* ===== 11. PAYMENT TABLE — ORDER LINK ===== */
+.fi-payment-order-link a,
+.fi-ta-cell.fi-payment-order-link a {
+    color: #1d4ed8;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.fi-payment-order-link a:hover {
+    color: #14295f;
+}
+
+/* ===== 12. PAYMENT EDIT PAGE ===== */
+
+/* Section headers */
+.fi-pay-section-summary > .fi-section-header {
+    background: linear-gradient(135deg, #14295f 0%, #1e3a8a 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-pay-section-summary > .fi-section-header * { color: #ffffff !important; }
+.fi-pay-section-summary > .fi-section-header .fi-section-header-heading { color: #fde68a !important; }
+
+.fi-pay-section-detail > .fi-section-header {
+    background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-pay-section-detail > .fi-section-header * { color: #ffffff !important; }
+.fi-pay-section-detail > .fi-section-header .fi-section-header-heading { color: #bae6fd !important; }
+
+.fi-pay-section-customer > .fi-section-header {
+    background: linear-gradient(135deg, #92400e 0%, #b45309 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-pay-section-customer > .fi-section-header * { color: #ffffff !important; }
+.fi-pay-section-customer > .fi-section-header .fi-section-header-heading { color: #fde68a !important; }
+
+.fi-pay-section-verify > .fi-section-header {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-pay-section-verify > .fi-section-header * { color: #ffffff !important; }
+.fi-pay-section-verify > .fi-section-header .fi-section-header-heading { color: #a7f3d0 !important; }
+
+/* Order link inside form */
+.fi-pay-order-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: ui-monospace, monospace;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 150ms ease;
+}
+.fi-pay-order-link:hover { color: #14295f; }
+.fi-pay-order-link-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* Status badges */
+.fi-pay-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.fi-pay-badge-success  { background: #dcfce7; color: #065f46; }
+.fi-pay-badge-warning  { background: #fef9c3; color: #92400e; }
+.fi-pay-badge-danger   { background: #fee2e2; color: #991b1b; }
+.fi-pay-badge-info     { background: #e0f2fe; color: #0369a1; }
+.fi-pay-badge-gray     { background: #f1f5f9; color: #475569; }
+
+/* Amount prominent */
+.fi-pay-amount {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #14295f;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Meta helpers */
+.fi-pay-meta-value { font-weight: 600; color: #14295f; }
+.fi-pay-paid       { color: #065f46 !important; }
+.fi-pay-meta-empty { color: #94a3b8; font-style: italic; }
+.fi-pay-failure    { color: #991b1b; font-weight: 500; line-height: 1.7; }
+.fi-pay-no-proof   { color: #94a3b8; font-style: italic; text-align: center; padding: 1.5rem 0; }
+
+/* Proof image */
+.fi-pay-proof-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.fi-pay-proof-link {
+    display: inline-block;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 2px solid rgba(20, 41, 95, 0.15);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.fi-pay-proof-link:hover {
+    border-color: #1d4ed8;
+    box-shadow: 0 4px 16px rgba(29, 78, 216, 0.2);
+}
+.fi-pay-proof-img {
+    max-width: 28rem;
+    max-height: 20rem;
+    object-fit: contain;
+    display: block;
+}
+.fi-pay-proof-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 3rem;
+    color: #64748b;
+}
+.fi-pay-proof-filename {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.fi-pay-proof-open {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.fi-pay-proof-open:hover { color: #14295f; }
+
+/* ===== 13. PRODUCT EDIT PAGE ===== */
+
+/* Identity section — navy */
+.fi-prod-section-identity > .fi-section-header {
+    background: linear-gradient(135deg, #14295f 0%, #1e3a8a 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-prod-section-identity > .fi-section-header * { color: #ffffff !important; }
+.fi-prod-section-identity > .fi-section-header .fi-section-header-heading { color: #bfdbfe !important; }
+
+/* Price section — emerald */
+.fi-prod-section-price > .fi-section-header {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-prod-section-price > .fi-section-header * { color: #ffffff !important; }
+.fi-prod-section-price > .fi-section-header .fi-section-header-heading { color: #a7f3d0 !important; }
+
+/* Desc section — cyan */
+.fi-prod-section-desc > .fi-section-header {
+    background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-prod-section-desc > .fi-section-header * { color: #ffffff !important; }
+.fi-prod-section-desc > .fi-section-header .fi-section-header-heading { color: #bae6fd !important; }
+
+/* Affiliate section — orange */
+.fi-prod-section-affiliate > .fi-section-header {
+    background: linear-gradient(135deg, #9a3412 0%, #c2410c 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-prod-section-affiliate > .fi-section-header * { color: #ffffff !important; }
+.fi-prod-section-affiliate > .fi-section-header .fi-section-header-heading { color: #fed7aa !important; }
+
+/* Landing page section — indigo */
+.fi-prod-section-landing > .fi-section-header {
+    background: linear-gradient(135deg, #3730a3 0%, #4338ca 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-prod-section-landing > .fi-section-header * { color: #ffffff !important; }
+.fi-prod-section-landing > .fi-section-header .fi-section-header-heading { color: #c7d2fe !important; }
+
+/* ── Global Save Button — 3D Gold + Shimmer ── */
+/*
+ * Save = type="submit"  (Filament submit action)
+ * Cancel = type="button" (Filament cancel/back action — color('gray') adds NO class
+ *          because ButtonComponent implements HasDefaultGrayColor)
+ */
+.fi-sc-actions .fi-btn[type="submit"] {
+    position: relative;
+    overflow: hidden;
+    min-height: 3rem;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    border-radius: 0.875rem !important;
+    border: 1px solid rgba(255, 214, 102, 0.72) !important;
+    background: linear-gradient(180deg, #ffd45c 0%, #f4b322 52%, #d98b08 100%) !important;
+    color: #10265f !important;
+    font-size: 0.875rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 248, 216, 0.9),
+        inset 0 -3px 0 rgba(166, 99, 0, 0.26),
+        0 8px 20px rgba(243, 179, 34, 0.28),
+        0 3px 0 rgba(170, 107, 6, 0.65) !important;
+    transition:
+        transform 150ms ease,
+        box-shadow 150ms ease,
+        filter 150ms ease !important;
+}
+
+/* Shimmer sweep on Save */
+.fi-sc-actions .fi-btn[type="submit"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 28%, rgba(255, 255, 255, 0.65) 42%, transparent 56%);
+    transform: translateX(-135%);
+    animation: fi-admin-save-shimmer 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes fi-admin-save-shimmer {
+    0%, 100% { transform: translateX(-135%); }
+    42%, 58% { transform: translateX(135%); }
+}
+
+.fi-sc-actions .fi-btn[type="submit"]:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.03);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 248, 216, 0.95),
+        inset 0 -3px 0 rgba(166, 99, 0, 0.28),
+        0 14px 28px rgba(243, 179, 34, 0.36),
+        0 3px 0 rgba(170, 107, 6, 0.72) !important;
+}
+
+.fi-sc-actions .fi-btn[type="submit"]:active {
+    transform: translateY(2px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 248, 216, 0.88),
+        inset 0 -1px 0 rgba(166, 99, 0, 0.18),
+        0 4px 8px rgba(243, 179, 34, 0.18),
+        0 1px 0 rgba(170, 107, 6, 0.5) !important;
+}
+
+.fi-sc-actions .fi-btn[type="submit"] .fi-btn-icon,
+.fi-sc-actions .fi-btn[type="submit"] .fi-icon {
+    color: #10265f !important;
+    position: relative;
+    z-index: 2;
+}
+
+.fi-sc-actions .fi-btn[type="submit"] .fi-btn-label {
+    position: relative;
+    z-index: 2;
+    color: #10265f !important;
+}
+
+/* ── Cancel Button — Silver / Slate Grey ── */
+/*
+ * Cancel button rendered by Filament has type="button" (not submit).
+ * color('gray') adds NO CSS class (HasDefaultGrayColor), so we target type="button".
+ */
+.fi-sc-actions .fi-btn[type="button"] {
+    position: relative;
+    overflow: hidden;
+    min-height: 3rem;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    border-radius: 0.875rem !important;
+    border: 1px solid rgba(148, 163, 184, 0.55) !important;
+    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 52%, #cbd5e1 100%) !important;
+    color: #475569 !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.92),
+        inset 0 -2px 0 rgba(100, 116, 139, 0.18),
+        0 4px 10px rgba(100, 116, 139, 0.12),
+        0 2px 0 rgba(100, 116, 139, 0.38) !important;
+    transition:
+        transform 150ms ease,
+        box-shadow 150ms ease,
+        filter 150ms ease !important;
+}
+
+.fi-sc-actions .fi-btn[type="button"]:hover {
+    transform: translateY(-2px);
+    filter: brightness(0.97);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.92),
+        inset 0 -2px 0 rgba(100, 116, 139, 0.22),
+        0 8px 16px rgba(100, 116, 139, 0.18),
+        0 2px 0 rgba(100, 116, 139, 0.44) !important;
+}
+
+.fi-sc-actions .fi-btn[type="button"]:active {
+    transform: translateY(2px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.88),
+        inset 0 -1px 0 rgba(100, 116, 139, 0.12),
+        0 2px 4px rgba(100, 116, 139, 0.08),
+        0 1px 0 rgba(100, 116, 139, 0.32) !important;
+}
+
+.fi-sc-actions .fi-btn[type="button"] .fi-btn-label {
+    color: #475569 !important;
+}
+
+.fi-sc-actions .fi-btn[type="button"] .fi-btn-icon,
+.fi-sc-actions .fi-btn[type="button"] .fi-icon {
+    color: #475569 !important;
+}
+
+/* Sticky save button area subtle lift */
+.fi-form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 0.875rem 0;
+    background: rgba(241, 245, 249, 0.92);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    margin-top: 0.5rem;
+}
+
+/* ===== 14. COURSE EDIT PAGE ===== */
+
+.fi-course-section-identity > .fi-section-header {
+    background: linear-gradient(135deg, #14295f 0%, #1e3a8a 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-course-section-identity > .fi-section-header * { color: #ffffff !important; }
+.fi-course-section-identity > .fi-section-header .fi-section-header-heading { color: #bfdbfe !important; }
+
+.fi-course-section-desc > .fi-section-header {
+    background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-course-section-desc > .fi-section-header * { color: #ffffff !important; }
+.fi-course-section-desc > .fi-section-header .fi-section-header-heading { color: #bae6fd !important; }
+
+.fi-course-section-access > .fi-section-header {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-course-section-access > .fi-section-header * { color: #ffffff !important; }
+.fi-course-section-access > .fi-section-header .fi-section-header-heading { color: #a7f3d0 !important; }
+
+/* ===== 15. EVENT CREATE / EDIT PAGE ===== */
+
+.fi-event-section-identity > .fi-section-header {
+    background: linear-gradient(135deg, #14295f 0%, #1e3a8a 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-event-section-identity > .fi-section-header * { color: #ffffff !important; }
+.fi-event-section-identity > .fi-section-header .fi-section-header-heading { color: #bfdbfe !important; }
+
+.fi-event-section-schedule > .fi-section-header {
+    background: linear-gradient(135deg, #78350f 0%, #b45309 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-event-section-schedule > .fi-section-header * { color: #ffffff !important; }
+.fi-event-section-schedule > .fi-section-header .fi-section-header-heading { color: #fde68a !important; }
+
+.fi-event-section-speaker > .fi-section-header {
+    background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-event-section-speaker > .fi-section-header * { color: #ffffff !important; }
+.fi-event-section-speaker > .fi-section-header .fi-section-header-heading { color: #bae6fd !important; }
+
+.fi-event-section-desc > .fi-section-header {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-event-section-desc > .fi-section-header * { color: #ffffff !important; }
+.fi-event-section-desc > .fi-section-header .fi-section-header-heading { color: #a7f3d0 !important; }
+
+.fi-event-section-zoom > .fi-section-header {
+    background: linear-gradient(135deg, #3730a3 0%, #4338ca 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-event-section-zoom > .fi-section-header * { color: #ffffff !important; }
+.fi-event-section-zoom > .fi-section-header .fi-section-header-heading { color: #c7d2fe !important; }
+
+/* Mobile: event identity grid collapses to 1-col */
+@media (max-width: 767px) {
+    .fi-event-section-identity .fi-sc-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ===== 16. PROOF OF PAYMENT — TABLE HINT & MODAL ===== */
+
+/* "Lihat bukti transfer →" hint in amount column */
+.fi-proof-hint {
+    display: inline-block;
+    margin-top: 0.1rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: color 150ms ease;
+}
+
+/* Make the entire amount cell show pointer when proof exists */
+.fi-ta-cell:has(.fi-proof-hint) {
+    cursor: pointer;
+}
+
+.fi-ta-row:hover .fi-proof-hint {
+    color: #14295f;
+}
+
+/* Modal inner wrapper */
+.fi-proof-modal-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0.25rem 0 0.5rem;
+}
+
+/* Meta info strip */
+.fi-proof-modal-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #f0f6ff 0%, #e8f0fe 100%);
+    border: 1px solid rgba(20, 41, 95, 0.1);
+}
+
+.fi-proof-modal-meta-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.fi-proof-modal-meta-label {
+    flex-shrink: 0;
+    width: 5.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.fi-proof-modal-meta-value {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.fi-proof-modal-amount {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #14295f;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Image container */
+.fi-proof-modal-img-wrap {
+    display: flex;
+    justify-content: center;
+    border-radius: 0.875rem;
+    overflow: hidden;
+    border: 2px solid rgba(20, 41, 95, 0.12);
+    background: #f8fafc;
+    min-height: 8rem;
+}
+
+.fi-proof-modal-img-link {
+    display: block;
+    width: 100%;
+    transition: opacity 150ms ease;
+}
+
+.fi-proof-modal-img-link:hover {
+    opacity: 0.92;
+}
+
+.fi-proof-modal-img {
+    width: 100%;
+    max-height: 26rem;
+    object-fit: contain;
+    display: block;
+}
+
+.fi-proof-modal-fallback {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 3rem 2rem;
+    width: 100%;
+}
+
+.fi-proof-modal-open-hint {
+    text-align: center;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-top: -0.5rem;
+}
+
+.fi-proof-modal-none {
+    text-align: center;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 2rem 0;
+}
+
+/* Modal footer action buttons sizing */
+.fi-modal-footer .fi-btn {
+    min-height: 2.6rem;
+    font-size: 0.8125rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+    border-radius: 0.75rem !important;
+}
+
+/* Approve button glow */
+.fi-modal-footer .fi-btn[data-color="success"],
+.fi-modal-footer .fi-color-success {
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28) !important;
+}
+
+/* Reject button */
+.fi-modal-footer .fi-btn[data-color="danger"],
+.fi-modal-footer .fi-color-danger {
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2) !important;
 }

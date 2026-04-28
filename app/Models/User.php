@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'email_verified_at', 'password', 'profile_photo_path', 'whatsapp_number', 'referrer_epi_channel_id', 'referral_locked_at', 'referral_source'])]
+#[Fillable(['name', 'legacy_epic_id', 'email', 'email_verified_at', 'password', 'must_reset_password', 'profile_photo_path', 'whatsapp_number', 'referrer_epi_channel_id', 'referral_locked_at', 'referral_source'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -38,6 +38,7 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'must_reset_password' => 'boolean',
             'referral_locked_at' => 'datetime',
         ];
     }
@@ -164,6 +165,30 @@ class User extends Authenticatable implements FilamentUser
     public function eventRegistrations(): HasMany
     {
         return $this->hasMany(EventRegistration::class);
+    }
+
+    /**
+     * @return HasMany<LegacyV1User, $this>
+     */
+    public function legacyV1MatchedUsers(): HasMany
+    {
+        return $this->hasMany(LegacyV1User::class, 'matched_user_id');
+    }
+
+    /**
+     * @return HasMany<LegacyV1User, $this>
+     */
+    public function legacyV1ImportedUsers(): HasMany
+    {
+        return $this->hasMany(LegacyV1User::class, 'imported_user_id');
+    }
+
+    /**
+     * @return HasMany<LegacyV1Commission, $this>
+     */
+    public function legacyV1Commissions(): HasMany
+    {
+        return $this->hasMany(LegacyV1Commission::class);
     }
 
     public function hasLockedReferrer(): bool
