@@ -2,14 +2,14 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasTable('legacy_v1_commission_import_batches')) {
-            Schema::create('legacy_v1_commission_import_batches', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_commission_import_batches', function (Blueprint $table): void {
                 $table->id();
                 $table->uuid('uuid')->unique();
                 $table->string('name')->nullable();
@@ -26,11 +26,9 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->index(['status']);
-            });
-        }
+        });
 
-        if (! Schema::hasTable('legacy_v1_commissions')) {
-            Schema::create('legacy_v1_commissions', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_commissions', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('import_batch_id')->constrained('legacy_v1_commission_import_batches')->cascadeOnDelete();
                 $table->string('import_key')->unique();
@@ -71,11 +69,9 @@ return new class extends Migration
                 $table->index(['commission_status']);
                 $table->index(['migration_status']);
                 $table->index(['legacy_period_year', 'legacy_period_month']);
-            });
-        }
+        });
 
-        if (! Schema::hasTable('legacy_v1_commission_import_errors')) {
-            Schema::create('legacy_v1_commission_import_errors', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_commission_import_errors', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('import_batch_id')->constrained('legacy_v1_commission_import_batches')->cascadeOnDelete();
                 $table->foreignId('legacy_v1_commission_id')->nullable()->constrained('legacy_v1_commissions')->nullOnDelete();
@@ -90,8 +86,7 @@ return new class extends Migration
 
                 $table->index(['import_batch_id', 'scope', 'severity']);
                 $table->index(['import_batch_id', 'resolved_at']);
-            });
-        }
+        });
     }
 
     public function down(): void
@@ -99,5 +94,31 @@ return new class extends Migration
         Schema::dropIfExists('legacy_v1_commission_import_errors');
         Schema::dropIfExists('legacy_v1_commissions');
         Schema::dropIfExists('legacy_v1_commission_import_batches');
+    }
+
+    protected function createTableIfMissing(string $table, \Closure $callback): void
+    {
+        if (Schema::hasTable($table)) {
+            return;
+        }
+
+        try {
+            Schema::create($table, $callback);
+        } catch (QueryException $exception) {
+            if (! $this->isDuplicateTableError($exception)) {
+                throw $exception;
+            }
+        }
+    }
+
+    protected function isDuplicateTableError(QueryException $exception): bool
+    {
+        $sqlState = $exception->errorInfo[0] ?? null;
+        $driverCode = (int) ($exception->errorInfo[1] ?? 0);
+        $message = strtolower($exception->getMessage());
+
+        return $sqlState === '42S01'
+            || $driverCode === 1050
+            || str_contains($message, 'already exists');
     }
 };

@@ -2,14 +2,14 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasTable('legacy_v1_import_batches')) {
-            Schema::create('legacy_v1_import_batches', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_import_batches', function (Blueprint $table): void {
                 $table->id();
                 $table->uuid('uuid')->unique();
                 $table->string('name')->nullable();
@@ -28,11 +28,9 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->index(['source_type', 'status']);
-            });
-        }
+        });
 
-        if (! Schema::hasTable('legacy_v1_product_mappings')) {
-            Schema::create('legacy_v1_product_mappings', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_product_mappings', function (Blueprint $table): void {
                 $table->id();
                 $table->string('legacy_product_key')->unique();
                 $table->string('legacy_product_name')->nullable();
@@ -45,11 +43,9 @@ return new class extends Migration
                 $table->timestamps();
 
                 $table->index(['is_active']);
-            });
-        }
+        });
 
-        if (! Schema::hasTable('legacy_v1_users')) {
-            Schema::create('legacy_v1_users', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_users', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('batch_id')->constrained('legacy_v1_import_batches')->cascadeOnDelete();
                 $table->unsignedInteger('row_number');
@@ -84,11 +80,9 @@ return new class extends Migration
                 $table->index(['normalized_email']);
                 $table->index(['normalized_whatsapp']);
                 $table->index(['status', 'match_status', 'sponsor_status']);
-            });
-        }
+        });
 
-        if (! Schema::hasTable('legacy_v1_product_accesses')) {
-            Schema::create('legacy_v1_product_accesses', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_product_accesses', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('batch_id')->constrained('legacy_v1_import_batches')->cascadeOnDelete();
                 $table->foreignId('legacy_v1_user_id')->nullable()->constrained('legacy_v1_users')->nullOnDelete();
@@ -120,11 +114,9 @@ return new class extends Migration
                 $table->index(['normalized_email']);
                 $table->index(['normalized_legacy_product_key']);
                 $table->index(['status']);
-            });
-        }
+        });
 
-        if (! Schema::hasTable('legacy_v1_sponsor_links')) {
-            Schema::create('legacy_v1_sponsor_links', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_sponsor_links', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('batch_id')->constrained('legacy_v1_import_batches')->cascadeOnDelete();
                 $table->foreignId('legacy_v1_user_id')->constrained('legacy_v1_users')->cascadeOnDelete();
@@ -142,11 +134,9 @@ return new class extends Migration
 
                 $table->unique(['legacy_v1_user_id']);
                 $table->index(['batch_id', 'resolution_status']);
-            });
-        }
+        });
 
-        if (! Schema::hasTable('legacy_v1_import_errors')) {
-            Schema::create('legacy_v1_import_errors', function (Blueprint $table) {
+        $this->createTableIfMissing('legacy_v1_import_errors', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('batch_id')->constrained('legacy_v1_import_batches')->cascadeOnDelete();
                 $table->foreignId('legacy_v1_user_id')->nullable()->constrained('legacy_v1_users')->nullOnDelete();
@@ -162,8 +152,7 @@ return new class extends Migration
 
                 $table->index(['batch_id', 'scope', 'severity']);
                 $table->index(['batch_id', 'resolved_at']);
-            });
-        }
+        });
     }
 
     public function down(): void
@@ -174,5 +163,31 @@ return new class extends Migration
         Schema::dropIfExists('legacy_v1_users');
         Schema::dropIfExists('legacy_v1_product_mappings');
         Schema::dropIfExists('legacy_v1_import_batches');
+    }
+
+    protected function createTableIfMissing(string $table, \Closure $callback): void
+    {
+        if (Schema::hasTable($table)) {
+            return;
+        }
+
+        try {
+            Schema::create($table, $callback);
+        } catch (QueryException $exception) {
+            if (! $this->isDuplicateTableError($exception)) {
+                throw $exception;
+            }
+        }
+    }
+
+    protected function isDuplicateTableError(QueryException $exception): bool
+    {
+        $sqlState = $exception->errorInfo[0] ?? null;
+        $driverCode = (int) ($exception->errorInfo[1] ?? 0);
+        $message = strtolower($exception->getMessage());
+
+        return $sqlState === '42S01'
+            || $driverCode === 1050
+            || str_contains($message, 'already exists');
     }
 };
