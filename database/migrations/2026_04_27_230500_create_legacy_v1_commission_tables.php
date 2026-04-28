@@ -30,7 +30,7 @@ return new class extends Migration
 
         $this->createTableIfMissing('legacy_v1_commissions', function (Blueprint $table): void {
                 $table->id();
-                $table->foreignId('import_batch_id')->constrained('legacy_v1_commission_import_batches')->cascadeOnDelete();
+                $table->foreignId('import_batch_id')->constrained('legacy_v1_commission_import_batches', indexName: 'lv1_comm_import_batch_fk')->cascadeOnDelete();
                 $table->string('import_key')->unique();
                 $table->unsignedInteger('row_number')->nullable();
                 $table->string('legacy_commission_id')->nullable();
@@ -38,15 +38,15 @@ return new class extends Migration
                 $table->string('legacy_user_name')->nullable();
                 $table->string('legacy_user_email')->nullable();
                 $table->string('legacy_user_whatsapp', 30)->nullable();
-                $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-                $table->foreignId('epi_channel_id')->nullable()->constrained('epi_channels')->nullOnDelete();
+                $table->foreignId('user_id')->nullable()->constrained('users', indexName: 'lv1_comm_user_fk')->nullOnDelete();
+                $table->foreignId('epi_channel_id')->nullable()->constrained('epi_channels', indexName: 'lv1_comm_channel_fk')->nullOnDelete();
                 $table->string('legacy_sponsor_epic_id', 50)->nullable();
                 $table->string('legacy_downline_epic_id', 50)->nullable();
                 $table->string('legacy_downline_name')->nullable();
                 $table->string('legacy_order_id')->nullable();
                 $table->string('legacy_product_code')->nullable();
                 $table->string('legacy_product_name')->nullable();
-                $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete();
+                $table->foreignId('product_id')->nullable()->constrained('products', indexName: 'lv1_comm_product_fk')->nullOnDelete();
                 $table->string('commission_type')->nullable();
                 $table->string('commission_level', 30)->nullable();
                 $table->decimal('commission_amount', 15, 2);
@@ -57,7 +57,7 @@ return new class extends Migration
                 $table->unsignedTinyInteger('legacy_period_month')->nullable();
                 $table->unsignedSmallInteger('legacy_period_year')->nullable();
                 $table->boolean('is_payable')->default(false);
-                $table->foreignId('payout_id')->nullable()->constrained('commission_payouts')->nullOnDelete();
+                $table->foreignId('payout_id')->nullable()->constrained('commission_payouts', indexName: 'lv1_comm_payout_fk')->nullOnDelete();
                 $table->text('source_note')->nullable();
                 $table->json('raw_payload')->nullable();
                 $table->string('migration_status', 30)->default('pending');
@@ -73,15 +73,15 @@ return new class extends Migration
 
         $this->createTableIfMissing('legacy_v1_commission_import_errors', function (Blueprint $table): void {
                 $table->id();
-                $table->foreignId('import_batch_id')->constrained('legacy_v1_commission_import_batches')->cascadeOnDelete();
-                $table->foreignId('legacy_v1_commission_id')->nullable()->constrained('legacy_v1_commissions')->nullOnDelete();
+                $table->foreignId('import_batch_id')->constrained('legacy_v1_commission_import_batches', indexName: 'lv1_comm_err_batch_fk')->cascadeOnDelete();
+                $table->foreignId('legacy_v1_commission_id')->nullable()->constrained('legacy_v1_commissions', indexName: 'lv1_comm_err_comm_fk')->nullOnDelete();
                 $table->string('scope', 30);
                 $table->string('severity', 20)->default('error');
                 $table->string('code', 50);
                 $table->text('message');
                 $table->json('context')->nullable();
                 $table->timestamp('resolved_at')->nullable();
-                $table->foreignId('resolved_by')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignId('resolved_by')->nullable()->constrained('users', indexName: 'lv1_comm_err_resolved_fk')->nullOnDelete();
                 $table->timestamps();
 
                 $table->index(['import_batch_id', 'scope', 'severity']);
