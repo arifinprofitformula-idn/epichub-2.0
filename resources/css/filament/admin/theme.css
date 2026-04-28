@@ -1667,7 +1667,46 @@ body:has(.fi-simple-layout) {
     }
 }
 
-/* ===== 16. PROOF OF PAYMENT — TABLE HINT & MODAL ===== */
+/* ===== 16. EVENT REGISTRATION CREATE / EDIT PAGE ===== */
+
+.fi-evtreg-section-main > .fi-section-header {
+    background: linear-gradient(135deg, #14295f 0%, #1e3a8a 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-evtreg-section-main > .fi-section-header * { color: #ffffff !important; }
+.fi-evtreg-section-main > .fi-section-header .fi-section-header-heading { color: #bfdbfe !important; }
+
+.fi-evtreg-section-meta > .fi-section-header {
+    background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-evtreg-section-meta > .fi-section-header * { color: #ffffff !important; }
+.fi-evtreg-section-meta > .fi-section-header .fi-section-header-heading { color: #bae6fd !important; }
+
+/* ===== 17. EPI CHANNEL CREATE / EDIT PAGE ===== */
+
+.fi-epic-section-identity > .fi-section-header {
+    background: linear-gradient(135deg, #14295f 0%, #1e3a8a 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-epic-section-identity > .fi-section-header * { color: #ffffff !important; }
+.fi-epic-section-identity > .fi-section-header .fi-section-header-heading { color: #bfdbfe !important; }
+
+.fi-epic-section-sponsor > .fi-section-header {
+    background: linear-gradient(135deg, #78350f 0%, #b45309 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-epic-section-sponsor > .fi-section-header * { color: #ffffff !important; }
+.fi-epic-section-sponsor > .fi-section-header .fi-section-header-heading { color: #fde68a !important; }
+
+.fi-epic-section-dates > .fi-section-header {
+    background: linear-gradient(135deg, #0e7490 0%, #0369a1 100%) !important;
+    border-radius: 0.875rem 0.875rem 0 0 !important;
+}
+.fi-epic-section-dates > .fi-section-header * { color: #ffffff !important; }
+.fi-epic-section-dates > .fi-section-header .fi-section-header-heading { color: #bae6fd !important; }
+
+/* ===== 18. PROOF OF PAYMENT — TABLE HINT & MODAL ===== */
 
 /* "Lihat bukti transfer →" hint in amount column */
 .fi-proof-hint {
