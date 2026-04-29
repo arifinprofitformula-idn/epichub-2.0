@@ -63,7 +63,12 @@ class LegacyV1ImportBatchesTable
                 SelectFilter::make('source_type')
                     ->options([
                         'users' => 'Users',
+                        'users_db' => 'Users DB',
                         'accesses' => 'Accesses',
+                        'accesses_db' => 'Accesses DB',
+                        'orders_db' => 'Orders DB',
+                        'payments_db' => 'Payments DB',
+                        'payouts_db' => 'Payouts DB',
                     ]),
                 SelectFilter::make('status')
                     ->options([

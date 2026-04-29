@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'batch_id',
     'row_number',
+    'legacy_user_id',
+    'source_type',
+    'import_key',
     'status',
     'match_status',
     'sponsor_status',
@@ -80,6 +83,14 @@ class LegacyV1User extends Model
     public function sponsorLinks(): HasMany
     {
         return $this->hasMany(LegacyV1SponsorLink::class, 'legacy_v1_user_id');
+    }
+
+    /**
+     * @return HasMany<LegacyV1UserMapping, $this>
+     */
+    public function userMappings(): HasMany
+    {
+        return $this->hasMany(LegacyV1UserMapping::class, 'legacy_v1_user_id');
     }
 
     /**

@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'batch_id',
     'legacy_v1_user_id',
+    'legacy_access_id',
+    'source_type',
+    'import_key',
     'row_number',
     'status',
     'raw_identifier_type',

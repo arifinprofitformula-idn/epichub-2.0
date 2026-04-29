@@ -22,6 +22,7 @@ class ImportLegacyV1UsersAction
         protected ResolveLegacyV1UserMatchAction $resolveUserMatch,
         protected RecordLegacyV1ImportErrorAction $recordImportError,
         protected GenerateLegacyMigrationReportAction $generateReport,
+        protected UpsertLegacyV1UserIntoApplicationAction $upsertLegacyUser,
     ) {}
 
     public function execute(string $absolutePath, ?User $actor = null): LegacyV1ImportBatch
@@ -95,142 +96,7 @@ class ImportLegacyV1UsersAction
 
     protected function processRow(LegacyV1ImportBatch $batch, LegacyV1User $legacyUser): void
     {
-        if ($legacyUser->normalized_epic_id === null && $legacyUser->normalized_email === null && $legacyUser->normalized_whatsapp === null) {
-            $this->markConflict(
-                $batch,
-                $legacyUser,
-                'missing_identifier',
-                'Baris user legacy tidak memiliki ID EPIC, email, atau WhatsApp yang bisa dipakai untuk pencocokan.',
-            );
-
-            return;
-        }
-
-        if ($legacyUser->normalized_email !== null && ! filter_var($legacyUser->normalized_email, FILTER_VALIDATE_EMAIL)) {
-            $this->markConflict(
-                $batch,
-                $legacyUser,
-                'invalid_email',
-                'Email legacy tidak valid.',
-            );
-
-            return;
-        }
-
-        $match = $this->resolveUserMatch->execute(
-            epicId: $legacyUser->normalized_epic_id,
-            email: $legacyUser->normalized_email,
-            whatsapp: $legacyUser->normalized_whatsapp,
-        );
-
-        if ($match['conflict'] !== null) {
-            $this->markConflict($batch, $legacyUser, 'identity_conflict', $match['conflict']);
-
-            return;
-        }
-
-        $user = $match['user'];
-        $created = false;
-        $warnings = [];
-
-        if (! $user && $legacyUser->normalized_email === null) {
-            $this->markConflict(
-                $batch,
-                $legacyUser,
-                'missing_email_for_new_user',
-                'User baru tidak bisa dibuat tanpa email yang valid.',
-            );
-
-            return;
-        }
-
-        try {
-            $user = DB::transaction(function () use ($legacyUser, $match, $user, &$created, &$warnings): User {
-                $user = $user
-                    ? User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail()
-                    : null;
-
-                if (! $user) {
-                    $created = true;
-
-                    $user = User::query()->create([
-                        'name' => $legacyUser->normalized_name ?? 'Pengguna Legacy',
-                        'legacy_epic_id' => $legacyUser->normalized_epic_id,
-                        'email' => $legacyUser->normalized_email,
-                        'email_verified_at' => $legacyUser->normalized_email ? now() : null,
-                        'password' => Hash::make(Str::random(40)),
-                        'must_reset_password' => true,
-                        'whatsapp_number' => $legacyUser->normalized_whatsapp,
-                    ]);
-                } else {
-                    $updates = [];
-
-                    if ($legacyUser->normalized_epic_id !== null) {
-                        if ($user->legacy_epic_id !== null && $user->legacy_epic_id !== $legacyUser->normalized_epic_id) {
-                            throw new RuntimeException('User existing sudah memiliki legacy EPIC ID lain.');
-                        }
-
-                        $updates['legacy_epic_id'] = $legacyUser->normalized_epic_id;
-                    }
-
-                    if ($legacyUser->normalized_whatsapp !== null) {
-                        $currentWhatsapp = $user->normalizedWhatsappNumber($user->whatsapp_number);
-
-                        if ($currentWhatsapp === null) {
-                            $updates['whatsapp_number'] = $legacyUser->normalized_whatsapp;
-                        } elseif ($currentWhatsapp !== $legacyUser->normalized_whatsapp) {
-                            $warnings[] = 'WhatsApp legacy berbeda dengan WhatsApp user existing dan tidak dioverwrite otomatis.';
-                        }
-                    }
-
-                    if ($legacyUser->normalized_email !== null && Str::lower($user->email) !== $legacyUser->normalized_email) {
-                        $warnings[] = 'Email legacy berbeda dengan email user existing dan tidak dioverwrite otomatis.';
-                    }
-
-                    if ($updates !== []) {
-                        $user->update($updates);
-                    }
-                }
-
-                $epiChannel = $this->syncEpiChannel($user, $legacyUser);
-
-                $this->ensureRoles($user, $epiChannel !== null);
-
-                $legacyUser->forceFill([
-                    'status' => 'imported',
-                    'match_status' => $created ? 'created' : ($match['matched_by'] ?? 'matched_existing'),
-                    'matched_user_id' => $user->id,
-                    'matched_by' => $created ? null : $match['matched_by'],
-                    'imported_user_id' => $user->id,
-                    'epi_channel_id' => $epiChannel?->id,
-                    'imported_at' => now(),
-                    'metadata' => array_merge($legacyUser->metadata ?? [], [
-                        'warnings' => $warnings,
-                        'created_user' => $created,
-                    ]),
-                ])->save();
-
-                return $user;
-            });
-        } catch (Throwable $exception) {
-            $this->markConflict($batch, $legacyUser, 'user_upsert_failed', $exception->getMessage());
-
-            return;
-        }
-
-        foreach ($warnings as $warning) {
-            $this->recordImportError->execute(
-                batch: $batch,
-                scope: 'user',
-                code: 'data_warning',
-                message: $warning,
-                legacyUser: $legacyUser,
-                severity: 'warning',
-                context: [
-                    'user_id' => $user->id,
-                ],
-            );
-        }
+        $this->upsertLegacyUser->execute($batch, $legacyUser);
     }
 
     protected function syncEpiChannel(User $user, LegacyV1User $legacyUser): ?EpiChannel

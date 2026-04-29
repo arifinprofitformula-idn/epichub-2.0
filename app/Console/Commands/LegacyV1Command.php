@@ -10,6 +10,17 @@ use RuntimeException;
 
 abstract class LegacyV1Command extends Command
 {
+    protected function resolveOptionalBatch(?string $batchInput): ?LegacyV1ImportBatch
+    {
+        $batchInput = trim((string) $batchInput);
+
+        if ($batchInput === '') {
+            return null;
+        }
+
+        return $this->resolveBatch($batchInput);
+    }
+
     protected function resolveBatch(string $batchInput): LegacyV1ImportBatch
     {
         $batch = LegacyV1ImportBatch::query()
@@ -25,6 +36,14 @@ abstract class LegacyV1Command extends Command
         }
 
         return $batch;
+    }
+
+    protected function latestBatch(?string $sourceType = null): ?LegacyV1ImportBatch
+    {
+        return LegacyV1ImportBatch::query()
+            ->when($sourceType !== null, fn ($query) => $query->where('source_type', $sourceType))
+            ->latest('id')
+            ->first();
     }
 
     protected function resolveCommissionBatch(string $batchInput): LegacyV1CommissionImportBatch

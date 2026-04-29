@@ -22,15 +22,19 @@ class RecordLegacyV1ImportErrorAction
         string $severity = 'error',
         array $context = [],
     ): LegacyV1ImportError {
-        return LegacyV1ImportError::query()->create([
-            'batch_id' => $batch->id,
-            'legacy_v1_user_id' => $legacyUser?->id,
-            'legacy_v1_product_access_id' => $legacyProductAccess?->id,
-            'scope' => $scope,
-            'severity' => $severity,
-            'code' => $code,
-            'message' => $message,
-            'context' => $context !== [] ? $context : null,
-        ]);
+        return LegacyV1ImportError::query()->updateOrCreate(
+            [
+                'batch_id' => $batch->id,
+                'legacy_v1_user_id' => $legacyUser?->id,
+                'legacy_v1_product_access_id' => $legacyProductAccess?->id,
+                'scope' => $scope,
+                'code' => $code,
+                'message' => $message,
+            ],
+            [
+                'severity' => $severity,
+                'context' => $context !== [] ? $context : null,
+            ],
+        );
     }
 }

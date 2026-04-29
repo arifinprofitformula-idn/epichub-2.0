@@ -27,6 +27,10 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'legacy_epic_id' => null,
+            'legacy_source' => null,
+            'legacy_user_id' => null,
+            'legacy_import_batch_id' => null,
+            'legacy_imported_at' => null,
             'email' => fake()->unique()->safeEmail(),
             'whatsapp_number' => null,
             'email_verified_at' => now(),

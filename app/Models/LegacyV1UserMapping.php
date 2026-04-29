@@ -9,19 +9,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'batch_id',
     'legacy_v1_user_id',
-    'legacy_v1_product_access_id',
-    'scope',
-    'severity',
-    'code',
-    'message',
-    'context',
-    'resolved_at',
-    'resolved_by',
+    'legacy_user_id',
+    'legacy_epic_id',
+    'legacy_email',
+    'legacy_whatsapp',
+    'user_id',
+    'match_method',
+    'status',
+    'notes',
+    'metadata',
 ])]
-class LegacyV1ImportError extends Model
+class LegacyV1UserMapping extends Model
 {
-    public $incrementing = true;
-
     /**
      * @return BelongsTo<LegacyV1ImportBatch, $this>
      */
@@ -39,26 +38,17 @@ class LegacyV1ImportError extends Model
     }
 
     /**
-     * @return BelongsTo<LegacyV1ProductAccess, $this>
-     */
-    public function legacyProductAccess(): BelongsTo
-    {
-        return $this->belongsTo(LegacyV1ProductAccess::class, 'legacy_v1_product_access_id');
-    }
-
-    /**
      * @return BelongsTo<User, $this>
      */
-    public function resolvedBy(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'resolved_by');
+        return $this->belongsTo(User::class);
     }
 
     protected function casts(): array
     {
         return [
-            'context' => 'array',
-            'resolved_at' => 'datetime',
+            'metadata' => 'array',
         ];
     }
 }

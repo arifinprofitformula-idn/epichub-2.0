@@ -58,6 +58,38 @@ class LegacyV1ImportBatch extends Model
     }
 
     /**
+     * @return HasMany<LegacyV1UserMapping, $this>
+     */
+    public function userMappings(): HasMany
+    {
+        return $this->hasMany(LegacyV1UserMapping::class, 'batch_id');
+    }
+
+    /**
+     * @return HasMany<LegacyV1Order, $this>
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(LegacyV1Order::class, 'batch_id');
+    }
+
+    /**
+     * @return HasMany<LegacyV1Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(LegacyV1Payment::class, 'batch_id');
+    }
+
+    /**
+     * @return HasMany<LegacyV1Payout, $this>
+     */
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(LegacyV1Payout::class, 'batch_id');
+    }
+
+    /**
      * @return HasMany<LegacyV1ImportError, $this>
      */
     public function importErrors(): HasMany

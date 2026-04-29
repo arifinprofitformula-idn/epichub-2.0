@@ -48,9 +48,83 @@ class ImportLegacyV1CommissionsAction
             'note',
         ]);
 
+        return $this->importRows(
+            rows: $parsed['rows'],
+            actor: $actor,
+            name: 'Legacy V1 Commissions - '.$parsed['file_name'],
+            fileName: $parsed['file_name'],
+            filePath: $absolutePath,
+            fileHash: $parsed['file_hash'],
+            fileSize: $parsed['file_size'],
+        );
+    }
+
+    public function executeFromDatabase(?User $actor = null): LegacyV1CommissionImportBatch
+    {
+        $connectionName = (string) config('legacy_v1.connection', 'legacy_mysql');
+        $source = (array) config('legacy_v1.sources.commissions');
+        $table = (string) data_get($source, 'table');
+        $columns = (array) data_get($source, 'columns', []);
+        $rows = DB::connection($connectionName)->table($table)->get();
+
+        $normalizedRows = collect($rows)
+            ->values()
+            ->map(function (object $row, int $index) use ($columns): array {
+                $payload = (array) $row;
+
+                return [
+                    'line' => $index + 1,
+                    'legacy_commission_id' => data_get($payload, (string) ($columns['legacy_commission_id'] ?? 'id')),
+                    'user_epic_id' => data_get($payload, (string) ($columns['user_epic_id'] ?? 'user_epic_id')),
+                    'user_name' => data_get($payload, (string) ($columns['user_name'] ?? 'user_name')),
+                    'user_email' => data_get($payload, (string) ($columns['user_email'] ?? 'user_email')),
+                    'user_whatsapp' => data_get($payload, (string) ($columns['user_whatsapp'] ?? 'user_whatsapp')),
+                    'sponsor_epic_id' => data_get($payload, (string) ($columns['sponsor_epic_id'] ?? 'sponsor_epic_id')),
+                    'downline_epic_id' => data_get($payload, (string) ($columns['downline_epic_id'] ?? 'downline_epic_id')),
+                    'downline_name' => data_get($payload, (string) ($columns['downline_name'] ?? 'downline_name')),
+                    'product_code' => data_get($payload, (string) ($columns['product_code'] ?? 'product_code')),
+                    'product_name' => data_get($payload, (string) ($columns['product_name'] ?? 'product_name')),
+                    'commission_type' => data_get($payload, (string) ($columns['commission_type'] ?? 'commission_type')),
+                    'commission_level' => data_get($payload, (string) ($columns['commission_level'] ?? 'commission_level')),
+                    'commission_amount' => data_get($payload, (string) ($columns['commission_amount'] ?? 'commission_amount')),
+                    'commission_status' => data_get($payload, (string) ($columns['commission_status'] ?? 'commission_status')),
+                    'earned_at' => data_get($payload, (string) ($columns['earned_at'] ?? 'earned_at')),
+                    'approved_at' => data_get($payload, (string) ($columns['approved_at'] ?? 'approved_at')),
+                    'paid_at' => data_get($payload, (string) ($columns['paid_at'] ?? 'paid_at')),
+                    'period_month' => data_get($payload, (string) ($columns['period_month'] ?? 'period_month')),
+                    'period_year' => data_get($payload, (string) ($columns['period_year'] ?? 'period_year')),
+                    'legacy_order_id' => data_get($payload, (string) ($columns['legacy_order_id'] ?? 'legacy_order_id')),
+                    'note' => data_get($payload, (string) ($columns['note'] ?? 'note')),
+                ];
+            })
+            ->all();
+
+        return $this->importRows(
+            rows: $normalizedRows,
+            actor: $actor,
+            name: 'Legacy V1 Commissions from Database',
+            fileName: $table,
+            filePath: $connectionName.'::'.$table,
+            fileHash: hash('sha256', json_encode($normalizedRows, JSON_THROW_ON_ERROR)),
+            fileSize: count($normalizedRows),
+        );
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    protected function importRows(
+        array $rows,
+        ?User $actor,
+        string $name,
+        string $fileName,
+        string $filePath,
+        string $fileHash,
+        int $fileSize,
+    ): LegacyV1CommissionImportBatch {
         $existingBatch = LegacyV1CommissionImportBatch::query()
-            ->where('file_hash', $parsed['file_hash'])
-            ->where('file_size', $parsed['file_size'])
+            ->where('file_hash', $fileHash)
+            ->where('file_size', $fileSize)
             ->whereIn('status', ['processing', 'completed', 'completed_with_issues'])
             ->latest('id')
             ->first();
@@ -63,17 +137,17 @@ class ImportLegacyV1CommissionsAction
 
         $batch = LegacyV1CommissionImportBatch::query()->create([
             'uuid' => (string) Str::uuid(),
-            'name' => 'Legacy V1 Commissions - '.$parsed['file_name'],
+            'name' => $name,
             'status' => 'processing',
-            'file_name' => $parsed['file_name'],
-            'file_path' => $absolutePath,
-            'file_hash' => $parsed['file_hash'],
-            'file_size' => $parsed['file_size'],
+            'file_name' => $fileName,
+            'file_path' => $filePath,
+            'file_hash' => $fileHash,
+            'file_size' => $fileSize,
             'imported_by' => $actor?->id,
             'started_at' => now(),
         ]);
 
-        foreach ($parsed['rows'] as $row) {
+        foreach ($rows as $row) {
             DB::transaction(function () use ($batch, $row): void {
                 $normalized = $this->normalizeCommission->execute($row);
 
