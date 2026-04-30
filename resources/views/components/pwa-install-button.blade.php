@@ -96,7 +96,7 @@
 
         <div class="flex items-start gap-4 pr-10">
             <img
-                src="{{ asset('epic-hub-auth-logo.png') }}"
+                src="{{ asset('icons/apple-touch-icon.png') }}"
                 alt="EPIC Hub"
                 class="h-14 w-auto object-contain"
                 width="56"
