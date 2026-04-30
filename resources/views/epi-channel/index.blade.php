@@ -57,7 +57,7 @@
                                 <div class="min-w-0">
                                     <div class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">EPI Channel</div>
                                     <div class="truncate text-base font-semibold text-zinc-900 dark:text-white">
-                                        {{ $channel->store_name ?: $channel->epic_code }}
+                                        {{ auth()->user()?->name ?: ($channel->store_name ?: $channel->epic_code) }}
                                     </div>
                                 </div>
                                 <div class="ml-auto">
@@ -67,11 +67,11 @@
 
                             <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-2">
                                 <div class="rounded-[var(--radius-lg)] border border-zinc-100 bg-zinc-50/70 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/60">
-                                    <div class="text-xs font-medium uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">EPIC Code</div>
+                                    <div class="text-xs font-medium uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">ID EPIC</div>
                                     <div class="mt-1.5 font-semibold text-zinc-900 dark:text-white">{{ $channel->epic_code }}</div>
                                 </div>
                                 <div class="rounded-[var(--radius-lg)] border border-zinc-100 bg-zinc-50/70 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/60">
-                                    <div class="text-xs font-medium uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">Nama Toko</div>
+                                    <div class="text-xs font-medium uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">EPI Store</div>
                                     <div class="mt-1.5 font-semibold text-zinc-900 dark:text-white">{{ $channel->store_name ?: '—' }}</div>
                                 </div>
                             </div>
@@ -205,14 +205,50 @@
 
                     <div class="mt-5 grid gap-4 md:grid-cols-2">
                         @forelse ($featuredProducts as $product)
-                            @php($productLink = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code)
-                            <div class="rounded-[var(--radius-lg)] border border-zinc-200 p-4 dark:border-zinc-800">
+                            @php
+                                $productLink = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code;
+                                $productCardThemes = [
+                                    [
+                                        'card' => 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-900/60 dark:bg-emerald-950/20',
+                                        'eyebrow' => 'text-emerald-700 dark:text-emerald-300',
+                                        'price' => 'border-emerald-200/80 bg-white/80 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+                                    ],
+                                    [
+                                        'card' => 'border-sky-200 bg-sky-50/70 dark:border-sky-900/60 dark:bg-sky-950/20',
+                                        'eyebrow' => 'text-sky-700 dark:text-sky-300',
+                                        'price' => 'border-sky-200/80 bg-white/80 text-sky-700 dark:border-sky-800 dark:bg-sky-900/40 dark:text-sky-300',
+                                    ],
+                                    [
+                                        'card' => 'border-amber-200 bg-amber-50/70 dark:border-amber-900/60 dark:bg-amber-950/20',
+                                        'eyebrow' => 'text-amber-700 dark:text-amber-300',
+                                        'price' => 'border-amber-200/80 bg-white/80 text-amber-700 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+                                    ],
+                                    [
+                                        'card' => 'border-violet-200 bg-violet-50/70 dark:border-violet-900/60 dark:bg-violet-950/20',
+                                        'eyebrow' => 'text-violet-700 dark:text-violet-300',
+                                        'price' => 'border-violet-200/80 bg-white/80 text-violet-700 dark:border-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
+                                    ],
+                                    [
+                                        'card' => 'border-rose-200 bg-rose-50/70 dark:border-rose-900/60 dark:bg-rose-950/20',
+                                        'eyebrow' => 'text-rose-700 dark:text-rose-300',
+                                        'price' => 'border-rose-200/80 bg-white/80 text-rose-700 dark:border-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
+                                    ],
+                                    [
+                                        'card' => 'border-cyan-200 bg-cyan-50/70 dark:border-cyan-900/60 dark:bg-cyan-950/20',
+                                        'eyebrow' => 'text-cyan-700 dark:text-cyan-300',
+                                        'price' => 'border-cyan-200/80 bg-white/80 text-cyan-700 dark:border-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300',
+                                    ],
+                                ];
+                                $productCardTheme = $productCardThemes[$loop->index % count($productCardThemes)];
+                            @endphp
+                            <div class="rounded-[var(--radius-lg)] border p-4 shadow-[0_10px_30px_rgba(15,23,42,0.04)] {{ $productCardTheme['card'] }}">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
+                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] {{ $productCardTheme['eyebrow'] }}">Produk unggulan</div>
                                         <div class="font-semibold text-zinc-900 dark:text-white">{{ $product->title }}</div>
                                         <div class="mt-1 text-xs text-zinc-500">{{ $product->product_type?->label() ?? $product->product_type?->value ?? '-' }}</div>
                                     </div>
-                                    <div class="shrink-0 text-sm font-semibold text-zinc-900 dark:text-white">
+                                    <div class="shrink-0 rounded-full border px-3 py-1 text-sm font-semibold {{ $productCardTheme['price'] }}">
                                         Rp&nbsp;{{ number_format((float) $product->effective_price, 0, ',', '.') }}
                                     </div>
                                 </div>

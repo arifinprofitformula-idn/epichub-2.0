@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Enums\PaymentStatus;
 use App\Enums\ProductType;
 use App\Filament\Resources\UserProducts\UserProductResource;
 use App\Filament\Resources\Users\UserResource;
@@ -145,8 +144,8 @@ class ViewUser extends ViewRecord
 
         return [
             'total_orders' => $user->orders()->count(),
-            'total_paid_payments' => $user->payments()->where('status', PaymentStatus::Success)->count(),
-            'total_paid_amount' => (float) $user->payments()->where('status', PaymentStatus::Success)->sum('amount'),
+            'total_paid_payments' => $user->payments()->success()->count(),
+            'total_paid_amount' => (float) $user->payments()->success()->sum('amount'),
             'total_active_products' => $user->userProducts()->active()->count(),
             'total_owned_courses' => $user->userProducts()
                 ->active()

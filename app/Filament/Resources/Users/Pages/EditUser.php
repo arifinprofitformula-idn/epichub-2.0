@@ -6,11 +6,14 @@ use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Enums\Width;
 use RuntimeException;
 
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
+
+    protected Width | string | null $maxContentWidth = Width::Full;
 
     protected function getHeaderActions(): array
     {

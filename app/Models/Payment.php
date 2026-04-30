@@ -68,12 +68,12 @@ class Payment extends Model
 
     public function scopeSuccess(Builder $query): void
     {
-        $query->where('status', PaymentStatus::Success);
+        $query->where($query->getModel()->qualifyColumn('status'), PaymentStatus::Success);
     }
 
     public function scopePending(Builder $query): void
     {
-        $query->where('status', PaymentStatus::Pending);
+        $query->where($query->getModel()->qualifyColumn('status'), PaymentStatus::Pending);
     }
 
     /**

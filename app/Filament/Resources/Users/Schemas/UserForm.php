@@ -13,9 +13,16 @@ class UserForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Grid::make(2)->schema([
-                Section::make('Profil')
-                    ->schema([
+            Section::make('Profil Pengguna')
+                ->description('Kelola identitas utama dan informasi akun pengguna dalam satu form yang utuh.')
+                ->icon('heroicon-o-user')
+                ->iconColor('primary')
+                ->extraAttributes(['class' => 'fi-user-section-profile'])
+                ->schema([
+                    Grid::make([
+                        'default' => 1,
+                        'xl' => 2,
+                    ])->schema([
                         TextInput::make('name')
                             ->label('Nama')
                             ->required()
@@ -33,11 +40,7 @@ class UserForm
                             ->tel()
                             ->maxLength(30)
                             ->nullable(),
-                    ])
-                    ->columnSpan(1),
 
-                Section::make('Akun')
-                    ->schema([
                         DateTimePicker::make('email_verified_at')
                             ->label('Email Diverifikasi Pada')
                             ->displayFormat('d M Y H:i')
@@ -54,9 +57,9 @@ class UserForm
                             ->label('Referrer Terkunci')
                             ->disabled()
                             ->dehydrated(false),
-                    ])
-                    ->columnSpan(1),
-            ]),
+                    ]),
+                ])
+                ->columnSpanFull(),
         ]);
     }
 }
