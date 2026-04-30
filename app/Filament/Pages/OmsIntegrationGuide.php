@@ -23,6 +23,11 @@ class OmsIntegrationGuide extends Page
 
     protected string $view = 'filament.pages.oms-integration-guide';
 
+    public function getHeading(): string
+    {
+        return '';
+    }
+
     public static function canAccess(): bool
     {
         return auth()->user()?->hasAnyRole(['super_admin', 'admin']) ?? false;
