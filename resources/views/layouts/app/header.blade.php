@@ -79,6 +79,7 @@
             </flux:toast.group>
         @endpersist
 
+        @include('partials.pwa-scripts')
         @fluxScripts
     </body>
 </html>

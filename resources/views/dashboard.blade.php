@@ -100,6 +100,8 @@
             </section>
         </div>
 
+        <x-pwa-install-button class="mt-4" />
+
         {{-- Quick links --}}
         <section class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
             <a

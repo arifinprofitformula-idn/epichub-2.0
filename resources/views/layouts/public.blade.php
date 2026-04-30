@@ -117,6 +117,7 @@
             </div>
         </footer>
 
+        @include('partials.pwa-scripts')
         @fluxScripts
     </body>
 </html>

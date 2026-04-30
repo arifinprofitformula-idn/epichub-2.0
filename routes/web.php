@@ -21,6 +21,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Middleware\CaptureReferralFromRequest;
 
+Route::view('/offline', 'offline')->name('offline');
+
 Route::middleware([CaptureReferralFromRequest::class])
     ->get('/', HomeController::class)
     ->name('home');
