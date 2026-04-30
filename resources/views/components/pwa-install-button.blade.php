@@ -96,24 +96,24 @@
 
         <div class="flex items-start gap-4 pr-10">
             <img
-                src="{{ asset('icons/icon-192.png') }}"
+                src="{{ asset('epic-hub-auth-logo.png') }}"
                 alt="EPIC Hub"
-                class="h-16 w-16 rounded-[1.15rem] border border-blue-100 bg-blue-50 object-cover"
-                width="64"
-                height="64"
+                class="h-14 w-auto object-contain"
+                width="56"
+                height="56"
                 loading="lazy"
             />
 
-            <div class="min-w-0">
-                <div class="text-sm font-semibold uppercase tracking-[0.18em] text-blue-600">EPIC Hub PWA</div>
-                <div class="mt-1 text-xl font-semibold tracking-tight text-slate-900">Pasang EPIC Hub sekarang</div>
-                <p class="mt-2 text-sm leading-relaxed text-slate-600">Buka lebih cepat langsung dari Home Screen.</p>
+            <div class="min-w-0 pt-1">
+                <div class="text-lg font-semibold leading-tight tracking-tight text-slate-900">
+                    Tambahkan EPIC Hub ke perangkat Anda
+                </div>
             </div>
         </div>
 
         <div class="mt-5 rounded-[1.4rem] bg-blue-50/80 p-4 text-sm leading-relaxed text-blue-900">
             <p x-show="canInstall">
-                Tambahkan EPIC Hub ke perangkat Anda.
+                Install sekarang untuk akses lebih cepat.
             </p>
             <p x-show="isIos && !canInstall" style="display: none;">
                 iPhone: Safari → Share → Add to Home Screen.
@@ -124,7 +124,7 @@
             <button
                 type="button"
                 x-on:click="dismiss()"
-                class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-150 hover:border-slate-300 hover:text-slate-900"
+                class="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-all duration-150 hover:border-slate-300 hover:text-slate-900 sm:w-auto"
             >
                 Tutup
             </button>
@@ -133,7 +133,8 @@
                 type="button"
                 x-show="canInstall"
                 x-on:click="promptInstall()"
-                class="inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(180deg,#4f8bff_0%,#2563eb_62%,#1e40af_100%)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(37,99,235,0.22)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.98]"
+                class="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-blue-700 bg-[linear-gradient(180deg,#4f8bff_0%,#2563eb_62%,#1e40af_100%)] px-5 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_12px_28px_rgba(37,99,235,0.22)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.98] sm:w-auto"
+                style="display: none;"
             >
                 Install EPIC Hub
             </button>
