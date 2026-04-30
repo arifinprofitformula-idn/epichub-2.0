@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'oms' => \App\Http\Middleware\VerifyOmsRequest::class,
+            'oms.signature' => \App\Http\Middleware\VerifyOmsRequest::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

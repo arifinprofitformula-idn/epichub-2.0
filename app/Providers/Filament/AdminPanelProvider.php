@@ -78,6 +78,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::fromEnum(AdminNavigationGroup::Program),
                 NavigationGroup::fromEnum(AdminNavigationGroup::Afiliasi),
                 NavigationGroup::fromEnum(AdminNavigationGroup::Administrasi),
+                NavigationGroup::make()->label('System / Integrations'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

@@ -11,6 +11,7 @@ return [
         ],
     ],
     'oms' => [
+        'integration_enabled' => (bool) env('OMS_INTEGRATION_ENABLED', false),
         'enabled' => (bool) env('OMS_INTEGRATION_ENABLED', false),
         'inbound_secret' => (string) env('OMS_INBOUND_SECRET', ''),
         'signature_secret' => (string) env('OMS_SIGNATURE_SECRET', ''),
@@ -24,4 +25,3 @@ return [
         ],
     ],
 ];
-

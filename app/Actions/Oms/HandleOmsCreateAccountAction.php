@@ -7,11 +7,14 @@ use App\Enums\OmsIntegrationDirection;
 use App\Enums\OmsIntegrationStatus;
 use App\Models\OmsIntegrationLog;
 use App\Services\Oms\OmsPasswordCipher;
+use Illuminate\Support\Facades\Validator;
 use RuntimeException;
+use Throwable;
 
 class HandleOmsCreateAccountAction
 {
     public function __construct(
+        protected NormalizeOmsCreateAccountPayloadAction $normalizePayload,
         protected OmsPasswordCipher $cipher,
         protected CreateOrUpdateEpiChannelFromOmsAction $createOrUpdateEpiChannel,
         protected LogOmsIntegrationAction $logOmsIntegration,
@@ -19,25 +22,17 @@ class HandleOmsCreateAccountAction
     }
 
     /**
-     * @param  array{
-     *      epic_code: string,
-     *      name: string,
-     *      email: string,
-     *      phone?: ?string,
-     *      store_name?: ?string,
-     *      sponsor_epic_code?: ?string,
-     *      sponsor_name?: ?string,
-     *      encrypted_password: string
-     *  }  $payload
+     * @param  array<string, mixed>  $rawPayload
      * @return array{
      *      ok: bool,
      *      response_code: string,
      *      message: string,
+     *      http_status: int,
      *      data?: array{epic_code: string, email: string},
      *      error?: string
      *  }
      */
-    public function execute(array $payload, string $requestId, ?string $ipAddress = null, ?string $userAgent = null): array
+    public function execute(array $rawPayload, string $requestId, ?string $ipAddress = null, ?string $userAgent = null): array
     {
         $existingSuccess = OmsIntegrationLog::query()
             ->where('direction', OmsIntegrationDirection::Inbound->value)
@@ -49,23 +44,80 @@ class HandleOmsCreateAccountAction
         if ($existingSuccess) {
             return [
                 'ok' => true,
-                'response_code' => (string) config('epichub.oms.response.success', '00'),
+                'response_code' => $this->successCode(),
                 'message' => 'Sukses',
+                'http_status' => 200,
                 'data' => [
-                    'epic_code' => (string) ($existingSuccess->epic_code ?: ($payload['epic_code'] ?? '')),
-                    'email' => (string) ($existingSuccess->email ?: ($payload['email'] ?? '')),
+                    'epic_code' => (string) ($existingSuccess->epic_code ?: data_get($rawPayload, 'kode_epic', data_get($rawPayload, 'kode_new_epic', ''))),
+                    'email' => (string) ($existingSuccess->email ?: data_get($rawPayload, 'email_epic', data_get($rawPayload, 'email_addr_new_epic', ''))),
                 ],
             ];
         }
 
+        $payload = $this->normalizePayload->execute($rawPayload);
+        $validator = Validator::make($payload, [
+            'epic_code' => ['required', 'string', 'max:100'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'whatsapp_number' => ['nullable', 'string', 'max:30'],
+            'store_name' => ['nullable', 'string', 'max:255'],
+            'sponsor_epic_code' => ['nullable', 'string', 'max:100'],
+            'sponsor_name' => ['nullable', 'string', 'max:255'],
+            'encrypted_password' => ['required', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            $response = $this->businessFailure('Payload OMS tidak valid.');
+
+            $this->logOmsIntegration->execute(
+                direction: OmsIntegrationDirection::Inbound,
+                action: 'create_account',
+                requestId: $requestId,
+                epicCode: $payload['epic_code'] ?? null,
+                email: $payload['email'] ?? null,
+                status: OmsIntegrationStatus::Failed,
+                responseCode: $response['response_code'],
+                httpStatus: $response['http_status'],
+                requestPayload: $rawPayload,
+                responsePayload: $response,
+                errorMessage: 'Payload OMS tidak valid.',
+                ipAddress: $ipAddress,
+                userAgent: $userAgent,
+            );
+
+            return $response;
+        }
+
         try {
             $plainPassword = $this->cipher->decrypt((string) $payload['encrypted_password']);
+        } catch (RuntimeException) {
+            $response = $this->businessFailure('Password tidak valid atau tidak dapat diproses.');
 
+            $this->logOmsIntegration->execute(
+                direction: OmsIntegrationDirection::Inbound,
+                action: 'create_account',
+                requestId: $requestId,
+                epicCode: $payload['epic_code'] ?? null,
+                email: $payload['email'] ?? null,
+                status: OmsIntegrationStatus::Failed,
+                responseCode: $response['response_code'],
+                httpStatus: $response['http_status'],
+                requestPayload: $rawPayload,
+                responsePayload: $response,
+                errorMessage: 'Password tidak valid atau tidak dapat diproses.',
+                ipAddress: $ipAddress,
+                userAgent: $userAgent,
+            );
+
+            return $response;
+        }
+
+        try {
             $result = $this->createOrUpdateEpiChannel->execute([
                 'epic_code' => (string) $payload['epic_code'],
                 'name' => (string) $payload['name'],
                 'email' => (string) $payload['email'],
-                'phone' => $payload['phone'] ?? null,
+                'whatsapp_number' => $payload['whatsapp_number'] ?? null,
                 'store_name' => $payload['store_name'] ?? null,
                 'sponsor_epic_code' => $payload['sponsor_epic_code'] ?? null,
                 'sponsor_name' => $payload['sponsor_name'] ?? null,
@@ -73,8 +125,9 @@ class HandleOmsCreateAccountAction
 
             $response = [
                 'ok' => true,
-                'response_code' => (string) config('epichub.oms.response.success', '00'),
+                'response_code' => $this->successCode(),
                 'message' => 'Sukses',
+                'http_status' => 200,
                 'data' => [
                     'epic_code' => $result['epi_channel']->epic_code,
                     'email' => $result['user']->email,
@@ -90,7 +143,7 @@ class HandleOmsCreateAccountAction
                 status: OmsIntegrationStatus::Success,
                 responseCode: $response['response_code'],
                 httpStatus: 200,
-                requestPayload: $payload,
+                requestPayload: $rawPayload,
                 responsePayload: $response,
                 ipAddress: $ipAddress,
                 userAgent: $userAgent,
@@ -98,12 +151,7 @@ class HandleOmsCreateAccountAction
 
             return $response;
         } catch (RuntimeException $e) {
-            $response = [
-                'ok' => false,
-                'response_code' => (string) config('epichub.oms.response.failed', '99'),
-                'message' => 'Gagal',
-                'error' => $e->getMessage(),
-            ];
+            $response = $this->businessFailure($e->getMessage());
 
             $this->logOmsIntegration->execute(
                 direction: OmsIntegrationDirection::Inbound,
@@ -113,8 +161,8 @@ class HandleOmsCreateAccountAction
                 email: $payload['email'] ?? null,
                 status: OmsIntegrationStatus::Failed,
                 responseCode: $response['response_code'],
-                httpStatus: 200,
-                requestPayload: $payload,
+                httpStatus: $response['http_status'],
+                requestPayload: $rawPayload,
                 responsePayload: $response,
                 errorMessage: $e->getMessage(),
                 ipAddress: $ipAddress,
@@ -122,6 +170,50 @@ class HandleOmsCreateAccountAction
             );
 
             return $response;
+        } catch (Throwable $e) {
+            $response = $this->businessFailure('Permintaan OMS gagal diproses.');
+
+            $this->logOmsIntegration->execute(
+                direction: OmsIntegrationDirection::Inbound,
+                action: 'create_account',
+                requestId: $requestId,
+                epicCode: $payload['epic_code'] ?? null,
+                email: $payload['email'] ?? null,
+                status: OmsIntegrationStatus::Failed,
+                responseCode: $response['response_code'],
+                httpStatus: $response['http_status'],
+                requestPayload: $rawPayload,
+                responsePayload: $response,
+                errorMessage: 'Permintaan OMS gagal diproses.',
+                ipAddress: $ipAddress,
+                userAgent: $userAgent,
+            );
+
+            return $response;
         }
+    }
+
+    /**
+     * @return array{ok: false, response_code: string, message: string, http_status: int, error: string}
+     */
+    protected function businessFailure(string $error): array
+    {
+        return [
+            'ok' => false,
+            'response_code' => $this->failedCode(),
+            'message' => 'Gagal',
+            'http_status' => 200,
+            'error' => $error,
+        ];
+    }
+
+    protected function successCode(): string
+    {
+        return (string) config('epichub.oms.response.success', '00');
+    }
+
+    protected function failedCode(): string
+    {
+        return (string) config('epichub.oms.response.failed', '99');
     }
 }

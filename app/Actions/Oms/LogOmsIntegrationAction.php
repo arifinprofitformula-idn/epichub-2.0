@@ -60,7 +60,18 @@ class LogOmsIntegrationAction
         foreach ($payload as $key => $value) {
             $normalized = strtolower((string) $key);
 
-            if (in_array($normalized, ['password', 'password_encrypted', 'encrypted_password', 'new_password', 'plain_password'], true)) {
+            if (in_array($normalized, [
+                'password',
+                'password_encrypted',
+                'encrypted_password',
+                'password_terenkripsi',
+                'new_password',
+                'plain_password',
+                'token',
+                'signature',
+                'x-oms-signature',
+                'authorization',
+            ], true)) {
                 $clean[$key] = '[REDACTED]';
                 continue;
             }
@@ -71,4 +82,3 @@ class LogOmsIntegrationAction
         return $clean;
     }
 }
-

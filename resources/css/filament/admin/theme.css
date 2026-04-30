@@ -1590,13 +1590,11 @@ body:has(.fi-simple-layout) {
 
 /* Sticky save button area subtle lift */
 .fi-form-actions {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
+    position: static;
     padding: 0.875rem 0;
-    background: rgba(241, 245, 249, 0.92);
-    backdrop-filter: blur(8px);
-    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    background: transparent;
+    backdrop-filter: none;
+    border-top: none;
     margin-top: 0.5rem;
 }
 

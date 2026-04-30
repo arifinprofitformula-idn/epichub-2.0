@@ -32,7 +32,9 @@
         x-cloak
         x-show="openModal"
         x-on:keydown.escape.window="openModal = null"
+        x-transition.opacity
         class="fi-admin-footer-modal-backdrop"
+        style="display: none;"
     >
         <div
             class="fi-admin-footer-modal"

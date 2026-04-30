@@ -18,49 +18,27 @@ class OmsEpiChannelController
 
     public function createAccount(Request $request): JsonResponse
     {
-        $normalized = $this->normalizeCreateAccountPayload($request);
-
-        $validator = Validator::make($normalized, [
-            'epic_code' => ['required', 'string', 'max:50'],
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
-            'store_name' => ['nullable', 'string', 'max:255'],
-            'sponsor_epic_code' => ['nullable', 'string', 'max:50'],
-            'sponsor_name' => ['nullable', 'string', 'max:255'],
-            'encrypted_password' => ['required', 'string'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'response_code' => (string) config('epichub.oms.response.failed', '99'),
-                'message' => 'Gagal',
-                'error' => 'Payload OMS tidak valid.',
-            ]);
-        }
-
-        $requestId = (string) $request->attributes->get('oms_request_id', '');
-
         $result = $this->handleCreateAccount->execute(
-            payload: $validator->validated(),
-            requestId: $requestId,
+            rawPayload: $request->all(),
+            requestId: (string) $request->attributes->get('oms_request_id', ''),
             ipAddress: $request->ip(),
             userAgent: $request->userAgent(),
         );
 
-        if ($result['ok']) {
-            return response()->json([
-                'response_code' => $result['response_code'],
-                'message' => $result['message'],
-                'data' => $result['data'],
-            ]);
-        }
-
-        return response()->json([
+        $payload = [
             'response_code' => $result['response_code'],
             'message' => $result['message'],
-            'error' => $result['error'] ?? 'Terjadi kesalahan.',
-        ]);
+        ];
+
+        if (isset($result['data'])) {
+            $payload['data'] = $result['data'];
+        }
+
+        if (isset($result['error'])) {
+            $payload['error'] = $result['error'];
+        }
+
+        return response()->json($payload, $result['http_status'] ?? 200);
     }
 
     public function changePassword(Request $request): JsonResponse
