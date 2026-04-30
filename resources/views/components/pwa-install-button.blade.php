@@ -80,13 +80,13 @@
     <div
         x-on:click.outside="dismiss()"
         {{ $attributes->class([
-            'relative w-full max-w-md overflow-hidden rounded-[2rem] border border-emerald-200 bg-white p-6 shadow-[0_28px_80px_rgba(15,23,42,0.24)]',
+            'relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-blue-200 bg-white p-6 shadow-[0_28px_80px_rgba(15,23,42,0.24)]',
         ]) }}
     >
         <button
             type="button"
             x-on:click="dismiss()"
-            class="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all duration-150 hover:border-emerald-200 hover:text-emerald-600"
+            class="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all duration-150 hover:border-blue-200 hover:text-blue-600"
             aria-label="Tutup pop up install EPIC Hub"
         >
             <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -98,27 +98,25 @@
             <img
                 src="{{ asset('icons/icon-192.png') }}"
                 alt="EPIC Hub"
-                class="h-16 w-16 rounded-[1.15rem] border border-emerald-100 bg-emerald-50 object-cover"
+                class="h-16 w-16 rounded-[1.15rem] border border-blue-100 bg-blue-50 object-cover"
                 width="64"
                 height="64"
                 loading="lazy"
             />
 
             <div class="min-w-0">
-                <div class="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-600">EPIC Hub PWA</div>
-                <div class="mt-1 text-xl font-semibold tracking-tight text-slate-900">Install EPIC Hub di perangkat Anda</div>
-                <p class="mt-2 text-sm leading-relaxed text-slate-600">
-                    Akses EPIC Hub lebih cepat langsung dari Home Screen tanpa perlu Play Store atau App Store.
-                </p>
+                <div class="text-sm font-semibold uppercase tracking-[0.18em] text-blue-600">EPIC Hub PWA</div>
+                <div class="mt-1 text-xl font-semibold tracking-tight text-slate-900">Pasang EPIC Hub sekarang</div>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600">Buka lebih cepat langsung dari Home Screen.</p>
             </div>
         </div>
 
-        <div class="mt-5 rounded-[1.4rem] bg-emerald-50/70 p-4 text-sm leading-relaxed text-emerald-900">
+        <div class="mt-5 rounded-[1.4rem] bg-blue-50/80 p-4 text-sm leading-relaxed text-blue-900">
             <p x-show="canInstall">
-                Browser Anda mendukung instalasi langsung. Tekan tombol install untuk menambahkan EPIC Hub ke Home Screen.
+                Tambahkan EPIC Hub ke perangkat Anda.
             </p>
             <p x-show="isIos && !canInstall" style="display: none;">
-                Pengguna iPhone: buka Safari, tekan Share, lalu pilih Add to Home Screen.
+                iPhone: Safari → Share → Add to Home Screen.
             </p>
         </div>
 
@@ -128,14 +126,14 @@
                 x-on:click="dismiss()"
                 class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-150 hover:border-slate-300 hover:text-slate-900"
             >
-                Nanti Saja
+                Tutup
             </button>
 
             <button
                 type="button"
                 x-show="canInstall"
                 x-on:click="promptInstall()"
-                class="inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#10b981,#059669)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(5,150,105,0.20)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.98]"
+                class="inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(180deg,#4f8bff_0%,#2563eb_62%,#1e40af_100%)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(37,99,235,0.22)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.98]"
             >
                 Install EPIC Hub
             </button>
