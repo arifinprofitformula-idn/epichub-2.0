@@ -4,25 +4,60 @@
         canInstall: false,
         isIos: false,
         isStandalone: false,
+        isVisible: false,
+        pageLoaded: false,
+        delayElapsed: false,
+        storageKey: 'epic-hub:pwa-install-dismissed',
         init() {
             this.isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
             this.isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
             this.deferredPrompt = window.__epicHubDeferredInstallPrompt;
             this.canInstall = !! this.deferredPrompt;
 
+            const onLoad = () => {
+                this.pageLoaded = true;
+
+                window.setTimeout(() => {
+                    this.delayElapsed = true;
+                    this.evaluateVisibility();
+                }, 5000);
+            };
+
+            if (document.readyState === 'complete') {
+                onLoad();
+            } else {
+                window.addEventListener('load', onLoad, { once: true });
+            }
+
             window.addEventListener('epic-hub:install-ready', () => {
                 this.deferredPrompt = window.__epicHubDeferredInstallPrompt;
                 this.canInstall = !! this.deferredPrompt;
+                this.evaluateVisibility();
             });
 
             window.addEventListener('epic-hub:installed', () => {
                 this.deferredPrompt = null;
                 this.canInstall = false;
                 this.isStandalone = true;
+                this.isVisible = false;
+                window.localStorage.removeItem(this.storageKey);
             });
         },
-        get visible() {
-            return ! this.isStandalone && (this.canInstall || this.isIos);
+        evaluateVisibility() {
+            if (! this.pageLoaded || ! this.delayElapsed || this.isStandalone || this.isDismissed()) {
+                return;
+            }
+
+            if (this.canInstall || this.isIos) {
+                this.isVisible = true;
+            }
+        },
+        isDismissed() {
+            return window.sessionStorage.getItem(this.storageKey) === '1';
+        },
+        dismiss() {
+            this.isVisible = false;
+            window.sessionStorage.setItem(this.storageKey, '1');
         },
         async promptInstall() {
             if (! this.deferredPrompt) {
@@ -34,40 +69,71 @@
             this.deferredPrompt = null;
             this.canInstall = false;
             window.__epicHubDeferredInstallPrompt = null;
+            this.dismiss();
         },
     }"
-    x-show="visible"
+    x-show="isVisible"
+    x-cloak
     style="display: none;"
-    {{ $attributes->class([
-        'rounded-[1.5rem] border border-emerald-200 bg-white/95 p-4 shadow-[0_18px_42px_rgba(5,150,105,0.10)]',
-    ]) }}
+    class="fixed inset-0 z-[90] flex items-end justify-center bg-slate-950/45 px-4 py-6 sm:items-center"
 >
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-start gap-3">
+    <div
+        x-on:click.outside="dismiss()"
+        {{ $attributes->class([
+            'relative w-full max-w-md overflow-hidden rounded-[2rem] border border-emerald-200 bg-white p-6 shadow-[0_28px_80px_rgba(15,23,42,0.24)]',
+        ]) }}
+    >
+        <button
+            type="button"
+            x-on:click="dismiss()"
+            class="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-all duration-150 hover:border-emerald-200 hover:text-emerald-600"
+            aria-label="Tutup pop up install EPIC Hub"
+        >
+            <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M7 7L17 17M17 7L7 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+        </button>
+
+        <div class="flex items-start gap-4 pr-10">
             <img
                 src="{{ asset('icons/icon-192.png') }}"
                 alt="EPIC Hub"
-                class="h-14 w-14 rounded-[1rem] border border-emerald-100 bg-emerald-50 object-cover"
-                width="56"
-                height="56"
+                class="h-16 w-16 rounded-[1.15rem] border border-emerald-100 bg-emerald-50 object-cover"
+                width="64"
+                height="64"
                 loading="lazy"
             />
 
             <div class="min-w-0">
                 <div class="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-600">EPIC Hub PWA</div>
-                <div class="mt-1 text-base font-semibold text-slate-900">Install EPIC Hub di perangkat Anda untuk akses lebih cepat.</div>
-                <p class="mt-1 text-sm leading-relaxed text-slate-600">
-                    Shortcut ini membuka EPIC Hub seperti app ringan tanpa perlu Play Store atau App Store.
-                </p>
-                <p x-show="isIos && !canInstall" class="mt-2 text-sm font-medium text-emerald-700">
-                    Pengguna iPhone: buka Safari → Share → Add to Home Screen.
+                <div class="mt-1 text-xl font-semibold tracking-tight text-slate-900">Install EPIC Hub di perangkat Anda</div>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                    Akses EPIC Hub lebih cepat langsung dari Home Screen tanpa perlu Play Store atau App Store.
                 </p>
             </div>
         </div>
 
-        <div x-show="canInstall" class="shrink-0">
+        <div class="mt-5 rounded-[1.4rem] bg-emerald-50/70 p-4 text-sm leading-relaxed text-emerald-900">
+            <p x-show="canInstall">
+                Browser Anda mendukung instalasi langsung. Tekan tombol install untuk menambahkan EPIC Hub ke Home Screen.
+            </p>
+            <p x-show="isIos && !canInstall" style="display: none;">
+                Pengguna iPhone: buka Safari, tekan Share, lalu pilih Add to Home Screen.
+            </p>
+        </div>
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
                 type="button"
+                x-on:click="dismiss()"
+                class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-150 hover:border-slate-300 hover:text-slate-900"
+            >
+                Nanti Saja
+            </button>
+
+            <button
+                type="button"
+                x-show="canInstall"
                 x-on:click="promptInstall()"
                 class="inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#10b981,#059669)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(5,150,105,0.20)] transition-all duration-150 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.98]"
             >

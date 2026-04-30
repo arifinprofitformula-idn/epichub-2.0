@@ -39,7 +39,6 @@
                         </div>
                     </div>
 
-                    <x-pwa-install-button class="mt-8" />
                 </div>
 
                 <div class="md:justify-self-end">

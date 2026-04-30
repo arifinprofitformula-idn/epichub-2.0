@@ -199,6 +199,7 @@
             </flux:toast.group>
         @endpersist
 
+        <x-pwa-install-button />
         @include('partials.pwa-scripts')
         @fluxScripts
     </body>
