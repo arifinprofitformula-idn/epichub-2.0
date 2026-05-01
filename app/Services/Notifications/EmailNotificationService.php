@@ -295,7 +295,163 @@ class EmailNotificationService
         );
     }
 
+    // ── Rendered content methods (dari template DB) ──────────────────────────
+
+    /**
+     * Kirim email transactional dengan konten HTML yang sudah dirender.
+     * Digunakan oleh NotificationDispatcher untuk template dari database.
+     *
+     * @param  array{email: string, name?: string}  $recipient
+     * @param  array<string, mixed>  $metadata
+     */
+    public function sendRenderedTransactionalEmail(
+        array $recipient,
+        string $subject,
+        string $htmlContent,
+        string $eventType,
+        array $metadata = [],
+    ): void {
+        if (! $this->shouldSend($eventType)) {
+            $this->logSkipped($recipient['email'], $subject, $eventType, $metadata);
+            return;
+        }
+
+        $this->dispatchRendered(
+            recipientEmail: $recipient['email'],
+            recipientName: $recipient['name'] ?? null,
+            subject: $subject,
+            htmlContent: $htmlContent,
+            eventType: $eventType,
+            metadata: $metadata,
+            notifiable: $metadata['notifiable'] ?? null,
+        );
+    }
+
+    /**
+     * Kirim email ke admin dengan konten HTML yang sudah dirender.
+     * Digunakan oleh NotificationDispatcher untuk template dari database.
+     *
+     * @param  array<string, mixed>  $metadata
+     */
+    public function sendRenderedAdminNotification(
+        string $subject,
+        string $htmlContent,
+        string $eventType,
+        array $metadata = [],
+    ): void {
+        $adminRecipients = $this->adminRecipients();
+
+        if ($adminRecipients === []) {
+            Log::info("EmailNotificationService: admin_notification_email tidak diset, skip event [{$eventType}]");
+            return;
+        }
+
+        if (! $this->shouldSend($eventType)) {
+            foreach ($adminRecipients as $adminEmail) {
+                $this->logSkipped($adminEmail, $subject, $eventType, $metadata);
+            }
+
+            return;
+        }
+
+        foreach ($adminRecipients as $adminEmail) {
+            $this->dispatchRendered(
+                recipientEmail: $adminEmail,
+                recipientName: 'Admin EPIC HUB',
+                subject: $subject,
+                htmlContent: $htmlContent,
+                eventType: $eventType,
+                metadata: $metadata,
+                notifiable: $metadata['notifiable'] ?? null,
+            );
+        }
+    }
+
     // ── Internals ────────────────────────────────────────────────────────────
+
+    private function dispatchRendered(
+        string $recipientEmail,
+        ?string $recipientName,
+        string $subject,
+        string $htmlContent,
+        string $eventType,
+        array $metadata,
+        mixed $notifiable,
+    ): void {
+        $useQueue = (bool) $this->settings->getMailketing('enable_email_queue', false);
+
+        if ($useQueue) {
+            dispatch(function () use ($recipientEmail, $recipientName, $subject, $htmlContent, $eventType, $metadata, $notifiable) {
+                $this->sendRendered($recipientEmail, $recipientName, $subject, $htmlContent, $eventType, $metadata, $notifiable);
+            })->afterCommit();
+        } else {
+            \Illuminate\Support\Facades\DB::afterCommit(function () use ($recipientEmail, $recipientName, $subject, $htmlContent, $eventType, $metadata, $notifiable) {
+                $this->sendRendered($recipientEmail, $recipientName, $subject, $htmlContent, $eventType, $metadata, $notifiable);
+            });
+        }
+    }
+
+    private function sendRendered(
+        string $recipientEmail,
+        ?string $recipientName,
+        string $subject,
+        string $htmlContent,
+        string $eventType,
+        array $metadata,
+        mixed $notifiable,
+    ): void {
+        $notifiableType = null;
+        $notifiableId   = null;
+
+        if (is_object($notifiable) && method_exists($notifiable, 'getKey')) {
+            $notifiableType = get_class($notifiable);
+            $notifiableId   = $notifiable->getKey();
+        }
+
+        if ($this->mailketing->isEnabled()) {
+            $this->sendViaMailketing(
+                recipientEmail: $recipientEmail,
+                recipientName: $recipientName,
+                subject: $subject,
+                content: $htmlContent,
+                eventType: $eventType,
+                notifiableType: $notifiableType,
+                notifiableId: $notifiableId,
+                metadata: $this->metadataWithRetryPayload(
+                    metadata: $metadata,
+                    recipientName: $recipientName,
+                    subject: $subject,
+                    content: $htmlContent,
+                    eventType: $eventType,
+                    notifiableType: $notifiableType,
+                    notifiableId: $notifiableId,
+                    provider: 'mailketing',
+                ),
+            );
+
+            return;
+        }
+
+        $this->sendViaFallback(
+            recipientEmail: $recipientEmail,
+            recipientName: $recipientName,
+            subject: $subject,
+            content: $htmlContent,
+            eventType: $eventType,
+            notifiableType: $notifiableType,
+            notifiableId: $notifiableId,
+            metadata: $this->metadataWithRetryPayload(
+                metadata: $metadata,
+                recipientName: $recipientName,
+                subject: $subject,
+                content: $htmlContent,
+                eventType: $eventType,
+                notifiableType: $notifiableType,
+                notifiableId: $notifiableId,
+                provider: 'laravel',
+            ),
+        );
+    }
 
     private function dispatch(
         string $recipientEmail,

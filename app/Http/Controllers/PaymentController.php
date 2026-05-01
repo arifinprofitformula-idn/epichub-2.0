@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Payments\UploadPaymentProofRequest;
 use App\Models\Payment;
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -83,62 +83,76 @@ class PaymentController extends Controller
                 return;
             }
 
-            $emailSvc   = app(EmailNotificationService::class);
-            $submittedAt = now()->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y, H:i');
+            $submittedAt  = now()->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y, H:i');
+            $amount       = 'Rp '.number_format((float) $payment->amount, 0, ',', '.');
+            $emailSvc     = app(EmailNotificationService::class);
+            $dispatcher   = app(NotificationDispatcher::class);
+            $builder      = app(NotificationPayloadBuilder::class);
 
-            $emailSvc->sendTransactionalEmail(
-                recipient: ['email' => $user->email, 'name' => $user->name],
-                subject: 'Bukti Pembayaran Anda Sedang Diverifikasi',
-                view: 'emails.orders.payment-submitted',
-                data: [
-                    'userName'      => $user->name,
-                    'orderNumber'   => $order->order_number,
-                    'paymentNumber' => $payment->payment_number,
-                    'amount'        => (float) $payment->amount,
-                    'paymentUrl'    => route('payments.show', $payment),
-                ],
-                eventType: 'payment_submitted',
-                metadata: ['notifiable' => $payment],
+            $memberPayload = $builder->forPaymentSubmitted($payment);
+            $adminPayload  = $builder->forAdminPayment($payment);
+
+            // ── Member ────────────────────────────────────────────────────
+            $dispatcher->notifyMemberEmail(
+                eventKey:   'payment_submitted',
+                user:       $user,
+                payload:    $memberPayload,
+                notifiable: $payment,
+                fallback:   fn () => $emailSvc->sendTransactionalEmail(
+                    recipient: ['email' => $user->email, 'name' => $user->name],
+                    subject:   'Bukti Pembayaran Anda Sedang Diverifikasi',
+                    view:      'emails.orders.payment-submitted',
+                    data:      [
+                        'userName'      => $user->name,
+                        'orderNumber'   => $order->order_number,
+                        'paymentNumber' => $payment->payment_number,
+                        'amount'        => (float) $payment->amount,
+                        'paymentUrl'    => route('payments.show', $payment),
+                    ],
+                    eventType: 'payment_submitted',
+                    metadata:  ['notifiable' => $payment],
+                ),
             );
 
-            $emailSvc->sendAdminNotification(
-                subject: 'Bukti Pembayaran Baru — '.$payment->payment_number,
-                view: 'emails.admin.payment-submitted',
-                data: [
-                    'paymentNumber' => $payment->payment_number,
-                    'orderNumber'   => $order->order_number,
-                    'customerName'  => $user->name,
-                    'customerEmail' => $user->email,
-                    'amount'        => (float) $payment->amount,
-                    'submittedAt'   => $submittedAt,
-                    'adminPaymentUrl' => url('/admin/payments/'.$payment->payment_number.'/edit'),
-                ],
-                eventType: 'admin_payment_submitted',
-                metadata: ['notifiable' => $payment],
+            $dispatcher->notifyMemberWhatsApp(
+                eventKey:   'payment_submitted',
+                user:       $user,
+                payload:    $memberPayload,
+                notifiable: $payment,
+                legacyData: ['name' => $user->name, 'payment_number' => $payment->payment_number],
             );
 
-            $whatsAppSvc = app(WhatsAppNotificationService::class);
-            $templateSvc = app(WhatsAppMessageTemplateService::class);
-            $amount = 'Rp '.number_format((float) $payment->amount, 0, ',', '.');
+            // ── Admin ─────────────────────────────────────────────────────
+            $dispatcher->notifyAdminEmail(
+                eventKey:   'admin_payment_submitted',
+                payload:    $adminPayload,
+                notifiable: $payment,
+                fallback:   fn () => $emailSvc->sendAdminNotification(
+                    subject:   'Bukti Pembayaran Baru — '.$payment->payment_number,
+                    view:      'emails.admin.payment-submitted',
+                    data:      [
+                        'paymentNumber'  => $payment->payment_number,
+                        'orderNumber'    => $order->order_number,
+                        'customerName'   => $user->name,
+                        'customerEmail'  => $user->email,
+                        'amount'         => (float) $payment->amount,
+                        'submittedAt'    => $submittedAt,
+                        'adminPaymentUrl'=> url('/admin/payments/'.$payment->payment_number.'/edit'),
+                    ],
+                    eventType: 'admin_payment_submitted',
+                    metadata:  ['notifiable' => $payment],
+                ),
+            );
 
-            $whatsAppSvc->sendToUser(
-                user: $user,
-                message: $templateSvc->render('payment_submitted', [
-                    'name' => $user->name,
+            $dispatcher->notifyAdminWhatsApp(
+                eventKey:   'admin_payment_submitted',
+                payload:    $adminPayload,
+                notifiable: $payment,
+                legacyData: [
                     'payment_number' => $payment->payment_number,
-                ]),
-                eventType: 'payment_submitted',
-                metadata: ['notifiable' => $payment],
-            );
-
-            $whatsAppSvc->sendAdminAlert(
-                message: $templateSvc->render('admin_payment_submitted', [
-                    'payment_number' => $payment->payment_number,
-                    'member_name' => $user->name,
-                    'amount' => $amount,
-                ]),
-                eventType: 'admin_payment_submitted',
-                metadata: ['notifiable' => $payment],
+                    'member_name'    => $user->name,
+                    'amount'         => $amount,
+                ],
             );
         } catch (\Throwable $e) {
             Log::error('PaymentController: gagal kirim payment submitted notification', ['error' => $e->getMessage()]);

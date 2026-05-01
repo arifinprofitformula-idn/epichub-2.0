@@ -8,14 +8,13 @@ use App\Actions\Event\CheckEventCheckoutEligibilityAction;
 use App\Actions\Orders\CreateDirectOrderAction;
 use App\Enums\PaymentMethod;
 use App\Enums\ProductType;
-use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -121,37 +120,38 @@ class CheckoutController extends Controller
     private function sendGuestWelcomeEmail(User $user): void
     {
         try {
-            app(EmailNotificationService::class)->sendTransactionalEmail(
-                recipient: ['email' => $user->email, 'name' => $user->name],
-                subject: 'Selamat Datang di EPIC HUB',
-                view: 'emails.auth.welcome',
-                data: [
-                    'userName'     => $user->name,
-                    'userEmail'    => $user->email,
-                    'dashboardUrl' => url('/dashboard'),
-                    'productsUrl'  => url('/produk-saya'),
-                ],
-                eventType: 'user_registered',
-                metadata: ['notifiable' => $user],
+            $payload    = app(NotificationPayloadBuilder::class)->forUserRegistered($user);
+            $dispatcher = app(NotificationDispatcher::class);
+
+            $dispatcher->notifyMemberEmail(
+                eventKey:   'user_registered',
+                user:       $user,
+                payload:    $payload,
+                notifiable: $user,
+                fallback:   fn () => app(EmailNotificationService::class)->sendTransactionalEmail(
+                    recipient: ['email' => $user->email, 'name' => $user->name],
+                    subject:   'Selamat Datang di EPIC HUB',
+                    view:      'emails.auth.welcome',
+                    data:      [
+                        'userName'     => $user->name,
+                        'userEmail'    => $user->email,
+                        'dashboardUrl' => url('/dashboard'),
+                        'productsUrl'  => url('/produk-saya'),
+                    ],
+                    eventType: 'user_registered',
+                    metadata:  ['notifiable' => $user],
+                ),
+            );
+
+            $dispatcher->notifyMemberWhatsApp(
+                eventKey:   'user_registered',
+                user:       $user,
+                payload:    $payload,
+                notifiable: $user,
+                legacyData: ['name' => $user->name, 'dashboard_url' => url('/dashboard')],
             );
         } catch (\Throwable $e) {
-            Log::error('CheckoutController: gagal kirim welcome email', ['error' => $e->getMessage()]);
-        }
-
-        try {
-            $message = app(WhatsAppMessageTemplateService::class)->render('user_registered', [
-                'name' => $user->name,
-                'dashboard_url' => url('/dashboard'),
-            ]);
-
-            app(WhatsAppNotificationService::class)->sendToUser(
-                user: $user,
-                message: $message,
-                eventType: 'user_registered',
-                metadata: ['notifiable' => $user],
-            );
-        } catch (\Throwable $e) {
-            Log::error('CheckoutController: gagal kirim welcome whatsapp', ['error' => $e->getMessage()]);
+            Log::error('CheckoutController: gagal kirim welcome notification', ['error' => $e->getMessage()]);
         }
 
         try {
@@ -159,7 +159,7 @@ class CheckoutController extends Controller
         } catch (\Throwable $e) {
             Log::error('CheckoutController: gagal subscriber automation default list', [
                 'user_id' => $user->id,
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -174,70 +174,88 @@ class CheckoutController extends Controller
                 return;
             }
 
-            $products = $order->items->map(fn ($item) => $item->product?->name ?? '-')->filter()->values()->all();
+            $paymentUrl  = route('payments.show', $payment);
             $methodLabel = $payment->payment_method instanceof PaymentMethod
                 ? $payment->payment_method->value
                 : (string) $payment->payment_method;
 
-            $emailSvc = app(EmailNotificationService::class);
+            $products = $order->items->map(fn ($item) => $item->product?->name ?? '-')->filter()->values()->all();
+            $amount   = 'Rp '.number_format((float) $order->total_amount, 0, ',', '.');
 
-            $emailSvc->sendTransactionalEmail(
-                recipient: ['email' => $user->email, 'name' => $user->name],
-                subject: 'Order Anda Berhasil Dibuat — '.$order->order_number,
-                view: 'emails.orders.created',
-                data: [
-                    'userName'      => $user->name,
-                    'orderNumber'   => $order->order_number,
-                    'products'      => $products,
-                    'totalAmount'   => (float) $order->total_amount,
-                    'paymentMethod' => $methodLabel,
-                    'paymentUrl'    => route('payments.show', $payment),
-                ],
-                eventType: 'order_created',
-                metadata: ['notifiable' => $order],
+            $payload    = app(NotificationPayloadBuilder::class)->forOrderCreated($order);
+            $dispatcher = app(NotificationDispatcher::class);
+            $emailSvc   = app(EmailNotificationService::class);
+
+            // ── Member ────────────────────────────────────────────────────
+            $dispatcher->notifyMemberEmail(
+                eventKey:   'order_created',
+                user:       $user,
+                payload:    $payload,
+                notifiable: $order,
+                fallback:   fn () => $emailSvc->sendTransactionalEmail(
+                    recipient: ['email' => $user->email, 'name' => $user->name],
+                    subject:   'Order Anda Berhasil Dibuat — '.$order->order_number,
+                    view:      'emails.orders.created',
+                    data:      [
+                        'userName'      => $user->name,
+                        'orderNumber'   => $order->order_number,
+                        'products'      => $products,
+                        'totalAmount'   => (float) $order->total_amount,
+                        'paymentMethod' => $methodLabel,
+                        'paymentUrl'    => $paymentUrl,
+                    ],
+                    eventType: 'order_created',
+                    metadata:  ['notifiable' => $order],
+                ),
             );
 
-            $emailSvc->sendAdminNotification(
-                subject: 'Order Baru Masuk — '.$order->order_number,
-                view: 'emails.admin.new-order',
-                data: [
-                    'orderNumber'   => $order->order_number,
-                    'customerName'  => $user->name,
-                    'customerEmail' => $user->email,
-                    'products'      => $products,
-                    'totalAmount'   => (float) $order->total_amount,
-                    'paymentMethod' => $methodLabel,
-                    'createdAt'     => $order->created_at?->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y, H:i') ?? '-',
-                    'adminOrderUrl' => url('/admin/orders/'.$order->order_number.'/edit'),
-                ],
-                eventType: 'admin_order_created',
-                metadata: ['notifiable' => $order],
-            );
-
-            $whatsAppSvc = app(WhatsAppNotificationService::class);
-            $templateSvc = app(WhatsAppMessageTemplateService::class);
-            $amount = 'Rp '.number_format((float) $order->total_amount, 0, ',', '.');
-
-            $whatsAppSvc->sendToUser(
-                user: $user,
-                message: $templateSvc->render('order_created', [
-                    'name' => $user->name,
+            $dispatcher->notifyMemberWhatsApp(
+                eventKey:   'order_created',
+                user:       $user,
+                payload:    $payload,
+                notifiable: $order,
+                legacyData: [
+                    'name'         => $user->name,
                     'order_number' => $order->order_number,
                     'total_amount' => $amount,
-                    'payment_url' => route('payments.show', $payment),
-                ]),
-                eventType: 'order_created',
-                metadata: ['notifiable' => $order],
+                    'payment_url'  => $paymentUrl,
+                ],
             );
 
-            $whatsAppSvc->sendAdminAlert(
-                message: $templateSvc->render('admin_order_created', [
+            // ── Admin ─────────────────────────────────────────────────────
+            $adminPayload = app(NotificationPayloadBuilder::class)->forAdminOrder($order);
+
+            $dispatcher->notifyAdminEmail(
+                eventKey:   'admin_order_created',
+                payload:    $adminPayload,
+                notifiable: $order,
+                fallback:   fn () => $emailSvc->sendAdminNotification(
+                    subject:   'Order Baru Masuk — '.$order->order_number,
+                    view:      'emails.admin.new-order',
+                    data:      [
+                        'orderNumber'   => $order->order_number,
+                        'customerName'  => $user->name,
+                        'customerEmail' => $user->email,
+                        'products'      => $products,
+                        'totalAmount'   => (float) $order->total_amount,
+                        'paymentMethod' => $methodLabel,
+                        'createdAt'     => $order->created_at?->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y, H:i') ?? '-',
+                        'adminOrderUrl' => url('/admin/orders/'.$order->order_number.'/edit'),
+                    ],
+                    eventType: 'admin_order_created',
+                    metadata:  ['notifiable' => $order],
+                ),
+            );
+
+            $dispatcher->notifyAdminWhatsApp(
+                eventKey:   'admin_order_created',
+                payload:    $adminPayload,
+                notifiable: $order,
+                legacyData: [
                     'order_number' => $order->order_number,
-                    'member_name' => $user->name,
+                    'member_name'  => $user->name,
                     'total_amount' => $amount,
-                ]),
-                eventType: 'admin_order_created',
-                metadata: ['notifiable' => $order],
+                ],
             );
         } catch (\Throwable $e) {
             Log::error('CheckoutController: gagal kirim order notification', ['error' => $e->getMessage()]);

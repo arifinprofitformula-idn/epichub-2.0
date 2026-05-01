@@ -14,8 +14,8 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\UserProduct;
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -159,29 +159,37 @@ class GrantProductAccessAction
                 default             => url('/produk-saya'),
             };
 
-            app(EmailNotificationService::class)->sendTransactionalEmail(
-                recipient: ['email' => $user->email, 'name' => $user->name],
-                subject: 'Akses Produk Anda Sudah Aktif',
-                view: 'emails.products.access-granted',
-                data: [
-                    'userName'      => $user->name,
-                    'productName'   => $product->name,
-                    'productType'   => $typeLabel,
-                    'accessUrl'     => $accessUrl,
-                    'myProductsUrl' => url('/produk-saya'),
-                ],
-                eventType: 'access_granted',
-                metadata: ['notifiable' => $userProduct],
+            $payload    = app(NotificationPayloadBuilder::class)->forAccessGranted($userProduct);
+            $dispatcher = app(NotificationDispatcher::class);
+            $emailSvc   = app(EmailNotificationService::class);
+
+            $dispatcher->notifyMemberEmail(
+                eventKey:   'access_granted',
+                user:       $user,
+                payload:    $payload,
+                notifiable: $userProduct,
+                fallback:   fn () => $emailSvc->sendTransactionalEmail(
+                    recipient: ['email' => $user->email, 'name' => $user->name],
+                    subject:   'Akses Produk Anda Sudah Aktif',
+                    view:      'emails.products.access-granted',
+                    data:      [
+                        'userName'      => $user->name,
+                        'productName'   => $product->name,
+                        'productType'   => $typeLabel,
+                        'accessUrl'     => $accessUrl,
+                        'myProductsUrl' => url('/produk-saya'),
+                    ],
+                    eventType: 'access_granted',
+                    metadata:  ['notifiable' => $userProduct],
+                ),
             );
 
-            app(WhatsAppNotificationService::class)->sendToUser(
-                user: $user,
-                message: app(WhatsAppMessageTemplateService::class)->render('access_granted', [
-                    'product_name' => $product->name,
-                    'produk_saya_url' => url('/produk-saya'),
-                ]),
-                eventType: 'access_granted',
-                metadata: ['notifiable' => $userProduct],
+            $dispatcher->notifyMemberWhatsApp(
+                eventKey:   'access_granted',
+                user:       $user,
+                payload:    $payload,
+                notifiable: $userProduct,
+                legacyData: ['product_name' => $product->name, 'produk_saya_url' => url('/produk-saya')],
             );
         } catch (\Throwable $e) {
             Log::error('GrantProductAccessAction: gagal kirim access granted notification', ['error' => $e->getMessage()]);

@@ -15,8 +15,8 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -128,36 +128,42 @@ class MarkPaymentAsPaidAction
                 return;
             }
 
-            $products = $order->items->map(fn ($item) => $item->product?->name ?? '-')->filter()->values()->all();
-
+            $products      = $order->items->map(fn ($item) => $item->product?->name ?? '-')->filter()->values()->all();
             $hasCourseProd = $order->items->contains(fn ($item) => $this->isProductType($item->product, ProductType::Course));
             $hasEventProd  = $order->items->contains(fn ($item) => $this->isProductType($item->product, ProductType::Event));
 
-            app(EmailNotificationService::class)->sendTransactionalEmail(
-                recipient: ['email' => $user->email, 'name' => $user->name],
-                subject: 'Pembayaran Berhasil, Akses Produk Aktif!',
-                view: 'emails.orders.payment-approved',
-                data: [
-                    'userName'      => $user->name,
-                    'orderNumber'   => $order->order_number,
-                    'products'      => $products,
-                    'myProductsUrl' => url('/produk-saya'),
-                    'myCoursesUrl'  => $hasCourseProd ? url('/kelas-saya') : null,
-                    'myEventsUrl'   => $hasEventProd ? url('/event-saya') : null,
-                ],
-                eventType: 'payment_approved',
-                metadata: ['notifiable' => $payment],
+            $payload    = app(NotificationPayloadBuilder::class)->forPaymentApproved($payment);
+            $dispatcher = app(NotificationDispatcher::class);
+            $emailSvc   = app(EmailNotificationService::class);
+
+            $dispatcher->notifyMemberEmail(
+                eventKey:   'payment_approved',
+                user:       $user,
+                payload:    $payload,
+                notifiable: $payment,
+                fallback:   fn () => $emailSvc->sendTransactionalEmail(
+                    recipient: ['email' => $user->email, 'name' => $user->name],
+                    subject:   'Pembayaran Berhasil, Akses Produk Aktif!',
+                    view:      'emails.orders.payment-approved',
+                    data:      [
+                        'userName'      => $user->name,
+                        'orderNumber'   => $order->order_number,
+                        'products'      => $products,
+                        'myProductsUrl' => url('/produk-saya'),
+                        'myCoursesUrl'  => $hasCourseProd ? url('/kelas-saya') : null,
+                        'myEventsUrl'   => $hasEventProd ? url('/event-saya') : null,
+                    ],
+                    eventType: 'payment_approved',
+                    metadata:  ['notifiable' => $payment],
+                ),
             );
 
-            $message = app(WhatsAppMessageTemplateService::class)->render('payment_approved', [
-                'produk_saya_url' => url('/produk-saya'),
-            ]);
-
-            app(WhatsAppNotificationService::class)->sendToUser(
-                user: $user,
-                message: $message,
-                eventType: 'payment_approved',
-                metadata: ['notifiable' => $payment],
+            $dispatcher->notifyMemberWhatsApp(
+                eventKey:   'payment_approved',
+                user:       $user,
+                payload:    $payload,
+                notifiable: $payment,
+                legacyData: ['produk_saya_url' => url('/produk-saya')],
             );
         } catch (\Throwable $e) {
             Log::error('MarkPaymentAsPaidAction: gagal kirim payment approved notification', ['error' => $e->getMessage()]);
