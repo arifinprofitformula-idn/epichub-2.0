@@ -5,7 +5,6 @@
         $tabs = [
             'summary' => 'Ringkasan',
             'v2' => 'Komisi EPIC HUB 2.0',
-            'legacy' => 'Komisi Legacy 1.0',
             'payout' => 'Payout',
         ];
 
@@ -18,12 +17,12 @@
         ];
 
         $summaryCards = [
-            ['label' => 'Total Komisi Legacy 1.0', 'value' => $summary['legacy_total'], 'tone' => 'from-amber-50 to-orange-50 border-amber-100'],
             ['label' => 'Total Komisi 2.0', 'value' => $summary['v2_total'], 'tone' => 'from-emerald-50 to-teal-50 border-emerald-100'],
-            ['label' => 'Total Komisi Keseluruhan', 'value' => $summary['overall_total'], 'tone' => 'from-sky-50 to-indigo-50 border-sky-100'],
             ['label' => 'Total Paid', 'value' => $summary['paid_total'], 'tone' => 'from-blue-50 to-indigo-50 border-blue-100'],
             ['label' => 'Total Unpaid/Pending', 'value' => $summary['unpaid_total'], 'tone' => 'from-amber-50 to-yellow-50 border-amber-100'],
             ['label' => 'Total Approved', 'value' => $summary['approved_total'], 'tone' => 'from-emerald-50 to-lime-50 border-emerald-100'],
+            ['label' => 'Total Pending', 'value' => $summary['pending_total'], 'tone' => 'from-sky-50 to-cyan-50 border-sky-100'],
+            ['label' => 'Total Ledger', 'value' => $summary['overall_total'], 'tone' => 'from-slate-50 to-zinc-50 border-slate-200'],
         ];
     @endphp
 
@@ -41,7 +40,7 @@
             </div>
             <h1 class="mt-2 text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">Komisi Saya</h1>
             <p class="mt-1 max-w-3xl text-sm text-zinc-500 dark:text-zinc-400">
-                Ledger ini menampilkan komisi aktif EPIC HUB 2.0 dan laporan legacy dari EPIC HUB 1.0 dengan sumber data yang tetap dipisahkan.
+                Ledger ini menampilkan seluruh komisi aktif EPIC HUB 2.0 untuk channel Anda.
             </p>
         </div>
         <a href="{{ route('epi-channel.dashboard') }}"
@@ -85,13 +84,13 @@
                 <div>
                     <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">Ringkasan Ledger</h2>
                     <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                        Total unpaid mencakup komisi yang belum dibayar dari sumber 2.0 maupun legacy 1.0.
+                        Ringkasan ini hanya menampilkan data komisi EPIC HUB 2.0 yang aktif di sistem saat ini.
                     </p>
                 </div>
                 <div class="grid gap-2 text-sm text-zinc-500 dark:text-zinc-400 md:grid-cols-3">
                     <div>Pending 2.0: <span class="font-semibold text-zinc-900 dark:text-white">Rp {{ number_format((float) $summary['v2_pending_total'], 0, ',', '.') }}</span></div>
-                    <div>Pending Legacy: <span class="font-semibold text-zinc-900 dark:text-white">Rp {{ number_format((float) $summary['legacy_pending_total'], 0, ',', '.') }}</span></div>
-                    <div>Paid Legacy: <span class="font-semibold text-zinc-900 dark:text-white">Rp {{ number_format((float) $summary['legacy_paid_total'], 0, ',', '.') }}</span></div>
+                    <div>Approved 2.0: <span class="font-semibold text-zinc-900 dark:text-white">Rp {{ number_format((float) $summary['v2_approved_total'], 0, ',', '.') }}</span></div>
+                    <div>Paid 2.0: <span class="font-semibold text-zinc-900 dark:text-white">Rp {{ number_format((float) $summary['v2_paid_total'], 0, ',', '.') }}</span></div>
                 </div>
             </div>
         </div>
@@ -99,14 +98,14 @@
         <div class="mt-6 rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <div class="border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
                 <h3 class="text-base font-semibold text-zinc-900 dark:text-white">Aktivitas Komisi Terbaru</h3>
-                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Sumber data tetap dipisahkan dan diberi label sesuai asal ledger.</p>
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Seluruh aktivitas pada ledger ini berasal dari EPIC HUB 2.0.</p>
             </div>
 
             @if ($recentLedgerRows->isEmpty())
                 <div class="p-8">
                     <x-ui.empty-state
                         title="Belum ada data komisi"
-                        description="Komisi EPIC HUB 2.0 maupun Legacy 1.0 akan muncul di sini setelah tersedia."
+                        description="Komisi EPIC HUB 2.0 akan muncul di sini setelah order referral selesai diproses."
                     />
                 </div>
             @else
@@ -205,69 +204,6 @@
 
                 <div class="border-t border-zinc-100 px-5 py-4 dark:border-zinc-800">
                     {{ $v2Commissions->links() }}
-                </div>
-            @endif
-        </div>
-    @endif
-
-    @if ($activeTab === 'legacy')
-        <div class="mt-6 rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
-                <h3 class="text-base font-semibold text-zinc-900 dark:text-white">Komisi Legacy EPIC HUB 1.0</h3>
-                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Data ini berasal dari sumber asli legacy dan tidak memicu komisi baru di EPIC HUB 2.0.</p>
-            </div>
-
-            @if ($legacyCommissions->isEmpty())
-                <div class="p-8">
-                    <x-ui.empty-state
-                        title="Belum ada komisi legacy"
-                        description="Jika laporan komisi EPIC HUB 1.0 untuk akun ini sudah diimport, datanya akan tampil di sini."
-                    />
-                </div>
-            @else
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-zinc-100 dark:divide-zinc-800">
-                        <thead class="bg-zinc-50/90 dark:bg-zinc-950">
-                            <tr class="text-left text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-                                <th class="px-5 py-3">Tanggal</th>
-                                <th class="px-5 py-3">Sumber</th>
-                                <th class="px-5 py-3">Produk</th>
-                                <th class="px-5 py-3">Tipe Komisi</th>
-                                <th class="px-5 py-3">Level</th>
-                                <th class="px-5 py-3">Status</th>
-                                <th class="px-5 py-3 text-right">Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
-                            @foreach ($legacyCommissions as $commission)
-                                @php
-                                    $statusColor = $commission->commission_status?->getColor() ?? 'gray';
-                                    $date = $commission->earned_at ?? $commission->approved_at ?? $commission->paid_at ?? $commission->created_at;
-                                @endphp
-                                <tr class="bg-white dark:bg-zinc-900">
-                                    <td class="px-5 py-4 text-sm text-zinc-600 dark:text-zinc-300">{{ $date?->format('d M Y H:i') ?? '-' }}</td>
-                                    <td class="px-5 py-4">
-                                        <span class="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">EPIC HUB 1.0</span>
-                                    </td>
-                                    <td class="px-5 py-4 text-sm font-medium text-zinc-900 dark:text-white">{{ $commission->product?->title ?? $commission->legacy_product_name ?? '-' }}</td>
-                                    <td class="px-5 py-4 text-sm text-zinc-600 dark:text-zinc-300">{{ filled($commission->commission_type) ? \Illuminate\Support\Str::headline((string) $commission->commission_type) : '-' }}</td>
-                                    <td class="px-5 py-4 text-sm text-zinc-600 dark:text-zinc-300">{{ $commission->commission_level ?? '-' }}</td>
-                                    <td class="px-5 py-4">
-                                        <span class="{{ $badgeClasses[$statusColor] ?? $badgeClasses['gray'] }} inline-flex rounded-full px-2.5 py-1 text-xs font-semibold">
-                                            {{ $commission->commission_status?->label() ?? '-' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-5 py-4 text-right text-sm font-semibold text-zinc-900 dark:text-white">
-                                        Rp {{ number_format((float) $commission->commission_amount, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="border-t border-zinc-100 px-5 py-4 dark:border-zinc-800">
-                    {{ $legacyCommissions->links() }}
                 </div>
             @endif
         </div>

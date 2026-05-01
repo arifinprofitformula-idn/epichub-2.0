@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'legacy_epic_id', 'legacy_source', 'legacy_user_id', 'legacy_import_batch_id', 'legacy_imported_at', 'email', 'email_verified_at', 'password', 'must_reset_password', 'profile_photo_path', 'whatsapp_number', 'referrer_epi_channel_id', 'referral_locked_at', 'referral_source'])]
+#[Fillable(['name', 'email', 'email_verified_at', 'password', 'profile_photo_path', 'whatsapp_number', 'referrer_epi_channel_id', 'referral_locked_at', 'referral_source'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -38,9 +38,7 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'must_reset_password' => 'boolean',
             'referral_locked_at' => 'datetime',
-            'legacy_imported_at' => 'datetime',
         ];
     }
 
@@ -166,62 +164,6 @@ class User extends Authenticatable implements FilamentUser
     public function eventRegistrations(): HasMany
     {
         return $this->hasMany(EventRegistration::class);
-    }
-
-    /**
-     * @return HasMany<LegacyV1User, $this>
-     */
-    public function legacyV1MatchedUsers(): HasMany
-    {
-        return $this->hasMany(LegacyV1User::class, 'matched_user_id');
-    }
-
-    /**
-     * @return HasMany<LegacyV1User, $this>
-     */
-    public function legacyV1ImportedUsers(): HasMany
-    {
-        return $this->hasMany(LegacyV1User::class, 'imported_user_id');
-    }
-
-    /**
-     * @return HasMany<LegacyV1UserMapping, $this>
-     */
-    public function legacyV1UserMappings(): HasMany
-    {
-        return $this->hasMany(LegacyV1UserMapping::class);
-    }
-
-    /**
-     * @return HasMany<LegacyV1Order, $this>
-     */
-    public function legacyV1Orders(): HasMany
-    {
-        return $this->hasMany(LegacyV1Order::class);
-    }
-
-    /**
-     * @return HasMany<LegacyV1Payment, $this>
-     */
-    public function legacyV1Payments(): HasMany
-    {
-        return $this->hasMany(LegacyV1Payment::class);
-    }
-
-    /**
-     * @return HasMany<LegacyV1Commission, $this>
-     */
-    public function legacyV1Commissions(): HasMany
-    {
-        return $this->hasMany(LegacyV1Commission::class);
-    }
-
-    /**
-     * @return HasMany<LegacyV1Payout, $this>
-     */
-    public function legacyV1Payouts(): HasMany
-    {
-        return $this->hasMany(LegacyV1Payout::class);
     }
 
     public function hasLockedReferrer(): bool

@@ -61,11 +61,6 @@ class EpiChannel extends Model
         return $this->hasMany(CommissionPayout::class);
     }
 
-    public function legacyV1Commissions(): HasMany
-    {
-        return $this->hasMany(LegacyV1Commission::class);
-    }
-
     public function scopeActive(Builder $query): void
     {
         $query->where('status', EpiChannelStatus::Active);
