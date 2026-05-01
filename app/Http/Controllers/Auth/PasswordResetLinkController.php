@@ -33,12 +33,21 @@ class PasswordResetLinkController
                 'email' => ['required', 'email'],
             ]);
 
+            $email = $request->input('email');
+
+            // Check if email exists in the users table
+            $userExists = \App\Models\User::where('email', $email)->exists();
+
+            if (! $userExists) {
+                // Show a clear message when email is not registered
+                return back()->with('status', 'Maaf email tidak terdaftar pada sistem, masukkan email valid yang terdaftar pada sistem EPIC HUB')->withInput();
+            }
+
             $status = Password::sendResetLink(
                 $request->only('email')
             );
 
-            // Always redirect to success page regardless of status
-            // This prevents enumeration attacks (user can't tell if email exists)
+            // Redirect to success page when the link was sent
             return redirect()->route('password.reset.sent');
         } catch (\Exception $e) {
             // Log the error for debugging
