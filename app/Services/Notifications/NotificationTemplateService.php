@@ -19,7 +19,10 @@ class NotificationTemplateService
             return null;
         }
 
-        return NotificationTemplate::findTemplate($eventKey, $targetKey);
+        return NotificationTemplate::findTemplate(
+            $this->registry->resolveTemplateEventKey($eventKey, $targetKey),
+            $targetKey,
+        );
     }
 
     /** @return \Illuminate\Database\Eloquent\Collection<int, NotificationTemplate> */
@@ -139,7 +142,7 @@ class NotificationTemplateService
      *
      * @return array{warnings: string[], deprecated: string[], invalid: string[]}
      */
-    public function validateTemplateFields(string $eventKey, array $fields): array
+    public function validateTemplateFields(string $eventKey, string $targetKey, array $fields): array
     {
         $warnings   = [];
         $deprecated = [];
@@ -156,7 +159,7 @@ class NotificationTemplateService
                 continue;
             }
 
-            $result = $this->registry->validateContent($content, $eventKey);
+            $result = $this->registry->validateContent($content, $eventKey, $targetKey);
 
             foreach ($result['invalid_shortcodes'] as $key) {
                 $hint = isset($result['suggestions'][$key])

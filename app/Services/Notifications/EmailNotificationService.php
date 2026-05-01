@@ -290,7 +290,7 @@ class EmailNotificationService
                 'paidAt' => $this->formatDateTime($payout->paid_at, config('app.timezone', 'Asia/Jakarta')),
                 'adminPayoutUrl' => url('/admin/commission-payouts'),
             ],
-            eventType: 'admin_commission_payout_paid',
+            eventType: 'admin_payout_paid',
             metadata: ['notifiable' => $payout],
         );
     }
@@ -704,6 +704,7 @@ class EmailNotificationService
             'course_enrolled'          => 'notify_course_enrollment',
             'affiliate_commission_created' => 'notify_commission_created',
             'commission_payout_paid'   => 'notify_payout_paid',
+            'admin_payout_paid'        => 'notify_admin_payout_paid',
             'admin_commission_payout_paid' => 'notify_admin_payout_paid',
             'payment_reminder'         => 'enable_payment_reminder',
             'event_reminder_day_before' => 'enable_event_reminder',

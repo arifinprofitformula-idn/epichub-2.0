@@ -132,6 +132,25 @@ class NotificationShortcodeRegistry
         'admin_platform'  => 'admin',
     ];
 
+    /**
+     * Beberapa tab UI memakai event dasar, tetapi target tertentu sebenarnya
+     * dikirim melalui event admin khusus di runtime.
+     */
+    private const TARGET_EVENT_OVERRIDES = [
+        'order_created' => [
+            'admin' => 'admin_order_created',
+        ],
+        'payment_submitted' => [
+            'admin' => 'admin_payment_submitted',
+        ],
+        'event_registration_confirmed' => [
+            'admin' => 'admin_event_registration',
+        ],
+        'commission_payout_paid' => [
+            'admin' => 'admin_payout_paid',
+        ],
+    ];
+
     // ── Public API ───────────────────────────────────────────────────────────
 
     /** Semua canonical shortcode beserta metadata-nya. */
@@ -156,8 +175,10 @@ class NotificationShortcodeRegistry
     public function forTarget(string $eventKey, string $targetKey): array
     {
         $canonical = $this->normalizeTarget($targetKey);
+        $resolvedEventKey = $this->resolveEventKeyForTarget($eventKey, $canonical);
+
         return array_values(array_filter(
-            $this->forEvent($eventKey),
+            $this->forEvent($resolvedEventKey),
             fn (array $def) => in_array($canonical, $def['targets'], true),
         ));
     }
@@ -202,10 +223,18 @@ class NotificationShortcodeRegistry
      *
      * @return array{valid: bool, found_shortcodes: string[], invalid_shortcodes: string[], deprecated_aliases: array<string,string>, suggestions: array<string,string>}
      */
-    public function validateContent(string $content, string $eventKey): array
+    public function validateContent(string $content, string $eventKey, ?string $targetKey = null): array
     {
         $found       = $this->extractShortcodes($content);
-        $validKeys   = array_column($this->forEvent($eventKey), 'key');
+        $resolvedEventKey = $targetKey !== null
+            ? $this->resolveEventKeyForTarget($eventKey, $this->normalizeTarget($targetKey))
+            : $eventKey;
+        $validKeys   = array_column(
+            $targetKey !== null
+                ? $this->forTarget($eventKey, $targetKey)
+                : $this->forEvent($resolvedEventKey),
+            'key'
+        );
         $allKeys     = array_keys($this->definitions());
         $aliasKeys   = array_keys(self::ALIASES);
 
@@ -219,7 +248,7 @@ class NotificationShortcodeRegistry
             }
 
             if (in_array($key, $aliasKeys, true)) {
-                $canonical = $this->resolveAlias($key, $eventKey);
+                $canonical = $this->resolveAlias($key, $resolvedEventKey);
                 $deprecated[$key] = $canonical;
                 continue;
             }
@@ -283,6 +312,33 @@ class NotificationShortcodeRegistry
         }
 
         return self::ALIASES[$alias] ?? $alias;
+    }
+
+    public function resolveEventKeyForTarget(string $eventKey, string $targetKey): string
+    {
+        $canonicalTarget = $this->normalizeTarget($targetKey);
+
+        return self::TARGET_EVENT_OVERRIDES[$eventKey][$canonicalTarget] ?? $eventKey;
+    }
+
+    public function resolveTemplateEventKey(string $eventKey, string $targetKey): string
+    {
+        $canonicalTarget = $this->normalizeTarget($targetKey);
+
+        if ($canonicalTarget !== 'admin') {
+            return $eventKey;
+        }
+
+        foreach (self::TARGET_EVENT_OVERRIDES as $baseEventKey => $targets) {
+            if (($targets[$canonicalTarget] ?? null) === $eventKey) {
+                return $baseEventKey;
+            }
+        }
+
+        return match ($eventKey) {
+            'admin_commission_payout_paid' => 'commission_payout_paid',
+            default => $eventKey,
+        };
     }
 
     /** Tambahkan key alias ke payload supaya render berjalan untuk template lama. */

@@ -129,7 +129,7 @@ class NotificationSettingsPage extends Page
                     'whatsapp_body'   => $fields['whatsapp_body'] ?? '',
                 ]);
 
-                $validation = $service->validateTemplateFields($eventKey, $fields);
+                $validation = $service->validateTemplateFields($eventKey, $targetKey, $fields);
                 $this->validationResults[$eventKey][$targetKey] = $validation;
 
                 if (! empty($validation['invalid'])) {
@@ -250,7 +250,12 @@ class NotificationSettingsPage extends Page
     {
         $registry = app(NotificationShortcodeRegistry::class);
 
-        $shortcodesForEvent = $registry->forEvent($this->activeEvent);
+        $shortcodesForEvent = collect($this->templates[$this->activeEvent] ?? [])
+            ->keys()
+            ->flatMap(fn (string $targetKey) => $registry->forTarget($this->activeEvent, $targetKey))
+            ->unique('key')
+            ->values()
+            ->all();
         $allAliases         = $registry->aliases();
 
         $activeTargets = $this->templates[$this->activeEvent] ?? [];
