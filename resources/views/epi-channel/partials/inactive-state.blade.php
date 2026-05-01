@@ -76,27 +76,54 @@
         </div>
     </x-ui.card>
 
-    @if (($referrerContact['has_contact'] ?? false) && filled($referrerContact['whatsapp_url'] ?? null))
+    @if (filled($referrerContact['sponsor_epic_code'] ?? null) || filled($referrerContact['sponsor_name'] ?? null))
         <x-ui.card class="p-6">
             <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">Hubungi Pereferral Anda</div>
+                <div class="min-w-0">
+                    <div class="text-sm font-semibold text-zinc-900 dark:text-white">Tertarik Daftar EPI Channel?</div>
                     <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-                        Jika Anda sudah terdaftar dalam jaringan EPI Channel namun akses belum aktif, hubungi pereferral Anda untuk memastikan proses aktivasi dan sinkronisasi data.
+                        Silakan hubungi pereferral Anda untuk mengetahui info lebih lanjut sekarang juga melalui tombol berikut
                     </div>
-                    <div class="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    <div class="mt-3 flex flex-wrap items-center gap-2">
                         @if (filled($referrerContact['sponsor_name'] ?? null))
-                            <span class="rounded-full bg-zinc-100 px-3 py-1 text-zinc-700">{{ $referrerContact['sponsor_name'] }}</span>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                                <svg viewBox="0 0 24 24" fill="none" class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M12 13C14.2091 13 16 11.2091 16 9C16 6.79086 14.2091 5 12 5C9.79086 5 8 6.79086 8 9C8 11.2091 9.79086 13 12 13Z" stroke="currentColor" stroke-width="1.6"/>
+                                    <path d="M4 20C4.95 17.33 8.13 16 12 16C15.87 16 19.05 17.33 20 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                </svg>
+                                {{ $referrerContact['sponsor_name'] }}
+                            </span>
                         @endif
                         @if (filled($referrerContact['sponsor_epic_code'] ?? null))
-                            <span class="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700">{{ $referrerContact['sponsor_epic_code'] }}</span>
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                <svg viewBox="0 0 24 24" fill="none" class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <rect x="3.75" y="3.75" width="16.5" height="16.5" rx="2.25" stroke="currentColor" stroke-width="1.6"/>
+                                    <path d="M8 12H16M8 8.5H16M8 15.5H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                ID EPIC: {{ $referrerContact['sponsor_epic_code'] }}
+                            </span>
+                        @endif
+                        @if (($referrerContact['has_contact'] ?? false) && filled($referrerContact['whatsapp_number'] ?? null))
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                                <svg viewBox="0 0 24 24" fill="none" class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 13.6 3.41 15.1 4.13 16.4L3 21L7.7 19.9C8.97 20.6 10.44 21 12 21Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                                </svg>
+                                {{ $referrerContact['whatsapp_number'] }}
+                            </span>
                         @endif
                     </div>
                 </div>
 
-                <x-ui.button variant="primary" size="lg" :href="$referrerContact['whatsapp_url']" target="_blank" rel="noopener noreferrer">
-                    Hubungi Pereferral via WhatsApp
-                </x-ui.button>
+                @if (($referrerContact['has_contact'] ?? false) && filled($referrerContact['whatsapp_url'] ?? null))
+                    <x-ui.button variant="primary" size="lg" :href="$referrerContact['whatsapp_url']" target="_blank" rel="noopener noreferrer">
+                        Hubungi via WhatsApp
+                    </x-ui.button>
+                @else
+                    <div class="shrink-0 rounded-[var(--radius-lg)] border border-dashed border-zinc-200 bg-zinc-50 px-4 py-3 text-center dark:border-zinc-700 dark:bg-zinc-900">
+                        <div class="text-xs font-semibold text-zinc-500 dark:text-zinc-400">WhatsApp belum tersedia</div>
+                        <div class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Pereferral belum mengisi nomor</div>
+                    </div>
+                @endif
             </div>
         </x-ui.card>
     @else

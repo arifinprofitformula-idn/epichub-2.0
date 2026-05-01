@@ -9,10 +9,15 @@ use App\Enums\PaymentStatus;
 use App\Models\Payment;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 
 class PaymentsTable
@@ -180,6 +185,92 @@ class PaymentsTable
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
             ])
+            ->filters([
+                Filter::make('needs_verification')
+                    ->label('Perlu Verifikasi')
+                    ->query(fn (Builder $query): Builder => $query
+                        ->where('status', PaymentStatus::Pending)
+                        ->where('payment_method', PaymentMethod::ManualBankTransfer)
+                    )
+                    ->toggle()
+                    ->indicateUsing(fn (array $data): ?string => $data['isActive'] ? 'Perlu Verifikasi' : null),
+
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(collect(PaymentStatus::cases())
+                        ->mapWithKeys(fn (PaymentStatus $s) => [$s->value => $s->label()])
+                        ->all())
+                    ->multiple()
+                    ->preload(),
+
+                SelectFilter::make('payment_method')
+                    ->label('Metode Pembayaran')
+                    ->options(collect(PaymentMethod::cases())
+                        ->mapWithKeys(fn (PaymentMethod $m) => [$m->value => $m->label()])
+                        ->all()),
+
+                TernaryFilter::make('has_proof')
+                    ->label('Bukti Transfer')
+                    ->placeholder('Semua')
+                    ->trueLabel('Ada bukti')
+                    ->falseLabel('Tanpa bukti')
+                    ->queries(
+                        true: fn (Builder $q) => $q->whereNotNull('proof_of_payment')->where('proof_of_payment', '!=', ''),
+                        false: fn (Builder $q) => $q->where(fn ($q) => $q->whereNull('proof_of_payment')->orWhere('proof_of_payment', '')),
+                        blank: fn (Builder $q) => $q,
+                    ),
+
+                Filter::make('created_from')
+                    ->label('Tanggal Mulai')
+                    ->form([
+                        DatePicker::make('created_from')
+                            ->label('Dari tanggal')
+                            ->displayFormat('d M Y')
+                            ->native(false),
+                    ])
+                    ->query(fn (Builder $q, array $data): Builder => $q->when(
+                        $data['created_from'] ?? null,
+                        fn ($q, $date) => $q->whereDate('created_at', '>=', $date)
+                    ))
+                    ->indicateUsing(fn (array $data): ?string => filled($data['created_from'] ?? null)
+                        ? 'Dari: '.date('d M Y', strtotime($data['created_from']))
+                        : null
+                    ),
+
+                Filter::make('created_until')
+                    ->label('Tanggal Akhir')
+                    ->form([
+                        DatePicker::make('created_until')
+                            ->label('Sampai tanggal')
+                            ->displayFormat('d M Y')
+                            ->native(false),
+                    ])
+                    ->query(fn (Builder $q, array $data): Builder => $q->when(
+                        $data['created_until'] ?? null,
+                        fn ($q, $date) => $q->whereDate('created_at', '<=', $date)
+                    ))
+                    ->indicateUsing(fn (array $data): ?string => filled($data['created_until'] ?? null)
+                        ? 'Sampai: '.date('d M Y', strtotime($data['created_until']))
+                        : null
+                    ),
+
+                TernaryFilter::make('is_verified')
+                    ->label('Verifikasi Admin')
+                    ->placeholder('Semua')
+                    ->trueLabel('Sudah diverifikasi')
+                    ->falseLabel('Belum diverifikasi')
+                    ->queries(
+                        true: fn (Builder $q) => $q->whereNotNull('verified_at'),
+                        false: fn (Builder $q) => $q->whereNull('verified_at'),
+                        blank: fn (Builder $q) => $q,
+                    ),
+            ])
+            ->filtersLayout(\Filament\Tables\Enums\FiltersLayout::AboveContentCollapsible)
+            ->filtersTriggerAction(
+                fn (Action $action) => $action
+                    ->label('Filter')
+                    ->icon('heroicon-o-funnel')
+            )
             ->recordActions([
                 EditAction::make()
                     ->label('')

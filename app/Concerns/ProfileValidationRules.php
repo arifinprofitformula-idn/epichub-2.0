@@ -75,7 +75,16 @@ trait ProfileValidationRules
                     return;
                 }
 
-                $query = User::query()->where('whatsapp_number', $normalized);
+                // Build all possible stored formats for this number so we catch
+                // legacy records that were saved before normalization was enforced.
+                $localFormat = '0'.substr($normalized, 2);   // 628xxx → 08xxx
+                $plusFormat  = '+'.$normalized;              // 628xxx → +628xxx
+
+                $query = User::query()->where(function ($q) use ($normalized, $localFormat, $plusFormat): void {
+                    $q->where('whatsapp_number', $normalized)
+                        ->orWhere('whatsapp_number', $localFormat)
+                        ->orWhere('whatsapp_number', $plusFormat);
+                });
 
                 if ($userId !== null) {
                     $query->whereKeyNot($userId);

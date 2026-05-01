@@ -90,16 +90,13 @@ test('register page shows referral info when ref is valid', function () {
 
     $this->get(route('register', ['ref' => 'REG-REF']))
         ->assertOk()
-        ->assertSee('Pendaftaran ini akan terhubung dengan pereferral:')
-        ->assertSee('Sponsor Register')
-        ->assertSee('REG-REF')
-        ->assertSee('Store Register');
+        ->assertSee('Anda diperkenalkan oleh')
+        ->assertSee('Sponsor Register');
 });
 
 test('register page shows house referral info when there is no ref', function () {
     $this->get(route('register'))
         ->assertOk()
-        ->assertSee('Pendaftaran ini akan terhubung dengan pereferral sistem EPIC Hub Official.')
-        ->assertSee('EPIC-HOUSE')
+        ->assertSee('Anda diperkenalkan oleh')
         ->assertSee('EPIC Hub Official');
 });

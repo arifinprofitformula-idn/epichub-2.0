@@ -225,7 +225,7 @@
 
             <div class="flex items-center justify-center">
                 <flux:button type="submit" variant="primary" class="epi-auth-btn w-full" data-test="register-user-button">
-                    Daftar Sekarang
+                    DAFTAR SEKARANG
                 </flux:button>
             </div>
 

@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\EpiChannels\Schemas;
 
 use App\Enums\EpiChannelStatus;
+use App\Models\EpiChannel;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -65,30 +67,65 @@ class EpiChannelForm
                 ])
                 ->columnSpanFull(),
 
-            /* ── 2. Sponsor & Sumber ── */
-            Section::make('Sponsor & Sumber')
-                ->description('Informasi sponsor upline dan asal pendaftaran channel')
+            /* ── 2. Pereferral ── */
+            Section::make('Pereferral')
+                ->description('Pilih channel pereferral yang mereferensikan pendaftaran ini')
                 ->icon('heroicon-o-user-group')
                 ->iconColor('warning')
                 ->extraAttributes(['class' => 'fi-epic-section-sponsor'])
                 ->schema([
-                    Grid::make(3)->schema([
-                        TextInput::make('sponsor_epic_code')
-                            ->label('EPIC Code Sponsor')
-                            ->maxLength(50)
+                    Grid::make(2)->schema([
+                        Select::make('sponsor_epic_code')
+                            ->label('Pereferral')
+                            ->placeholder('Cari nama atau ID EPIC pereferral…')
+                            ->helperText('Ketik nama atau ID EPIC untuk mencari pereferral dari data yang sudah ada')
+                            ->searchable()
                             ->nullable()
-                            ->helperText('EPIC Code dari upline / sponsor yang mereferensikan'),
+                            ->native(false)
+                            ->columnSpan(1)
+                            ->getSearchResultsUsing(function (string $search): array {
+                                return EpiChannel::query()
+                                    ->where(function ($q) use ($search): void {
+                                        $q->where('epic_code', 'like', "%{$search}%")
+                                            ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$search}%"))
+                                            ->orWhere('store_name', 'like', "%{$search}%");
+                                    })
+                                    ->with('user')
+                                    ->limit(20)
+                                    ->get()
+                                    ->mapWithKeys(fn (EpiChannel $c): array => [
+                                        $c->epic_code => $c->epic_code.' — '.($c->user?->name ?? $c->store_name ?? '-'),
+                                    ])
+                                    ->all();
+                            })
+                            ->getOptionLabelUsing(fn (?string $value): ?string => $value
+                                ? (function () use ($value): string {
+                                    $c = EpiChannel::query()->with('user')->where('epic_code', $value)->first();
+
+                                    return $c ? $c->epic_code.' — '.($c->user?->name ?? $c->store_name ?? '-') : $value;
+                                })()
+                                : null
+                            )
+                            ->afterStateUpdated(function (?string $state, Set $set): void {
+                                if (! $state) {
+                                    $set('sponsor_name', null);
+
+                                    return;
+                                }
+
+                                $channel = EpiChannel::query()->with('user')->where('epic_code', $state)->first();
+                                $set('sponsor_name', $channel?->user?->name ?? $channel?->store_name);
+                            })
+                            ->live(),
 
                         TextInput::make('sponsor_name')
-                            ->label('Nama Sponsor')
+                            ->label('Nama Pereferral')
                             ->maxLength(255)
-                            ->nullable(),
-
-                        TextInput::make('source')
-                            ->label('Sumber Registrasi')
-                            ->maxLength(20)
-                            ->default('manual')
-                            ->helperText('Contoh: manual, import, referral'),
+                            ->nullable()
+                            ->readOnly()
+                            ->placeholder('Terisi otomatis setelah memilih pereferral')
+                            ->helperText('Diisi otomatis berdasarkan pilihan pereferral di atas')
+                            ->columnSpan(1),
                     ]),
                 ])
                 ->columnSpanFull(),

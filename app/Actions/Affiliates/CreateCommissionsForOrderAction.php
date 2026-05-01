@@ -61,7 +61,7 @@ class CreateCommissionsForOrderAction
         }
 
         $results = collect();
-        $converted = false;
+        $hasCommission = false;
         $isHouseChannel = $channel->isHouseChannel();
 
         foreach ($order->items as $item) {
@@ -98,7 +98,7 @@ class CreateCommissionsForOrderAction
                 continue;
             }
 
-            $converted = true;
+            $hasCommission = true;
 
             if ($isHouseChannel) {
                 continue;
@@ -129,12 +129,16 @@ class CreateCommissionsForOrderAction
             $results->push($commission);
         }
 
-        if ($converted && $referralOrder->status === ReferralOrderStatus::Pending) {
+        // Mark the referral order as converted whenever the linked order is paid,
+        // regardless of whether commissions were generated. The referral attribution
+        // (visit → purchase) succeeded even when the product has no affiliate config.
+        if ($referralOrder->status === ReferralOrderStatus::Pending) {
             $referralOrder->update([
                 'status' => ReferralOrderStatus::Converted,
                 'metadata' => array_merge($referralOrder->metadata ?? [], [
-                    'house_channel' => $isHouseChannel,
+                    'house_channel'               => $isHouseChannel,
                     'commission_skipped_for_house' => $isHouseChannel,
+                    'commission_generated'         => $hasCommission,
                 ]),
             ]);
         }

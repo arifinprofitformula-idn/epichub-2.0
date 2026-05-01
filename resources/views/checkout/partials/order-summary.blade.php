@@ -120,12 +120,5 @@
             </span>
         </div>
 
-        {{-- Referral info --}}
-        <x-referral-info-card
-            :channel="data_get($referralInfo ?? [], 'channel')"
-            :source="data_get($referralInfo ?? [], 'source', 'default_system')"
-            :locked="(bool) data_get($referralInfo ?? [], 'is_locked', false)"
-            class="mt-4"
-        />
     </div>
 </div>

@@ -279,22 +279,23 @@ new #[Title('Profile settings')] class extends Component
                             </div>
                             <span class="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">WhatsApp</span>
                         </label>
-                        <div class="flex gap-2">
-                            <div class="flex items-center rounded-xl border border-zinc-200 bg-zinc-50 px-3 dark:border-zinc-700 dark:bg-zinc-800">
-                                <span class="text-sm font-semibold text-zinc-400 dark:text-zinc-500">+62</span>
+                        <div class="flex overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm transition-all duration-200 focus-within:border-emerald-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800 dark:focus-within:border-emerald-500 dark:focus-within:bg-zinc-900 dark:focus-within:ring-emerald-900/30">
+                            <div class="flex shrink-0 items-center border-r border-zinc-200 bg-zinc-100 px-3 dark:border-zinc-700 dark:bg-zinc-800">
+                                <span class="text-sm font-bold text-zinc-500 dark:text-zinc-400">+62</span>
                             </div>
                             <input
                                 id="whatsapp_input"
                                 wire:model="whatsapp_number"
-                                type="text"
+                                type="tel"
                                 autocomplete="tel"
-                                placeholder="628123456789"
-                                class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 shadow-sm outline-none transition-all duration-200 placeholder:text-zinc-300 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-600 dark:focus:border-emerald-500 dark:focus:bg-zinc-900 dark:focus:ring-emerald-900/30"
+                                inputmode="numeric"
+                                placeholder="85860437327"
+                                class="w-full bg-transparent px-4 py-2.5 text-sm font-medium text-zinc-900 outline-none placeholder:text-zinc-300 dark:text-white dark:placeholder:text-zinc-600"
                             />
                         </div>
                         <p class="mt-2 flex items-start gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
                             <svg viewBox="0 0 24 24" fill="none" class="mt-0.5 size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" stroke="currentColor" stroke-width="1.4"/><path d="M12 11V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="8.5" r="0.75" fill="currentColor"/></svg>
-                            Digunakan sebagai kontak jika kamu aktif sebagai EPI Channel.
+                            Ketik nomor tanpa awalan 0 atau +62. Contoh: <span class="font-semibold text-zinc-500">85860437327</span>
                         </p>
                         @error('whatsapp_number')
                             <p class="mt-2 flex items-center gap-1.5 text-xs font-medium text-rose-600">

@@ -102,7 +102,7 @@ class GrantProductAccessAction
         ?Order $order,
         ?User $actor,
         array $metadata,
-        Carbon $createdAt,
+        \DateTimeInterface $createdAt,
     ): void {
         AccessLog::query()->create([
             'user_id' => $user->id,

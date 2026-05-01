@@ -18,38 +18,49 @@ class ResolveReferrerContactAction
      */
     public function execute(User $user): array
     {
-        $user->loadMissing('epiChannel');
+        $user->loadMissing('epiChannel', 'referrerEpiChannel.user');
 
-        $channel = $user->epiChannel;
+        // Priority 1 — referral locked on the user account (set during registration).
+        // This is the authoritative source of the referral relationship.
+        $referrerChannel = $user->referrerEpiChannel;
 
-        if (! $channel) {
-            return $this->emptyContact();
+        // Priority 2 — sponsor recorded on the user's own EpiChannel record
+        // (set via OMS import or manual admin entry).
+        if (! $referrerChannel) {
+            $ownChannel = $user->epiChannel;
+            $sponsorEpicCode = $ownChannel?->sponsor_epic_code;
+
+            if (filled($sponsorEpicCode)) {
+                $referrerChannel = EpiChannel::query()
+                    ->with('user')
+                    ->where('epic_code', $sponsorEpicCode)
+                    ->first();
+            }
+
+            // No referral data at all.
+            if (! $referrerChannel) {
+                return [
+                    ...$this->emptyContact(),
+                    'sponsor_name' => $ownChannel?->sponsor_name,
+                ];
+            }
         }
 
-        $sponsorEpicCode = $channel->sponsor_epic_code;
-        $sponsorName = $channel->sponsor_name;
+        $referrerChannel->loadMissing('user');
 
-        if (! filled($sponsorEpicCode)) {
-            return [
-                ...$this->emptyContact(),
-                'sponsor_name' => $sponsorName,
-            ];
-        }
-
-        $sponsorChannel = EpiChannel::query()
-            ->with('user')
-            ->where('epic_code', $sponsorEpicCode)
-            ->first();
-
-        $sponsorUser = $sponsorChannel?->user;
-        $whatsappNumber = $sponsorUser?->whatsapp_number_for_url;
-        $resolvedSponsorName = $sponsorUser?->name ?? $sponsorChannel?->sponsor_name ?? $sponsorChannel?->store_name ?? $sponsorName;
+        $referrerUser = $referrerChannel->user;
+        $whatsappNumber = $referrerUser?->whatsapp_number_for_url;
+        $resolvedName = $referrerUser?->name
+            ?? $referrerChannel->store_name
+            ?? $referrerChannel->sponsor_name;
 
         return [
-            'sponsor_name' => $resolvedSponsorName,
-            'sponsor_epic_code' => $sponsorEpicCode,
-            'whatsapp_number' => $whatsappNumber,
-            'whatsapp_url' => $whatsappNumber ? $this->buildWhatsappUrl($whatsappNumber, $resolvedSponsorName, $user) : null,
+            'sponsor_name'      => $resolvedName,
+            'sponsor_epic_code' => $referrerChannel->epic_code,
+            'whatsapp_number'   => $whatsappNumber,
+            'whatsapp_url'      => $whatsappNumber
+                ? $this->buildWhatsappUrl($whatsappNumber, $resolvedName, $user)
+                : null,
             'has_contact' => filled($whatsappNumber),
         ];
     }
