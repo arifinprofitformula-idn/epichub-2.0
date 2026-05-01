@@ -68,15 +68,15 @@ class EpiChannelForm
                 ->columnSpanFull(),
 
             /* ── 2. Pereferral ── */
-            Section::make('Pereferral')
-                ->description('Pilih channel pereferral yang mereferensikan pendaftaran ini')
+            Section::make('Sponsor Channel')
+                ->description('Cari sponsor berdasarkan nama atau ID EPIC dari data channel yang sudah ada')
                 ->icon('heroicon-o-user-group')
                 ->iconColor('warning')
                 ->extraAttributes(['class' => 'fi-epic-section-sponsor'])
                 ->schema([
                     Grid::make(2)->schema([
                         Select::make('sponsor_epic_code')
-                            ->label('Pereferral')
+                            ->label('Sponsor / Pereferral')
                             ->placeholder('Cari nama atau ID EPIC pereferral…')
                             ->helperText('Ketik nama atau ID EPIC untuk mencari pereferral dari data yang sudah ada')
                             ->searchable()

@@ -20,30 +20,29 @@ class ResolveReferrerContactAction
     {
         $user->loadMissing('epiChannel', 'referrerEpiChannel.user');
 
-        // Priority 1 — referral locked on the user account (set during registration).
-        // This is the authoritative source of the referral relationship.
-        $referrerChannel = $user->referrerEpiChannel;
+        $ownChannel = $user->epiChannel;
+        $referrerChannel = null;
 
-        // Priority 2 — sponsor recorded on the user's own EpiChannel record
-        // (set via OMS import or manual admin entry).
+        // Priority 1 — sponsor recorded on the user's own EpiChannel profile.
+        // This is the sponsor the member should contact for channel onboarding.
+        if (filled($ownChannel?->sponsor_epic_code)) {
+            $referrerChannel = EpiChannel::query()
+                ->with('user')
+                ->where('epic_code', $ownChannel->sponsor_epic_code)
+                ->first();
+        }
+
+        // Priority 2 — referral locked on the user account (set during registration).
         if (! $referrerChannel) {
-            $ownChannel = $user->epiChannel;
-            $sponsorEpicCode = $ownChannel?->sponsor_epic_code;
+            $referrerChannel = $user->referrerEpiChannel;
+        }
 
-            if (filled($sponsorEpicCode)) {
-                $referrerChannel = EpiChannel::query()
-                    ->with('user')
-                    ->where('epic_code', $sponsorEpicCode)
-                    ->first();
-            }
-
-            // No referral data at all.
-            if (! $referrerChannel) {
-                return [
-                    ...$this->emptyContact(),
-                    'sponsor_name' => $ownChannel?->sponsor_name,
-                ];
-            }
+        if (! $referrerChannel) {
+            return [
+                ...$this->emptyContact(),
+                'sponsor_name' => $ownChannel?->sponsor_name,
+                'sponsor_epic_code' => $ownChannel?->sponsor_epic_code,
+            ];
         }
 
         $referrerChannel->loadMissing('user');

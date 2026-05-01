@@ -101,6 +101,49 @@
                 </x-ui.card>
             </div>
 
+            @if (filled($referrerContact['sponsor_epic_code'] ?? null) || filled($referrerContact['sponsor_name'] ?? null))
+                <div class="mt-4">
+                    <x-ui.card class="p-6">
+                        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold text-zinc-900 dark:text-white">Kontak Pereferral</div>
+                                <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+                                    Gunakan kontak sponsor Anda bila perlu koordinasi terkait aktivasi, pembinaan, atau tindak lanjut channel.
+                                </div>
+                                <div class="mt-3 flex flex-wrap items-center gap-2">
+                                    @if (filled($referrerContact['sponsor_name'] ?? null))
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                                            {{ $referrerContact['sponsor_name'] }}
+                                        </span>
+                                    @endif
+                                    @if (filled($referrerContact['sponsor_epic_code'] ?? null))
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                            ID EPIC: {{ $referrerContact['sponsor_epic_code'] }}
+                                        </span>
+                                    @endif
+                                    @if (filled($referrerContact['whatsapp_number'] ?? null))
+                                        <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                                            WA: {{ $referrerContact['whatsapp_number'] }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if (filled($referrerContact['whatsapp_url'] ?? null))
+                                <x-ui.button variant="primary" size="sm" :href="$referrerContact['whatsapp_url']" target="_blank" rel="noopener noreferrer">
+                                    Hubungi Sponsor
+                                </x-ui.button>
+                            @else
+                                <div class="shrink-0 rounded-[var(--radius-lg)] border border-dashed border-zinc-200 bg-zinc-50 px-4 py-3 text-center dark:border-zinc-700 dark:bg-zinc-900">
+                                    <div class="text-xs font-semibold text-zinc-500 dark:text-zinc-400">WhatsApp sponsor belum tersedia</div>
+                                    <div class="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">Nomor akan muncul dari profil sponsor</div>
+                                </div>
+                            @endif
+                        </div>
+                    </x-ui.card>
+                </div>
+            @endif
+
             {{-- Primary stats row --}}
             <div class="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
                 <x-ui.card class="p-5">

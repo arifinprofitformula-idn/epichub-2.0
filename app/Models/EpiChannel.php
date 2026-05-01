@@ -61,6 +61,11 @@ class EpiChannel extends Model
         return $this->hasMany(CommissionPayout::class);
     }
 
+    public function clientNotes(): HasMany
+    {
+        return $this->hasMany(AffiliateClientNote::class);
+    }
+
     public function scopeActive(Builder $query): void
     {
         $query->where('status', EpiChannelStatus::Active);

@@ -8,6 +8,7 @@ use App\Http\Controllers\Catalog\ProductLandingAssetController;
 use App\Http\Controllers\Catalog\ProductLandingPageController;
 use App\Http\Controllers\Catalog\EventCatalogController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DashboardClientController;
 use App\Http\Controllers\MyCourseController;
 use App\Http\Controllers\MyCourseLessonController;
 use App\Http\Controllers\MyEventAccessController;
@@ -58,6 +59,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/klien', [DashboardClientController::class, 'index'])->name('dashboard.clients.index');
+    Route::get('/dashboard/klien/{client}', [DashboardClientController::class, 'show'])->name('dashboard.clients.show');
+    Route::post('/dashboard/klien/{client}/notes', [DashboardClientController::class, 'storeNote'])->name('dashboard.clients.notes.store');
+    Route::post('/dashboard/klien/{client}/follow-up', [DashboardClientController::class, 'markFollowUp'])->name('dashboard.clients.follow-up.store');
+
     Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 
     Route::prefix('epi-channel')->name('epi-channel.')->group(function () {

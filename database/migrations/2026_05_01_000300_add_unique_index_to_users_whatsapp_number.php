@@ -13,26 +13,33 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Normalize all existing whatsapp numbers to 62... format before adding unique index.
-        // This prevents migration failure from differently-formatted duplicates and ensures
-        // the PHP validation closure (which queries normalized values) matches DB values.
+        // Normalize and deduplicate all existing whatsapp numbers before adding
+        // the unique index. This must also handle rows that are already stored in
+        // normalized form, otherwise MySQL will still fail on duplicate values.
         DB::table('users')
             ->whereNotNull('whatsapp_number')
             ->orderBy('id')
             ->each(function (object $row): void {
                 $normalized = $this->normalize($row->whatsapp_number);
 
-                if ($normalized === null || $normalized === $row->whatsapp_number) {
+                if ($normalized === null) {
+                    DB::table('users')
+                        ->where('id', $row->id)
+                        ->update(['whatsapp_number' => null]);
+
                     return;
                 }
 
-                // If another record already has this normalized number, clear the duplicate.
-                $conflict = DB::table('users')
+                // Older row wins. If another lower-id record already owns the same
+                // normalized number, clear this duplicate even when its value was
+                // already normalized before the migration ran.
+                $ownerId = DB::table('users')
                     ->where('whatsapp_number', $normalized)
-                    ->where('id', '!=', $row->id)
-                    ->exists();
+                    ->where('id', '<', $row->id)
+                    ->orderBy('id')
+                    ->value('id');
 
-                if ($conflict) {
+                if ($ownerId !== null) {
                     DB::table('users')
                         ->where('id', $row->id)
                         ->update(['whatsapp_number' => null]);
@@ -72,8 +79,13 @@ return new class extends Migration
 
         if (str_starts_with($normalized, '+62')) {
             $normalized = '62'.substr($normalized, 3);
+        } elseif (str_starts_with($normalized, '62')) {
+            // Already has Indonesia country code.
         } elseif (str_starts_with($normalized, '0')) {
             $normalized = '62'.substr($normalized, 1);
+        } else {
+            // Allow inputs that were saved without leading 0 or +62.
+            $normalized = '62'.$normalized;
         }
 
         $normalized = preg_replace('/\D/', '', $normalized) ?? '';

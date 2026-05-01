@@ -68,6 +68,9 @@
                         <flux:sidebar.item icon="clipboard-document-list" :href="route('epi-channel.orders')" :current="request()->routeIs('epi-channel.orders')" wire:navigate>
                             Referral Order
                         </flux:sidebar.item>
+                        <flux:sidebar.item icon="users" :href="route('dashboard.clients.index')" :current="request()->routeIs('dashboard.clients.*')" wire:navigate>
+                            Klien
+                        </flux:sidebar.item>
                         <flux:sidebar.item icon="banknotes" :href="route('epi-channel.commissions')" :current="request()->routeIs('epi-channel.commissions')" wire:navigate>
                             Komisi
                         </flux:sidebar.item>

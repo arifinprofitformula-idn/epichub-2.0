@@ -85,7 +85,7 @@ class MyEpiChannelController extends Controller
             'featuredProducts' => $featuredProducts,
             'whatsappReminderNeeded' => blank($user->whatsapp_number_for_url),
             'mainReferralLink' => route('referral.redirect', ['epicCode' => $channel->epic_code], absolute: true),
-            'referrerContact' => null,
+            'referrerContact' => $this->resolveReferrerContact->execute($user),
         ]);
     }
 

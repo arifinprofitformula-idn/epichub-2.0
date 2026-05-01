@@ -23,15 +23,10 @@ return new class extends Migration
                     return;
                 }
 
-                if ($normalized === $row->whatsapp_number) {
-                    return; // Already in correct format.
-                }
-
-                // If another row already owns this normalized number, clear the duplicate
-                // (older row wins — lower id was registered first).
+                // Older row wins — lower id was registered first.
                 $alreadyOwned = DB::table('users')
                     ->where('whatsapp_number', $normalized)
-                    ->where('id', '!=', $row->id)
+                    ->where('id', '<', $row->id)
                     ->exists();
 
                 DB::table('users')
@@ -59,8 +54,12 @@ return new class extends Migration
 
         if (str_starts_with($normalized, '+62')) {
             $normalized = '62'.substr($normalized, 3);
+        } elseif (str_starts_with($normalized, '62')) {
+            // Already has Indonesia country code.
         } elseif (str_starts_with($normalized, '0')) {
             $normalized = '62'.substr($normalized, 1);
+        } else {
+            $normalized = '62'.$normalized;
         }
 
         $normalized = preg_replace('/\D/', '', $normalized) ?? '';

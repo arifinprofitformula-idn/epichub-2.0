@@ -166,6 +166,14 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(EventRegistration::class);
     }
 
+    /**
+     * @return HasMany<AffiliateClientNote, $this>
+     */
+    public function affiliateClientNotes(): HasMany
+    {
+        return $this->hasMany(AffiliateClientNote::class, 'client_user_id');
+    }
+
     public function hasLockedReferrer(): bool
     {
         return $this->referrer_epi_channel_id !== null;

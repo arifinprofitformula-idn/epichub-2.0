@@ -93,6 +93,15 @@ class Order extends Model
         $query->where('status', OrderStatus::Paid);
     }
 
+    public function scopeAttributedToEpiChannel(Builder $query, int $epiChannelId): void
+    {
+        $query->where(function (Builder $scopedQuery) use ($epiChannelId): void {
+            $scopedQuery
+                ->where('referrer_epi_channel_id', $epiChannelId)
+                ->orWhereHas('referralOrder', fn (Builder $referralOrderQuery) => $referralOrderQuery->where('epi_channel_id', $epiChannelId));
+        });
+    }
+
     public function scopePending(Builder $query): void
     {
         $query->where('status', OrderStatus::Pending);
