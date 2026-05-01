@@ -4,6 +4,7 @@ namespace App\Actions\Payments;
 
 use App\Actions\Access\GrantOrderAccessAction;
 use App\Actions\Affiliates\CreateCommissionsForOrderAction;
+use App\Actions\Contributors\CreateContributorCommissionsForOrderAction;
 use App\Actions\Event\RegisterOrderEventsAction;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
@@ -21,6 +22,7 @@ class MarkPaymentAsPaidAction
         protected GrantOrderAccessAction $grantOrderAccess,
         protected RegisterOrderEventsAction $registerOrderEvents,
         protected CreateCommissionsForOrderAction $createCommissionsForOrder,
+        protected CreateContributorCommissionsForOrderAction $createContributorCommissionsForOrder,
     ) {
     }
 
@@ -50,6 +52,7 @@ class MarkPaymentAsPaidAction
                 $this->grantOrderAccess->execute($order, $verifiedBy);
                 $this->registerOrderEvents->execute($order, $verifiedBy);
                 $this->tryCreateCommissions($order);
+                $this->tryCreateContributorCommissions($order);
 
                 return $payment->refresh();
             }
@@ -75,6 +78,7 @@ class MarkPaymentAsPaidAction
             $this->grantOrderAccess->execute($order, $verifiedBy);
             $this->registerOrderEvents->execute($order, $verifiedBy);
             $this->tryCreateCommissions($order);
+            $this->tryCreateContributorCommissions($order);
 
             // Catatan: future payment gateway callback harus memakai alur yang sama agar grant akses konsisten dan idempotent.
 
@@ -88,6 +92,18 @@ class MarkPaymentAsPaidAction
             $this->createCommissionsForOrder->execute($order);
         } catch (\Throwable $e) {
             Log::error('Failed to create commissions for order', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    protected function tryCreateContributorCommissions(Order $order): void
+    {
+        try {
+            $this->createContributorCommissionsForOrder->execute($order);
+        } catch (\Throwable $e) {
+            Log::error('Failed to create contributor commissions for order', [
                 'order_id' => $order->id,
                 'error' => $e->getMessage(),
             ]);

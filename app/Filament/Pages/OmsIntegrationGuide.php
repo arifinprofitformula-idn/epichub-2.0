@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Navigation\AdminNavigationGroup;
 use App\Models\OmsIntegrationLog;
 use BackedEnum;
 use Filament\Pages\Page;
@@ -17,7 +18,7 @@ class OmsIntegrationGuide extends Page
 
     protected static ?string $navigationLabel = 'OMS Integration';
 
-    protected static string|UnitEnum|null $navigationGroup = 'System / Integrations';
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Settings;
 
     protected static ?int $navigationSort = 90;
 

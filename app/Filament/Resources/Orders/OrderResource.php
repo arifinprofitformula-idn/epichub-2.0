@@ -25,7 +25,7 @@ class OrderResource extends Resource
 
     protected static ?string $navigationLabel = 'Pesanan';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Operasional;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Administration;
 
     protected static ?int $navigationSort = 10;
 

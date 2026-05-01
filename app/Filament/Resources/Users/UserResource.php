@@ -36,7 +36,7 @@ class UserResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Pengguna';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Administrasi;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Administration;
 
     protected static ?int $navigationSort = 10;
 

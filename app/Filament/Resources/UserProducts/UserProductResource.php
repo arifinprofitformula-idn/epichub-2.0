@@ -22,7 +22,7 @@ class UserProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Hak Akses Produk';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Operasional;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Administration;
 
     protected static ?int $navigationSort = 30;
 

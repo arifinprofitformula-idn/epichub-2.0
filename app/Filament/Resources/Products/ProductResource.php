@@ -28,7 +28,7 @@ class ProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Produk';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Katalog;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Products;
 
     protected static ?int $navigationSort = 10;
 

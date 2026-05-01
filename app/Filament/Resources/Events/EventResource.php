@@ -28,7 +28,7 @@ class EventResource extends Resource
 
     protected static ?string $navigationLabel = 'Event';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Program;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Products;
 
     protected static ?int $navigationSort = 20;
 

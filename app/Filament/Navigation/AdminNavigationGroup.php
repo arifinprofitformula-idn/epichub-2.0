@@ -7,20 +7,18 @@ use Illuminate\Contracts\Support\Htmlable;
 
 enum AdminNavigationGroup implements HasLabel
 {
-    case Operasional;
-    case Katalog;
-    case Program;
+    case Products;
     case Afiliasi;
-    case Administrasi;
+    case Administration;
+    case Settings;
 
     public function getLabel(): string|Htmlable|null
     {
         return match ($this) {
-            self::Operasional => 'Operasional',
-            self::Katalog => 'Katalog',
-            self::Program => 'Program & Event',
-            self::Afiliasi => 'Afiliasi',
-            self::Administrasi => 'Administrasi',
+            self::Products => 'Products',
+            self::Afiliasi => 'Affiliasi',
+            self::Administration => 'Administration',
+            self::Settings => 'Settings',
         };
     }
 }

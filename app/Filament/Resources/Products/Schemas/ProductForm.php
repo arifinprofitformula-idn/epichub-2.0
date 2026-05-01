@@ -3,11 +3,14 @@
 namespace App\Filament\Resources\Products\Schemas;
 
 use App\Enums\AffiliateCommissionType;
+use App\Enums\ContributorCommissionBase;
+use App\Enums\ContributorCommissionType;
 use App\Enums\ProductAccessType;
 use App\Enums\ProductStatus;
 use App\Enums\ProductType;
 use App\Enums\ProductVisibility;
 use App\Models\Product;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -244,6 +247,83 @@ class ProductForm
                                 ->minValue(0)
                                 ->required(fn (Get $get): bool => (bool) $get('is_affiliate_enabled'))
                                 ->hidden(fn (Get $get): bool => ! (bool) $get('is_affiliate_enabled')),
+                        ]),
+                    ])
+                    ->columnSpanFull(),
+
+                /* ── Komisi Kontributor ── */
+                Section::make('Komisi Kontributor')
+                    ->description('Pengaturan komisi untuk author/kontributor produk ini')
+                    ->icon('heroicon-o-academic-cap')
+                    ->iconColor('violet')
+                    ->extraAttributes(['class' => 'fi-prod-section-contributor'])
+                    ->schema([
+                        Toggle::make('is_contributor_commission_enabled')
+                            ->label('Aktifkan Komisi Kontributor')
+                            ->helperText('Komisi kontributor akan dihitung saat pembayaran order berhasil/paid.')
+                            ->default(false)
+                            ->live()
+                            ->columnSpanFull(),
+
+                        Grid::make(2)->schema([
+                            Select::make('contributor_user_id')
+                                ->label('Kontributor / Author')
+                                ->options(fn () => User::query()
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                                    ->all())
+                                ->searchable()
+                                ->preload()
+                                ->nullable()
+                                ->required(fn (Get $get): bool => (bool) $get('is_contributor_commission_enabled'))
+                                ->hidden(fn (Get $get): bool => ! (bool) $get('is_contributor_commission_enabled')),
+
+                            Select::make('contributor_commission_type')
+                                ->label('Tipe Komisi')
+                                ->options(collect(ContributorCommissionType::cases())
+                                    ->mapWithKeys(fn (ContributorCommissionType $t) => [$t->value => $t->label()])
+                                    ->all())
+                                ->native(false)
+                                ->required(fn (Get $get): bool => (bool) $get('is_contributor_commission_enabled'))
+                                ->hidden(fn (Get $get): bool => ! (bool) $get('is_contributor_commission_enabled'))
+                                ->live(),
+
+                            TextInput::make('contributor_commission_value')
+                                ->label(fn (Get $get): string => $get('contributor_commission_type') === ContributorCommissionType::Fixed->value
+                                    ? 'Nilai Komisi (Rp)'
+                                    : 'Nilai Komisi (%)')
+                                ->numeric()
+                                ->minValue(0)
+                                ->maxValue(fn (Get $get): ?int => $get('contributor_commission_type') === ContributorCommissionType::Percent->value ? 100 : null)
+                                ->required(fn (Get $get): bool => (bool) $get('is_contributor_commission_enabled'))
+                                ->hidden(fn (Get $get): bool => ! (bool) $get('is_contributor_commission_enabled'))
+                                ->rules([
+                                    fn (Get $get): \Closure => function (string $attribute, mixed $value, \Closure $fail) use ($get): void {
+                                        if (! (bool) $get('is_contributor_commission_enabled')) {
+                                            return;
+                                        }
+                                        if ($value === null || $value === '') {
+                                            return;
+                                        }
+                                        $type = $get('contributor_commission_type');
+                                        if ($type === ContributorCommissionType::Percent->value && (float) $value > 100) {
+                                            $fail('Nilai persentase tidak boleh melebihi 100%.');
+                                        }
+                                        if ((float) $value < 0) {
+                                            $fail('Nilai komisi tidak boleh negatif.');
+                                        }
+                                    },
+                                ]),
+
+                            Select::make('contributor_commission_base')
+                                ->label('Dasar Perhitungan')
+                                ->options(collect(ContributorCommissionBase::cases())
+                                    ->mapWithKeys(fn (ContributorCommissionBase $b) => [$b->value => $b->label()])
+                                    ->all())
+                                ->default(ContributorCommissionBase::Gross->value)
+                                ->native(false)
+                                ->required(fn (Get $get): bool => (bool) $get('is_contributor_commission_enabled'))
+                                ->hidden(fn (Get $get): bool => ! (bool) $get('is_contributor_commission_enabled')),
                         ]),
                     ])
                     ->columnSpanFull(),

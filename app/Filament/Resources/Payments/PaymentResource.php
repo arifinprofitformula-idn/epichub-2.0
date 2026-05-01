@@ -25,7 +25,7 @@ class PaymentResource extends Resource
 
     protected static ?string $navigationLabel = 'Pembayaran';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Operasional;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Administration;
 
     protected static ?int $navigationSort = 20;
 

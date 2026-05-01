@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\AffiliateCommissionType;
+use App\Enums\ContributorCommissionBase;
+use App\Enums\ContributorCommissionType;
 use App\Enums\ProductAccessType;
 use App\Enums\ProductStatus;
 use App\Enums\ProductType;
@@ -47,6 +49,11 @@ use Illuminate\Support\Carbon;
     'landing_page_version',
     'affiliate_commission_type',
     'affiliate_commission_value',
+    'is_contributor_commission_enabled',
+    'contributor_user_id',
+    'contributor_commission_type',
+    'contributor_commission_value',
+    'contributor_commission_base',
     'sort_order',
     'metadata',
 ])]
@@ -86,6 +93,18 @@ class Product extends Model
     public function userProducts(): HasMany
     {
         return $this->hasMany(UserProduct::class);
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function contributorUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'contributor_user_id');
+    }
+
+    /** @return HasMany<ContributorCommission, $this> */
+    public function contributorCommissions(): HasMany
+    {
+        return $this->hasMany(ContributorCommission::class);
     }
 
     /**
@@ -186,6 +205,10 @@ class Product extends Model
             'landing_page_version' => 'integer',
             'affiliate_commission_type' => AffiliateCommissionType::class,
             'affiliate_commission_value' => 'decimal:2',
+            'is_contributor_commission_enabled' => 'boolean',
+            'contributor_commission_type' => ContributorCommissionType::class,
+            'contributor_commission_value' => 'decimal:2',
+            'contributor_commission_base' => ContributorCommissionBase::class,
             'sort_order' => 'integer',
             'metadata' => 'array',
         ];

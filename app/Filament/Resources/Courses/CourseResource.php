@@ -35,7 +35,7 @@ class CourseResource extends Resource
 
     protected static ?string $navigationLabel = 'Kelas';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Program;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Products;
 
     protected static ?int $navigationSort = 10;
 

@@ -28,7 +28,7 @@ class CourseSectionResource extends Resource
 
     protected static ?string $navigationLabel = 'Bagian Kelas';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Program;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Products;
 
     public static function form(Schema $schema): Schema
     {

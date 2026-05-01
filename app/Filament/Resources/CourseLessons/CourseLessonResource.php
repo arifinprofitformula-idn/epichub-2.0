@@ -30,7 +30,7 @@ class CourseLessonResource extends Resource
 
     protected static ?string $navigationLabel = 'Materi Kelas';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Program;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Products;
 
     public static function form(Schema $schema): Schema
     {

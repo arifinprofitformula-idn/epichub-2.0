@@ -72,12 +72,10 @@ class AdminPanelProvider extends PanelProvider
                 fn (): string => view('filament.admin.sidebar-logout')->render(),
             )
             ->navigationGroups([
-                NavigationGroup::fromEnum(AdminNavigationGroup::Operasional),
-                NavigationGroup::fromEnum(AdminNavigationGroup::Katalog),
-                NavigationGroup::fromEnum(AdminNavigationGroup::Program),
+                NavigationGroup::fromEnum(AdminNavigationGroup::Products),
                 NavigationGroup::fromEnum(AdminNavigationGroup::Afiliasi),
-                NavigationGroup::fromEnum(AdminNavigationGroup::Administrasi),
-                NavigationGroup::make()->label('System / Integrations'),
+                NavigationGroup::fromEnum(AdminNavigationGroup::Administration),
+                NavigationGroup::fromEnum(AdminNavigationGroup::Settings),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

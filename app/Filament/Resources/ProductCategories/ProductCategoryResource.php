@@ -26,7 +26,7 @@ class ProductCategoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Kategori Produk';
 
-    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Katalog;
+    protected static string|UnitEnum|null $navigationGroup = AdminNavigationGroup::Products;
 
     protected static ?int $navigationSort = 20;
 
