@@ -2,7 +2,9 @@
 
 namespace App\Concerns;
 
+use App\Actions\Support\NormalizeWhatsappNumberAction;
 use App\Models\User;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +20,7 @@ trait ProfileValidationRules
         return [
             'name' => $this->nameRules(),
             'email' => $this->emailRules($userId),
-            'whatsapp_number' => $this->whatsappNumberRules(),
+            'whatsapp_number' => $this->whatsappNumberRules($userId),
         ];
     }
 
@@ -55,13 +57,34 @@ trait ProfileValidationRules
      *
      * @return array<int, ValidationRule|array<mixed>|string>
      */
-    protected function whatsappNumberRules(): array
+    protected function whatsappNumberRules(?int $userId = null): array
     {
         return [
             'nullable',
             'string',
             'max:30',
             'regex:/^[0-9+\-\s]+$/',
+            function (string $attribute, mixed $value, Closure $fail) use ($userId): void {
+                if (! is_string($value) || trim($value) === '') {
+                    return;
+                }
+
+                $normalized = app(NormalizeWhatsappNumberAction::class)->execute($value);
+
+                if (! filled($normalized)) {
+                    return;
+                }
+
+                $query = User::query()->where('whatsapp_number', $normalized);
+
+                if ($userId !== null) {
+                    $query->whereKeyNot($userId);
+                }
+
+                if ($query->exists()) {
+                    $fail('Nomor WhatsApp sudah terdaftar pada akun lain.');
+                }
+            },
         ];
     }
 }

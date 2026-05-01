@@ -40,8 +40,7 @@ new #[Title('Profile settings')] class extends Component
         $user = Auth::user();
 
         $validated = $this->validate([
-            'name' => $this->nameRules(),
-            'whatsapp_number' => $this->whatsappNumberRules(),
+            'whatsapp_number' => $this->whatsappNumberRules($user->id),
             'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
@@ -113,7 +112,7 @@ new #[Title('Profile settings')] class extends Component
 
     <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
 
-    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Perbarui nama, foto profil, dan kontak WhatsApp Anda.')">
+    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Perbarui foto profil dan kontak WhatsApp Anda. Nama lengkap dikunci dan hanya dapat diubah oleh admin.')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-5">
 
             {{-- Photo Upload Card --}}
@@ -209,20 +208,17 @@ new #[Title('Profile settings')] class extends Component
                         </label>
                         <input
                             id="name_input"
-                            wire:model="name"
                             type="text"
-                            required
-                            autofocus
+                            value="{{ $name }}"
+                            readonly
+                            disabled
                             autocomplete="name"
-                            placeholder="Masukkan nama lengkap..."
-                            class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-900 shadow-sm outline-none transition-all duration-200 placeholder:text-zinc-300 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder:text-zinc-600 dark:focus:border-blue-500 dark:focus:bg-zinc-900 dark:focus:ring-blue-900/30"
+                            class="w-full cursor-not-allowed rounded-xl border border-zinc-200 bg-zinc-100 px-4 py-2.5 text-sm font-medium text-zinc-500 shadow-sm outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400"
                         />
-                        @error('name')
-                            <p class="mt-2 flex items-center gap-1.5 text-xs font-medium text-rose-600">
-                                <svg viewBox="0 0 24 24" fill="none" class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity=".1"/><path d="M12 9V12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="15" r="0.75" fill="currentColor"/></svg>
-                                {{ $message }}
-                            </p>
-                        @enderror
+                        <p class="mt-2 flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+                            <svg viewBox="0 0 24 24" fill="none" class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" stroke="currentColor" stroke-width="1.4" fill="currentColor" fill-opacity=".08"/><path d="M8.75 12.5L11 14.75L15.25 9.75" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            Nama lengkap dikunci dan tidak dapat diubah dari halaman ini.
+                        </p>
                     </div>
 
                     {{-- Email (locked) --}}

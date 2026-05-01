@@ -19,6 +19,7 @@ test('new users can register', function () {
     $response = $this->post(route('register.store'), [
         'name' => 'John Doe',
         'email' => 'test@example.com',
+        'whatsapp_number' => '0812 3456 789',
         'password' => 'Password!23',
         'password_confirmation' => 'Password!23',
     ]);
@@ -29,8 +30,50 @@ test('new users can register', function () {
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', [
         'email' => 'test@example.com',
+        'whatsapp_number' => '628123456789',
         'referral_source' => 'default_system',
     ]);
+});
+
+test('registration rejects duplicate email', function () {
+    User::factory()->create([
+        'email' => 'test@example.com',
+    ]);
+
+    $response = $this->from(route('register'))->post(route('register.store'), [
+        'name' => 'John Doe',
+        'email' => 'test@example.com',
+        'whatsapp_number' => '0812 9999 0000',
+        'password' => 'Password!23',
+        'password_confirmation' => 'Password!23',
+    ]);
+
+    $response
+        ->assertSessionHasErrors(['email'])
+        ->assertRedirect(route('register'));
+
+    $this->assertGuest();
+});
+
+test('registration rejects duplicate whatsapp even with different formatting', function () {
+    User::factory()->create([
+        'email' => 'existing@example.com',
+        'whatsapp_number' => '628123456789',
+    ]);
+
+    $response = $this->from(route('register'))->post(route('register.store'), [
+        'name' => 'John Doe',
+        'email' => 'fresh@example.com',
+        'whatsapp_number' => '+62 812-3456-789',
+        'password' => 'Password!23',
+        'password_confirmation' => 'Password!23',
+    ]);
+
+    $response
+        ->assertSessionHasErrors(['whatsapp_number'])
+        ->assertRedirect(route('register'));
+
+    $this->assertGuest();
 });
 
 test('register page shows referral info when ref is valid', function () {

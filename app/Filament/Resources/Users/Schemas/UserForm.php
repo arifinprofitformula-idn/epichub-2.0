@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Actions\Support\NormalizeWhatsappNumberAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
@@ -39,7 +40,10 @@ class UserForm
                             ->label('WhatsApp')
                             ->tel()
                             ->maxLength(30)
-                            ->nullable(),
+                            ->nullable()
+                            ->mutateStateForValidationUsing(fn (?string $state): ?string => app(NormalizeWhatsappNumberAction::class)->execute($state))
+                            ->dehydrateStateUsing(fn (?string $state): ?string => app(NormalizeWhatsappNumberAction::class)->execute($state))
+                            ->unique(ignoreRecord: true),
 
                         DateTimePicker::make('email_verified_at')
                             ->label('Email Diverifikasi Pada')

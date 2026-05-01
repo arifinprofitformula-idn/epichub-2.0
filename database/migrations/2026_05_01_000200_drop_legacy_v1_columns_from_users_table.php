@@ -15,6 +15,10 @@ return new class extends Migration
 
         $driver = Schema::getConnection()->getDriverName();
 
+        if ($driver === 'sqlite') {
+            return;
+        }
+
         if (Schema::hasColumn('users', 'legacy_import_batch_id') && in_array($driver, ['mysql', 'mariadb'], true)) {
             try {
                 DB::statement('ALTER TABLE users DROP FOREIGN KEY users_legacy_batch_fk');

@@ -312,6 +312,7 @@ class MyEpiChannelController extends Controller
 
         return view('epi-channel.profile', [
             'channel' => $channel,
+            'user'    => $request->user(),
         ]);
     }
 

@@ -13,6 +13,7 @@ test('profile page is displayed', function () {
 
 test('profile information can be updated', function () {
     $user = User::factory()->create();
+    $originalName = $user->name;
 
     $this->actingAs($user);
 
@@ -26,7 +27,7 @@ test('profile information can be updated', function () {
 
     $user->refresh();
 
-    expect($user->name)->toEqual('Test User');
+    expect($user->name)->toEqual($originalName);
     expect($user->email)->not->toEqual('hacker@example.com');
     expect($user->whatsapp_number)->toEqual('628123456789');
     expect($user->email_verified_at)->not->toBeNull();
@@ -63,6 +64,26 @@ test('email verification status is unchanged when email address is unchanged', f
     $response->assertHasNoErrors();
 
     expect($user->refresh()->email_verified_at)->not->toBeNull();
+});
+
+test('duplicate whatsapp is rejected on profile update', function () {
+    User::factory()->create([
+        'whatsapp_number' => '628123456789',
+    ]);
+
+    $user = User::factory()->create([
+        'whatsapp_number' => '628999999999',
+    ]);
+
+    $this->actingAs($user);
+
+    $response = Livewire::test('pages::settings.profile')
+        ->set('whatsapp_number', '+62 812-3456-789')
+        ->call('updateProfileInformation');
+
+    $response->assertHasErrors(['whatsapp_number']);
+
+    expect($user->refresh()->whatsapp_number)->toEqual('628999999999');
 });
 
 test('profile photo can be uploaded with maximum size 2mb', function () {
