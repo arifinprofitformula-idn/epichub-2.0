@@ -43,7 +43,9 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::createUsersUsing(CreateNewUser::class);
         
         // Register custom password reset link sender with error handling
-        Fortify::sendPasswordResetNotificationUsing(SendPasswordResetLink::class);
+        if (method_exists(Fortify::class, 'sendPasswordResetNotificationUsing')) {
+            Fortify::sendPasswordResetNotificationUsing(SendPasswordResetLink::class);
+        }
     }
 
     /**
