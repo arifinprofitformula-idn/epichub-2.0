@@ -20,19 +20,35 @@ class PasswordResetLinkController
     /**
      * Handle an incoming password reset link request.
      * Custom implementation to redirect to success page after email is sent.
+     * 
+     * This overrides Fortify's default behavior to:
+     * 1. Send reset link
+     * 2. Redirect to a success page
+     * 3. Prevent email enumeration
      */
-    public function store(Request $request): Response|\Illuminate\Http\RedirectResponse
+    public function store(Request $request)
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
+        try {
+            $request->validate([
+                'email' => ['required', 'email'],
+            ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
 
-        // Always redirect to success page regardless of status
-        // This prevents enumeration attacks (user can't tell if email exists)
-        return redirect()->route('password.reset.sent');
+            // Always redirect to success page regardless of status
+            // This prevents enumeration attacks (user can't tell if email exists)
+            return redirect()->route('password.reset.sent');
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Password reset error: ' . $e->getMessage(), [
+                'email' => $request->input('email'),
+                'exception' => $e,
+            ]);
+            
+            // Still redirect to success page (security)
+            return redirect()->route('password.reset.sent');
+        }
     }
 }

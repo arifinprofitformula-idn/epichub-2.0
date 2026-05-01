@@ -32,6 +32,7 @@ Route::middleware('guest')->group(function () {
         ->name('password.reset.sent');
     
     // Override Fortify's password.email route to redirect to success page
+    // Important: This must override Fortify's route, so we register it with same path
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
         ->name('password.email');
 });

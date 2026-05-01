@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Actions\Affiliates\ResolveCurrentReferralAction;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Actions\Fortify\SendPasswordResetLink;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -40,6 +41,9 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+        
+        // Register custom password reset link sender with error handling
+        Fortify::sendPasswordResetNotificationUsing(SendPasswordResetLink::class);
     }
 
     /**
