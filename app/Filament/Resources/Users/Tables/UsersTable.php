@@ -26,7 +26,7 @@ class UsersTable
     {
         return $table
             ->defaultSort('created_at', 'desc')
-            ->searchPlaceholder('Cari nama, email, WhatsApp, atau kode EPIC')
+            ->searchPlaceholder('Cari nama, email, WhatsApp, atau ID EPIC')
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama')
@@ -34,28 +34,10 @@ class UsersTable
                     ->sortable(),
 
                 TextColumn::make('email')
-                    ->label('Email')
-                    ->searchable()
+                    ->label('Kontak')
+                    ->description(fn (User $record): string => $record->whatsapp_number ?: '-')
+                    ->searchable(['email', 'whatsapp_number'])
                     ->sortable()
-                    ->copyable(),
-
-                TextColumn::make('whatsapp_number')
-                    ->label('WhatsApp')
-                    ->searchable()
-                    ->toggleable(),
-
-                TextColumn::make('role_labels')
-                    ->label('Role')
-                    ->state(fn (User $record): string => $record->roles->pluck('name')->implode(', '))
-                    ->badge()
-                    ->placeholder('-')
-                    ->toggleable(),
-
-                TextColumn::make('email_verified_label')
-                    ->label('Email')
-                    ->state(fn (User $record): string => $record->email_verified_at ? 'Terverifikasi' : 'Belum')
-                    ->badge()
-                    ->color(fn (User $record): string => $record->email_verified_at ? 'success' : 'warning')
                     ->toggleable(),
 
                 TextColumn::make('epiChannel.status')
@@ -71,21 +53,18 @@ class UsersTable
                     }),
 
                 TextColumn::make('epiChannel.epic_code')
-                    ->label('Kode EPIC')
+                    ->label('ID EPIC')
                     ->placeholder('-')
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->orWhereHas('epiChannel', fn (Builder $epiQuery) => $epiQuery->where('epic_code', 'like', "%{$search}%"));
                     })
                     ->toggleable(),
 
-                TextColumn::make('referral_lock_status')
-                    ->label('Referral Terkunci')
-                    ->state(fn (User $record): string => $record->referralLockStatusLabel())
-                    ->badge()
-                    ->color(fn (User $record): string => match ($record->referralLockStatusLabel()) {
-                        'Locked' => 'success',
-                        'House Channel' => 'info',
-                        default => 'warning',
+                TextColumn::make('referrerEpiChannel.epic_code')
+                    ->label('ID EPIC Pereferral')
+                    ->placeholder('-')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->orWhereHas('referrerEpiChannel', fn (Builder $epiQuery) => $epiQuery->where('epic_code', 'like', "%{$search}%"));
                     })
                     ->toggleable(),
 
