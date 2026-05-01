@@ -10,6 +10,8 @@
   .wrapper { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
   .card { background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
   .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 32px 40px; text-align: center; }
+  .header-logo-container { margin-bottom: 16px; }
+  .header-logo-image { max-width: 100px; height: auto; display: inline-block; }
   .header-logo { color: #f59e0b; font-size: 22px; font-weight: 800; letter-spacing: 2px; }
   .header-tagline { color: #94a3b8; font-size: 12px; margin-top: 4px; letter-spacing: 1px; }
   .body { padding: 40px; }
@@ -43,8 +45,11 @@
   <div class="card">
 
     <div class="header">
-      <div class="header-logo">⚡ EPIC HUB</div>
-      <div class="header-tagline">Platform Digital Indonesia</div>
+      <div class="header-logo-container">
+        <img src="{{ asset('icons/icon-192.png') }}" alt="EPIC HUB" class="header-logo-image" />
+      </div>
+      <div class="header-logo">EPIC HUB</div>
+      <div class="header-tagline">Connect Grow Impact</div>
     </div>
 
     <div class="body">

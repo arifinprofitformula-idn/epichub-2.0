@@ -20,9 +20,21 @@ use App\Http\Controllers\MyProductFileController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Middleware\CaptureReferralFromRequest;
 
 Route::view('/offline', 'offline')->name('offline');
+
+// Custom password reset routes (override Fortify defaults)
+Route::middleware('guest')->group(function () {
+    // Password reset sent success page
+    Route::get('/forgot-password/success', fn() => response()->view('pages.auth.password-reset-sent'))
+        ->name('password.reset.sent');
+    
+    // Override Fortify's password.email route to redirect to success page
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+});
 
 Route::middleware([CaptureReferralFromRequest::class])
     ->get('/', HomeController::class)
