@@ -167,7 +167,7 @@ class NotificationPayloadBuilder
             'order_number'   => $order?->order_number ?? '',
             'payment_number' => $payment->payment_number,
             'products_list'  => $this->productsList($order),
-            'produk_saya_url'=> url('/my-products'),
+            'produk_saya_url'=> url('/produk-saya'),
             'total_amount'   => $this->formatCurrency((float) $order?->total_amount),
         ]);
     }
