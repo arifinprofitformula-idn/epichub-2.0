@@ -431,7 +431,13 @@ class NotificationPayloadBuilder
             return '';
         }
 
-        return url('/orders/'.$order->order_number.'/pay');
+        $payment = $order->latestPayment();
+
+        if ($payment) {
+            return route('payments.show', $payment);
+        }
+
+        return route('orders.show', $order);
     }
 
     private function formatEventDatetime($event): string
