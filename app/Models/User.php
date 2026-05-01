@@ -177,7 +177,11 @@ class User extends Authenticatable implements FilamentUser
 
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify(new ResetPasswordNotification($token));
+        // Reset password di EPIC HUB dikirim melalui service notifikasi internal
+        // dari ResetPasswordNotification::toMail(), jadi kita panggil langsung
+        // agar Laravel MailChannel tidak ikut mencoba mengirim MailMessage kosong
+        // via SMTP fallback bawaan framework.
+        (new ResetPasswordNotification($token))->toMail($this);
     }
 
     public function hasLockedReferrer(): bool

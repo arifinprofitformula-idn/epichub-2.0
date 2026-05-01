@@ -6,6 +6,8 @@ use App\Models\NotificationTemplate;
 use App\Models\User;
 use Closure;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\View;
 
 /**
  * Titik sentral pengiriman notifikasi Step 4.
@@ -361,13 +363,63 @@ class NotificationDispatcher
         return $message === $legacyMsg ? 'fallback' : 'database';
     }
 
-    /** Bungkus plain text sebagai HTML aman dengan whitespace dipertahankan. */
+    /** Render body email DB sebagai HTML aman, sambil tetap mendukung plain text legacy. */
     private function wrapBodyAsHtml(string $body): string
     {
+        $trimmed = trim($body);
+
+        if ($trimmed === '') {
+            return '';
+        }
+
+        $htmlContent = ! $this->containsHtmlMarkup($trimmed)
+            ? $this->wrapPlainTextAsHtml($trimmed)
+            : $this->sanitizeEmailHtml($trimmed);
+
+        return View::make('emails.layouts.epic', [
+            'htmlContent' => $htmlContent,
+        ])->render();
+    }
+
+    private function containsHtmlMarkup(string $body): bool
+    {
+        return $body !== strip_tags($body);
+    }
+
+    private function wrapPlainTextAsHtml(string $body): string
+    {
         $escaped = htmlspecialchars($body, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         return '<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.7; color: #333; white-space: pre-line; padding: 0;">'
-            . $escaped
+            . nl2br($escaped, false)
             . '</div>';
+    }
+
+    private function sanitizeEmailHtml(string $body): string
+    {
+        $sanitized = preg_replace('/<\?(?:php|=).*?\?>/is', '', $body) ?? '';
+        $sanitized = preg_replace('/<%.*?%>/is', '', $sanitized) ?? '';
+        $sanitized = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $sanitized) ?? '';
+        $sanitized = preg_replace('/<(iframe|object|embed|form|input|button|textarea|select)\b[^>]*>.*?<\/\1>/is', '', $sanitized) ?? '';
+        $sanitized = preg_replace('/<(iframe|object|embed|form|input|button|textarea|select)\b[^>]*\/?>/is', '', $sanitized) ?? '';
+        $sanitized = preg_replace('/\s+on[a-z]+\s*=\s*(".*?"|\'.*?\'|[^\s>]+)/is', '', $sanitized) ?? '';
+        $sanitized = preg_replace_callback(
+            '/\b(href|src)\s*=\s*("|\')(.*?)\2/is',
+            function (array $matches): string {
+                $attribute = strtolower($matches[1]);
+                $quote = $matches[2];
+                $value = trim($matches[3]);
+
+                if (Str::startsWith(Str::lower($value), ['javascript:', 'vbscript:', 'data:text/html'])) {
+                    return $attribute.'='.$quote.'#'.$quote;
+                }
+
+                return $attribute.'='.$quote.$value.$quote;
+            },
+            $sanitized,
+        ) ?? '';
+
+        return $sanitized;
     }
 
     private function withTemplateMeta(array $base, string $targetKey, ?int $templateId, string $templateSource): array

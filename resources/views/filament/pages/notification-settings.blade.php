@@ -200,10 +200,10 @@
                             <textarea
                                 wire:model.defer="templates.{{ $activeEvent }}.{{ $targetKey }}.email_body"
                                 rows="10"
-                                placeholder="Tulis template email di sini. Gunakan {shortcode} untuk data dinamis."
+                                placeholder="<div style=&quot;font-family:Arial,sans-serif&quot;><h2>Halo {member_name}</h2><p>Pembayaran Anda untuk order <strong>{order_number}</strong> sudah kami terima.</p><a href=&quot;{payment_url}&quot; style=&quot;display:inline-block;background:#0f766e;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none&quot;>Lihat Detail</a></div>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-primary-500 focus:ring-primary-500 focus:outline-none resize-y"
                             ></textarea>
-                            <p class="text-xs text-gray-400">Gunakan shortcode {snake_case}. Klik tombol <strong>Shortcode</strong> di atas untuk melihat daftar.</p>
+                            <p class="text-xs text-gray-400">Mendukung HTML email dan inline CSS. Gunakan shortcode {snake_case}; klik tombol <strong>Shortcode</strong> di atas untuk melihat daftar.</p>
                         </div>
                     </div>
 

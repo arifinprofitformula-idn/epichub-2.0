@@ -3,17 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@php
+  $replyToEmail = app(\App\Services\Settings\AppSettingService::class)
+    ->getMailketing('mailketing_reply_to_email', config('mail.from.address', 'support@epichub.id'));
+@endphp
 <title>{{ $subject ?? config('app.name', 'EPIC HUB') }}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: Arial, Helvetica, sans-serif; background: #f4f6f9; color: #1a1a2e; line-height: 1.6; }
+  body { font-family: Arial, Helvetica, sans-serif; background: #eef2f7; color: #172033; line-height: 1.6; }
   .wrapper { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
-  .card { background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 32px 40px; text-align: center; }
-  .header-logo-container { margin-bottom: 16px; }
-  .header-logo-image { max-width: 100px; height: auto; display: inline-block; }
-  .header-logo { color: #f59e0b; font-size: 22px; font-weight: 800; letter-spacing: 2px; }
-  .header-tagline { color: #94a3b8; font-size: 12px; margin-top: 4px; letter-spacing: 1px; }
+  .card { background: #ffffff; border-radius: 18px; overflow: hidden; box-shadow: 0 18px 36px rgba(15, 23, 42, .08); border: 1px solid #dbe3ee; }
+  .header { background: radial-gradient(circle at top, rgba(245, 158, 11, .16), transparent 34%), linear-gradient(135deg, #0f172a 0%, #111827 52%, #1e293b 100%); padding: 36px 40px; text-align: center; }
+  .header-logo-container { margin-bottom: 14px; }
+  .header-logo-image { max-width: 88px; height: auto; display: inline-block; filter: drop-shadow(0 8px 20px rgba(245, 158, 11, .18)); }
+  .header-logo { color: #f8fafc; font-size: 24px; font-weight: 800; letter-spacing: 2.4px; }
+  .header-tagline { color: #fbbf24; font-size: 12px; margin-top: 6px; letter-spacing: 2px; text-transform: uppercase; }
   .body { padding: 40px; }
   .greeting { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 16px; }
   .text { font-size: 15px; color: #4b5563; margin-bottom: 16px; }
@@ -29,9 +33,9 @@
   .alert-box { background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 14px 18px; margin: 20px 0; font-size: 14px; color: #92400e; }
   .success-box { background: #d1fae5; border: 1px solid #34d399; border-radius: 8px; padding: 14px 18px; margin: 20px 0; font-size: 14px; color: #065f46; }
   .danger-box { background: #fee2e2; border: 1px solid #f87171; border-radius: 8px; padding: 14px 18px; margin: 20px 0; font-size: 14px; color: #991b1b; }
-  .footer { background: #f8fafc; padding: 24px 40px; text-align: center; border-top: 1px solid #e5e7eb; }
-  .footer-text { font-size: 12px; color: #9ca3af; line-height: 1.8; }
-  .footer-link { color: #f59e0b; text-decoration: none; }
+  .footer { background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); padding: 24px 40px; text-align: center; border-top: 1px solid #e5e7eb; }
+  .footer-text { font-size: 12px; color: #64748b; line-height: 1.8; }
+  .footer-link { color: #b45309; text-decoration: none; font-weight: 700; }
   @media (max-width: 480px) {
     .body, .footer { padding: 28px 20px; }
     .header { padding: 24px 20px; }
@@ -53,15 +57,19 @@
     </div>
 
     <div class="body">
-      @yield('content')
+      @isset($htmlContent)
+        {!! $htmlContent !!}
+      @else
+        @yield('content')
+      @endisset
     </div>
 
     <div class="footer">
       <p class="footer-text">
-        Email ini dikirim secara otomatis oleh sistem <strong>EPIC HUB</strong>.<br>
+        Email ini dikirim secara otomatis oleh sistem EPIC HUB.<br>
         Jika ada pertanyaan, hubungi kami di
-        <a href="mailto:{{ config('mail.from.address', 'support@epichub.id') }}" class="footer-link">{{ config('mail.from.address', 'support@epichub.id') }}</a><br><br>
-        &copy; {{ date('Y') }} EPIC HUB. Hak cipta dilindungi.
+        <a href="mailto:{{ $replyToEmail }}" class="footer-link">{{ $replyToEmail }}</a><br><br>
+        &copy; 2026 EPIC HUB. Hak cipta dilindungi.
       </p>
     </div>
 
