@@ -53,6 +53,17 @@ class MailketingSettingsPage extends Page implements HasForms
     public bool   $enable_email_queue  = false;
     public string $test_recipient_email = '';
 
+    // Notification toggles
+    public bool $notify_user_registered         = true;
+    public bool $notify_password_reset          = true;
+    public bool $notify_order_created           = true;
+    public bool $notify_payment_submitted       = true;
+    public bool $notify_payment_approved        = true;
+    public bool $notify_payment_rejected        = true;
+    public bool $notify_access_granted          = true;
+    public bool $notify_admin_order_created     = true;
+    public bool $notify_admin_payment_submitted = true;
+
     public function mount(): void
     {
         $settings = app(AppSettingService::class);
@@ -70,6 +81,16 @@ class MailketingSettingsPage extends Page implements HasForms
         $this->enable_email_logs   = (bool) $settings->getMailketing('enable_email_logs', true);
         $this->enable_email_queue  = (bool) $settings->getMailketing('enable_email_queue', false);
         $this->test_recipient_email = (string) $settings->getMailketing('test_recipient_email', '');
+
+        $this->notify_user_registered         = (bool) $settings->getMailketing('notify_user_registered', true);
+        $this->notify_password_reset          = (bool) $settings->getMailketing('notify_password_reset', true);
+        $this->notify_order_created           = (bool) $settings->getMailketing('notify_order_created', true);
+        $this->notify_payment_submitted       = (bool) $settings->getMailketing('notify_payment_submitted', true);
+        $this->notify_payment_approved        = (bool) $settings->getMailketing('notify_payment_approved', true);
+        $this->notify_payment_rejected        = (bool) $settings->getMailketing('notify_payment_rejected', true);
+        $this->notify_access_granted          = (bool) $settings->getMailketing('notify_access_granted', true);
+        $this->notify_admin_order_created     = (bool) $settings->getMailketing('notify_admin_order_created', true);
+        $this->notify_admin_payment_submitted = (bool) $settings->getMailketing('notify_admin_payment_submitted', true);
 
         // Token tidak ditampilkan penuh — hanya ditampilkan sebagai placeholder masked di view
         // Field mailketing_api_token sengaja dibiarkan kosong di form state agar tidak bocor ke UI
@@ -105,6 +126,16 @@ class MailketingSettingsPage extends Page implements HasForms
         $settings->setMailketing('enable_email_logs',  $this->enable_email_logs,  false, 'boolean');
         $settings->setMailketing('enable_email_queue', $this->enable_email_queue, false, 'boolean');
         $settings->setMailketing('test_recipient_email', $this->test_recipient_email);
+
+        $settings->setMailketing('notify_user_registered',         $this->notify_user_registered,         false, 'boolean');
+        $settings->setMailketing('notify_password_reset',          $this->notify_password_reset,          false, 'boolean');
+        $settings->setMailketing('notify_order_created',           $this->notify_order_created,           false, 'boolean');
+        $settings->setMailketing('notify_payment_submitted',       $this->notify_payment_submitted,       false, 'boolean');
+        $settings->setMailketing('notify_payment_approved',        $this->notify_payment_approved,        false, 'boolean');
+        $settings->setMailketing('notify_payment_rejected',        $this->notify_payment_rejected,        false, 'boolean');
+        $settings->setMailketing('notify_access_granted',          $this->notify_access_granted,          false, 'boolean');
+        $settings->setMailketing('notify_admin_order_created',     $this->notify_admin_order_created,     false, 'boolean');
+        $settings->setMailketing('notify_admin_payment_submitted', $this->notify_admin_payment_submitted, false, 'boolean');
 
         // Simpan token hanya jika diisi (tidak kosong)
         if (filled($this->mailketing_api_token)) {

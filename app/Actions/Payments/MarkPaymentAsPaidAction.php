@@ -9,9 +9,11 @@ use App\Actions\Event\RegisterOrderEventsAction;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Enums\ProductType;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Notifications\EmailNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -82,7 +84,9 @@ class MarkPaymentAsPaidAction
 
             // Catatan: future payment gateway callback harus memakai alur yang sama agar grant akses konsisten dan idempotent.
 
-            return $payment->refresh();
+            $this->sendPaymentApprovedEmail($payment->refresh(), $order);
+
+            return $payment;
         });
     }
 
@@ -108,6 +112,50 @@ class MarkPaymentAsPaidAction
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    protected function sendPaymentApprovedEmail(Payment $payment, Order $order): void
+    {
+        try {
+            $order->loadMissing(['items.product', 'user']);
+            $user = $order->user;
+
+            if (! $user) {
+                return;
+            }
+
+            $products = $order->items->map(fn ($item) => $item->product?->name ?? '-')->filter()->values()->all();
+
+            $hasCourseProd = $order->items->contains(fn ($item) => $this->isProductType($item->product, ProductType::Course));
+            $hasEventProd  = $order->items->contains(fn ($item) => $this->isProductType($item->product, ProductType::Event));
+
+            app(EmailNotificationService::class)->sendTransactionalEmail(
+                recipient: ['email' => $user->email, 'name' => $user->name],
+                subject: 'Pembayaran Berhasil, Akses Produk Aktif!',
+                view: 'emails.orders.payment-approved',
+                data: [
+                    'userName'      => $user->name,
+                    'orderNumber'   => $order->order_number,
+                    'products'      => $products,
+                    'myProductsUrl' => url('/produk-saya'),
+                    'myCoursesUrl'  => $hasCourseProd ? url('/kelas-saya') : null,
+                    'myEventsUrl'   => $hasEventProd ? url('/event-saya') : null,
+                ],
+                eventType: 'payment_approved',
+                metadata: ['notifiable' => $payment],
+            );
+        } catch (\Throwable $e) {
+            Log::error('MarkPaymentAsPaidAction: gagal kirim payment approved email', ['error' => $e->getMessage()]);
+        }
+    }
+
+    private function isProductType(mixed $product, ProductType $type): bool
+    {
+        if (! $product) {
+            return false;
+        }
+        $pt = $product->product_type;
+        return ($pt instanceof ProductType ? $pt : ProductType::tryFrom((string) $pt)) === $type;
     }
 }
 

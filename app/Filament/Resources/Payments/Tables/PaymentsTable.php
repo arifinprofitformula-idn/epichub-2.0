@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Models\Payment;
+use App\Services\Notifications\EmailNotificationService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
@@ -148,6 +149,30 @@ class PaymentsTable
                                                 $record->order->update([
                                                     'status' => OrderStatus::Failed,
                                                 ]);
+                                            }
+
+                                            try {
+                                                $record->loadMissing(['order.user']);
+                                                $user = $record->order?->user;
+
+                                                if ($user) {
+                                                    app(EmailNotificationService::class)->sendTransactionalEmail(
+                                                        recipient: ['email' => $user->email, 'name' => $user->name],
+                                                        subject: 'Pembayaran Perlu Diperiksa Ulang',
+                                                        view: 'emails.orders.payment-rejected',
+                                                        data: [
+                                                            'userName'      => $user->name,
+                                                            'orderNumber'   => $record->order->order_number,
+                                                            'paymentNumber' => $record->payment_number,
+                                                            'reason'        => $data['notes'] ?? null,
+                                                            'paymentUrl'    => route('payments.show', $record),
+                                                        ],
+                                                        eventType: 'payment_rejected',
+                                                        metadata: ['notifiable' => $record],
+                                                    );
+                                                }
+                                            } catch (\Throwable $e) {
+                                                \Illuminate\Support\Facades\Log::error('PaymentsTable: gagal kirim payment rejected email', ['error' => $e->getMessage()]);
                                             }
                                         }),
                                 ]

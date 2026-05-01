@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Payments\UploadPaymentProofRequest;
 use App\Models\Payment;
+use App\Services\Notifications\EmailNotificationService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -62,7 +64,57 @@ class PaymentController extends Controller
             'proof_of_payment' => $path,
         ]);
 
+        $this->sendPaymentSubmittedEmails($payment->fresh(['order.items.product', 'order.user']));
+
         return back();
+    }
+
+    private function sendPaymentSubmittedEmails(Payment $payment): void
+    {
+        try {
+            $order = $payment->order;
+            $user  = $order?->user;
+
+            if (! $order || ! $user) {
+                return;
+            }
+
+            $emailSvc   = app(EmailNotificationService::class);
+            $submittedAt = now()->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y, H:i');
+
+            $emailSvc->sendTransactionalEmail(
+                recipient: ['email' => $user->email, 'name' => $user->name],
+                subject: 'Bukti Pembayaran Anda Sedang Diverifikasi',
+                view: 'emails.orders.payment-submitted',
+                data: [
+                    'userName'      => $user->name,
+                    'orderNumber'   => $order->order_number,
+                    'paymentNumber' => $payment->payment_number,
+                    'amount'        => (float) $payment->amount,
+                    'paymentUrl'    => route('payments.show', $payment),
+                ],
+                eventType: 'payment_submitted',
+                metadata: ['notifiable' => $payment],
+            );
+
+            $emailSvc->sendAdminNotification(
+                subject: 'Bukti Pembayaran Baru — '.$payment->payment_number,
+                view: 'emails.admin.payment-submitted',
+                data: [
+                    'paymentNumber' => $payment->payment_number,
+                    'orderNumber'   => $order->order_number,
+                    'customerName'  => $user->name,
+                    'customerEmail' => $user->email,
+                    'amount'        => (float) $payment->amount,
+                    'submittedAt'   => $submittedAt,
+                    'adminPaymentUrl' => url('/admin/payments/'.$payment->payment_number.'/edit'),
+                ],
+                eventType: 'admin_payment_submitted',
+                metadata: ['notifiable' => $payment],
+            );
+        } catch (\Throwable $e) {
+            Log::error('PaymentController: gagal kirim payment submitted email', ['error' => $e->getMessage()]);
+        }
     }
 }
 

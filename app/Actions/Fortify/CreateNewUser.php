@@ -8,7 +8,9 @@ use App\Actions\Support\NormalizeWhatsappNumberAction;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Services\Notifications\EmailNotificationService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Spatie\Permission\Models\Role;
@@ -50,11 +52,36 @@ class CreateNewUser implements CreatesNewUsers
 
             $resolved = $this->resolveReferralForUser->execute($user, request());
 
-            return $this->lockUserReferrer->execute(
+            $user = $this->lockUserReferrer->execute(
                 user: $user,
                 epiChannel: $resolved['epiChannel'],
                 source: $resolved['source'],
             );
+
+            $this->sendWelcomeEmail($user);
+
+            return $user;
         });
+    }
+
+    private function sendWelcomeEmail(User $user): void
+    {
+        try {
+            app(EmailNotificationService::class)->sendTransactionalEmail(
+                recipient: ['email' => $user->email, 'name' => $user->name],
+                subject: 'Selamat Datang di EPIC HUB',
+                view: 'emails.auth.welcome',
+                data: [
+                    'userName'      => $user->name,
+                    'userEmail'     => $user->email,
+                    'dashboardUrl'  => url('/dashboard'),
+                    'productsUrl'   => url('/produk-saya'),
+                ],
+                eventType: 'user_registered',
+                metadata: ['notifiable' => $user],
+            );
+        } catch (\Throwable $e) {
+            Log::error('CreateNewUser: gagal kirim welcome email', ['error' => $e->getMessage()]);
+        }
     }
 }

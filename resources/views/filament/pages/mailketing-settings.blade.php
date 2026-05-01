@@ -133,6 +133,34 @@
                     </div>
                 </div>
 
+                {{-- Notification Toggles --------------------------------------- --}}
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">Notification Toggles</h4>
+                    <p class="text-xs text-gray-500 mb-4">Aktifkan atau matikan notifikasi email untuk setiap event. Email yang dimatikan akan tetap tercatat sebagai <em>skipped</em> di log.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                        @foreach([
+                            ['notify_user_registered',         'Registrasi Akun',              'Email selamat datang ke user baru'],
+                            ['notify_password_reset',          'Reset Password',               'Email link reset password'],
+                            ['notify_order_created',           'Order Dibuat',                 'Email konfirmasi order ke user'],
+                            ['notify_payment_submitted',       'Bukti Pembayaran Dikirim',     'Email konfirmasi ke user setelah upload bukti'],
+                            ['notify_payment_approved',        'Pembayaran Disetujui',         'Email akses aktif ke user'],
+                            ['notify_payment_rejected',        'Pembayaran Ditolak',           'Email penolakan ke user'],
+                            ['notify_access_granted',          'Akses Produk Diberikan',       'Email akses manual ke user'],
+                            ['notify_admin_order_created',     'Admin: Order Baru',            'Notifikasi order baru ke admin'],
+                            ['notify_admin_payment_submitted', 'Admin: Bukti Pembayaran Baru', 'Notifikasi bukti baru ke admin'],
+                        ] as [$field, $label, $hint])
+                        <div class="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50">
+                            <div class="mr-3">
+                                <p class="font-medium text-sm text-gray-700">{{ $label }}</p>
+                                <p class="text-xs text-gray-500">{{ $hint }}</p>
+                            </div>
+                            <input type="checkbox" wire:model="{{ $field }}" id="{{ $field }}"
+                                class="shrink-0 rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500">
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 {{-- Mailketing List IDs ------------------------------------------ --}}
                 <div>
                     <h4 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">

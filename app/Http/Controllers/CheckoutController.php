@@ -6,12 +6,18 @@ use App\Actions\Affiliates\ResolveCurrentReferralAction;
 use App\Actions\Checkout\CreateGuestCheckoutUserAction;
 use App\Actions\Event\CheckEventCheckoutEligibilityAction;
 use App\Actions\Orders\CreateDirectOrderAction;
+use App\Enums\PaymentMethod;
 use App\Enums\ProductType;
+use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Product;
+use App\Models\User;
+use App\Services\Notifications\EmailNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use RuntimeException;
@@ -101,9 +107,87 @@ class CheckoutController extends Controller
         if ($guestUserCreated) {
             Auth::login($payment['user']);
             $request->session()->regenerate();
+            $this->sendGuestWelcomeEmail($payment['user']);
         }
 
+        $this->sendOrderCreatedEmails($payment['user'], $payment['payment']);
+
         return redirect()->route('payments.show', $payment['payment']);
+    }
+
+    private function sendGuestWelcomeEmail(User $user): void
+    {
+        try {
+            app(EmailNotificationService::class)->sendTransactionalEmail(
+                recipient: ['email' => $user->email, 'name' => $user->name],
+                subject: 'Selamat Datang di EPIC HUB',
+                view: 'emails.auth.welcome',
+                data: [
+                    'userName'     => $user->name,
+                    'userEmail'    => $user->email,
+                    'dashboardUrl' => url('/dashboard'),
+                    'productsUrl'  => url('/produk-saya'),
+                ],
+                eventType: 'user_registered',
+                metadata: ['notifiable' => $user],
+            );
+        } catch (\Throwable $e) {
+            Log::error('CheckoutController: gagal kirim welcome email', ['error' => $e->getMessage()]);
+        }
+    }
+
+    private function sendOrderCreatedEmails(User $user, Payment $payment): void
+    {
+        try {
+            $payment->loadMissing(['order.items.product']);
+            $order = $payment->order;
+
+            if (! $order) {
+                return;
+            }
+
+            $products = $order->items->map(fn ($item) => $item->product?->name ?? '-')->filter()->values()->all();
+            $methodLabel = $payment->payment_method instanceof PaymentMethod
+                ? $payment->payment_method->value
+                : (string) $payment->payment_method;
+
+            $emailSvc = app(EmailNotificationService::class);
+
+            $emailSvc->sendTransactionalEmail(
+                recipient: ['email' => $user->email, 'name' => $user->name],
+                subject: 'Order Anda Berhasil Dibuat — '.$order->order_number,
+                view: 'emails.orders.created',
+                data: [
+                    'userName'      => $user->name,
+                    'orderNumber'   => $order->order_number,
+                    'products'      => $products,
+                    'totalAmount'   => (float) $order->total_amount,
+                    'paymentMethod' => $methodLabel,
+                    'paymentUrl'    => route('payments.show', $payment),
+                ],
+                eventType: 'order_created',
+                metadata: ['notifiable' => $order],
+            );
+
+            $emailSvc->sendAdminNotification(
+                subject: 'Order Baru Masuk — '.$order->order_number,
+                view: 'emails.admin.new-order',
+                data: [
+                    'orderNumber'   => $order->order_number,
+                    'customerName'  => $user->name,
+                    'customerEmail' => $user->email,
+                    'products'      => $products,
+                    'totalAmount'   => (float) $order->total_amount,
+                    'paymentMethod' => $methodLabel,
+                    'createdAt'     => $order->created_at?->setTimezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y, H:i') ?? '-',
+                    'adminOrderUrl' => url('/admin/orders/'.$order->order_number.'/edit'),
+                ],
+                eventType: 'admin_order_created',
+                metadata: ['notifiable' => $order],
+            );
+        } catch (\Throwable $e) {
+            Log::error('CheckoutController: gagal kirim order email', ['error' => $e->getMessage()]);
+        }
     }
 }
 

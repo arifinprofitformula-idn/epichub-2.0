@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Actions\Support\NormalizeWhatsappNumberAction;
+use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -172,6 +173,11 @@ class User extends Authenticatable implements FilamentUser
     public function affiliateClientNotes(): HasMany
     {
         return $this->hasMany(AffiliateClientNote::class, 'client_user_id');
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     public function hasLockedReferrer(): bool

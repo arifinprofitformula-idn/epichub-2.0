@@ -13,7 +13,9 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\UserProduct;
+use App\Services\Notifications\EmailNotificationService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class GrantProductAccessAction
 {
@@ -91,6 +93,11 @@ class GrantProductAccessAction
 
         $this->maybeRegisterEvent($user, $product, $userProduct, $sourceProduct, $actor, $order);
 
+        // Kirim email access_granted hanya untuk manual grant (bukan dari order payment — itu sudah ditangani oleh payment_approved)
+        if ($order === null && $logAction === AccessLogAction::ManualGrant) {
+            $this->sendAccessGrantedEmail($user, $product, $userProduct);
+        }
+
         return $userProduct->refresh();
     }
 
@@ -127,6 +134,46 @@ class GrantProductAccessAction
         $value = (string) $accessType;
 
         return $value !== '' ? $value : null;
+    }
+
+    protected function sendAccessGrantedEmail(User $user, Product $product, UserProduct $userProduct): void
+    {
+        try {
+            $type = $product->product_type instanceof ProductType
+                ? $product->product_type
+                : ProductType::tryFrom((string) $product->product_type);
+
+            $typeLabel = match ($type) {
+                ProductType::Course  => 'Kelas Online',
+                ProductType::Event   => 'Event',
+                ProductType::Bundle  => 'Bundle',
+                ProductType::Digital => 'Produk Digital',
+                default              => 'Produk',
+            };
+
+            $accessUrl = match ($type) {
+                ProductType::Course => url('/kelas-saya'),
+                ProductType::Event  => url('/event-saya'),
+                default             => url('/produk-saya'),
+            };
+
+            app(EmailNotificationService::class)->sendTransactionalEmail(
+                recipient: ['email' => $user->email, 'name' => $user->name],
+                subject: 'Akses Produk Anda Sudah Aktif',
+                view: 'emails.products.access-granted',
+                data: [
+                    'userName'      => $user->name,
+                    'productName'   => $product->name,
+                    'productType'   => $typeLabel,
+                    'accessUrl'     => $accessUrl,
+                    'myProductsUrl' => url('/produk-saya'),
+                ],
+                eventType: 'access_granted',
+                metadata: ['notifiable' => $userProduct],
+            );
+        } catch (\Throwable $e) {
+            Log::error('GrantProductAccessAction: gagal kirim access granted email', ['error' => $e->getMessage()]);
+        }
     }
 
     protected function maybeRegisterEvent(
