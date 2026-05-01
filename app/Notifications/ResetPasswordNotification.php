@@ -3,8 +3,8 @@
 namespace App\Notifications;
 
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use Illuminate\Auth\Notifications\ResetPassword as BaseResetPassword;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -19,19 +19,26 @@ class ResetPasswordNotification extends BaseResetPassword
         $url = $this->resetUrl($notifiable);
 
         try {
-            $service = app(EmailNotificationService::class);
+            $dispatcher = app(NotificationDispatcher::class);
+            $payload = app(NotificationPayloadBuilder::class)->forPasswordReset($notifiable, $url);
 
-            $service->sendTransactionalEmail(
-                recipient: ['email' => $notifiable->email, 'name' => $notifiable->name ?? null],
-                subject: 'Reset Password EPIC HUB',
-                view: 'emails.auth.password-reset',
-                data: [
-                    'userName'       => $notifiable->name ?? $notifiable->email,
-                    'resetUrl'       => $url,
-                    'expiryMinutes'  => config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60),
-                ],
-                eventType: 'password_reset_requested',
-                metadata: ['notifiable' => $notifiable],
+            $dispatcher->notifyMemberEmail(
+                eventKey: 'password_reset_requested',
+                user: $notifiable,
+                payload: $payload,
+                notifiable: $notifiable,
+                fallback: fn () => app(EmailNotificationService::class)->sendTransactionalEmail(
+                    recipient: ['email' => $notifiable->email, 'name' => $notifiable->name ?? null],
+                    subject: 'Reset Password EPIC HUB',
+                    view: 'emails.auth.password-reset',
+                    data: [
+                        'userName'       => $notifiable->name ?? $notifiable->email,
+                        'resetUrl'       => $url,
+                        'expiryMinutes'  => config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60),
+                    ],
+                    eventType: 'password_reset_requested',
+                    metadata: ['notifiable' => $notifiable],
+                ),
             );
         } catch (\Throwable $e) {
             Log::error('ResetPasswordNotification: gagal kirim via EmailNotificationService', [
@@ -40,15 +47,17 @@ class ResetPasswordNotification extends BaseResetPassword
         }
 
         try {
-            $message = app(WhatsAppMessageTemplateService::class)->render('password_reset_requested', [
-                'name' => $notifiable->name ?? $notifiable->email,
-            ]);
+            $dispatcher = app(NotificationDispatcher::class);
+            $payload = app(NotificationPayloadBuilder::class)->forPasswordReset($notifiable);
 
-            app(WhatsAppNotificationService::class)->sendToUser(
+            $dispatcher->notifyMemberWhatsApp(
+                eventKey: 'password_reset_requested',
                 user: $notifiable,
-                message: $message,
-                eventType: 'password_reset_requested',
-                metadata: ['notifiable' => $notifiable],
+                payload: $payload,
+                notifiable: $notifiable,
+                legacyData: [
+                    'name' => $notifiable->name ?? $notifiable->email,
+                ],
             );
         } catch (\Throwable $e) {
             Log::error('ResetPasswordNotification: gagal kirim WhatsApp reset password', [

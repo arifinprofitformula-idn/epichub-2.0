@@ -7,8 +7,8 @@ use App\Enums\UserProductStatus;
 use App\Models\UserProduct;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use Carbon\Carbon;
 
 class UserProductObserver
@@ -18,7 +18,7 @@ class UserProductObserver
     public function created(UserProduct $userProduct): void
     {
         if ($this->shouldNotify($userProduct, wasActiveBefore: false)) {
-            app(EmailNotificationService::class)->sendCourseEnrollmentEmail($userProduct);
+            $this->sendEnrollmentNotifications($userProduct);
             $this->subscribeCourseStudent($userProduct);
         }
     }
@@ -28,9 +28,23 @@ class UserProductObserver
         $wasActiveBefore = $this->wasActiveBefore($userProduct);
 
         if ($this->shouldNotify($userProduct, $wasActiveBefore)) {
-            app(EmailNotificationService::class)->sendCourseEnrollmentEmail($userProduct);
+            $this->sendEnrollmentNotifications($userProduct);
             $this->subscribeCourseStudent($userProduct);
         }
+    }
+
+    private function sendEnrollmentNotifications(UserProduct $userProduct): void
+    {
+        $dispatcher = app(NotificationDispatcher::class);
+        $payload = app(NotificationPayloadBuilder::class)->forCourseEnrollment($userProduct);
+
+        $dispatcher->notifyMemberEmail(
+            eventKey: 'course_enrolled',
+            user: $userProduct->user,
+            payload: $payload,
+            notifiable: $userProduct,
+            fallback: fn () => app(EmailNotificationService::class)->sendCourseEnrollmentEmail($userProduct),
+        );
     }
 
     private function subscribeCourseStudent(UserProduct $userProduct): void
@@ -42,14 +56,15 @@ class UserProductObserver
         }
 
         try {
-            app(WhatsAppNotificationService::class)->sendToUser(
+            app(NotificationDispatcher::class)->notifyMemberWhatsApp(
+                eventKey: 'course_enrolled',
                 user: $userProduct->user,
-                message: app(WhatsAppMessageTemplateService::class)->render('course_enrolled', [
+                payload: app(NotificationPayloadBuilder::class)->forCourseEnrollment($userProduct),
+                notifiable: $userProduct,
+                legacyData: [
                     'course_name' => $userProduct->product->course->title,
                     'course_url' => route('my-courses.show', $userProduct),
-                ]),
-                eventType: 'course_enrolled',
-                metadata: ['notifiable' => $userProduct],
+                ],
             );
         } catch (\Throwable) {
             // Observer ini tidak boleh memblokir flow grant akses.

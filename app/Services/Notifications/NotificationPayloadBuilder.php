@@ -29,14 +29,57 @@ class NotificationPayloadBuilder
         ]);
     }
 
-    public function forPasswordReset(User $user): array
+    public function forPasswordReset(User $user, ?string $resetUrl = null): array
     {
-        return $this->withAliases([
+        $payload = [
             'member_name'  => $user->name,
             'member_email' => $user->email,
             'login_url'    => url('/login'),
             'sent_at'      => $this->now(),
-        ]);
+        ];
+
+        if ($resetUrl !== null) {
+            $payload['reset_url'] = $resetUrl;
+        }
+
+        return $this->withAliases($payload);
+    }
+
+    public function forPaymentReminder(Payment $payment, int $attemptNumber = 1): array
+    {
+        $payment->loadMissing(['order.items.product', 'order.user']);
+
+        $order = $payment->order;
+        $user  = $order?->user;
+
+        return $this->withAliases([
+            'member_name'    => $user?->name ?? '',
+            'member_email'   => $user?->email ?? '',
+            'member_whatsapp'=> $user?->whatsapp_number ?? '',
+            'order_number'   => $order?->order_number ?? '',
+            'products_list'  => $this->productsList($order),
+            'total_amount'   => $this->formatCurrency((float) $order?->total_amount),
+            'payment_url'    => $this->orderPaymentUrl($order),
+            'attempt_number' => $attemptNumber,
+        ], 'payment_reminder');
+    }
+
+    public function forEventReminder(EventRegistration $registration, string $eventType): array
+    {
+        $registration->loadMissing(['event', 'user']);
+
+        $event = $registration->event;
+        $user  = $registration->user;
+
+        return $this->withAliases([
+            'member_name'    => $user?->name ?? '',
+            'member_email'   => $user?->email ?? '',
+            'member_whatsapp'=> $user?->whatsapp_number ?? '',
+            'event_name'     => $event?->title ?? '',
+            'event_datetime' => $this->formatEventDatetime($event),
+            'event_location' => $this->eventLocation($event),
+            'event_url'      => $registration->id ? url('/my-events/'.$registration->id) : url('/my-events'),
+        ], $eventType);
     }
 
     // ── Order ────────────────────────────────────────────────────────────────

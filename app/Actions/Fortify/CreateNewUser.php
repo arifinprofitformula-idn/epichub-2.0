@@ -10,8 +10,8 @@ use App\Concerns\ProfileValidationRules;
 use App\Models\User;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -71,34 +71,45 @@ class CreateNewUser implements CreatesNewUsers
     private function sendWelcomeEmail(User $user): void
     {
         try {
-            app(EmailNotificationService::class)->sendTransactionalEmail(
-                recipient: ['email' => $user->email, 'name' => $user->name],
-                subject: 'Selamat Datang di EPIC HUB',
-                view: 'emails.auth.welcome',
-                data: [
-                    'userName'      => $user->name,
-                    'userEmail'     => $user->email,
-                    'dashboardUrl'  => url('/dashboard'),
-                    'productsUrl'   => url('/produk-saya'),
-                ],
-                eventType: 'user_registered',
-                metadata: ['notifiable' => $user],
+            $dispatcher = app(NotificationDispatcher::class);
+            $payload = app(NotificationPayloadBuilder::class)->forUserRegistered($user);
+
+            $dispatcher->notifyMemberEmail(
+                eventKey: 'user_registered',
+                user: $user,
+                payload: $payload,
+                notifiable: $user,
+                fallback: fn () => app(EmailNotificationService::class)->sendTransactionalEmail(
+                    recipient: ['email' => $user->email, 'name' => $user->name],
+                    subject: 'Selamat Datang di EPIC HUB',
+                    view: 'emails.auth.welcome',
+                    data: [
+                        'userName'      => $user->name,
+                        'userEmail'     => $user->email,
+                        'dashboardUrl'  => url('/dashboard'),
+                        'productsUrl'   => url('/produk-saya'),
+                    ],
+                    eventType: 'user_registered',
+                    metadata: ['notifiable' => $user],
+                ),
             );
         } catch (\Throwable $e) {
             Log::error('CreateNewUser: gagal kirim welcome email', ['error' => $e->getMessage()]);
         }
 
         try {
-            $message = app(WhatsAppMessageTemplateService::class)->render('user_registered', [
-                'name' => $user->name,
-                'dashboard_url' => url('/dashboard'),
-            ]);
+            $dispatcher = app(NotificationDispatcher::class);
+            $payload = app(NotificationPayloadBuilder::class)->forUserRegistered($user);
 
-            app(WhatsAppNotificationService::class)->sendToUser(
+            $dispatcher->notifyMemberWhatsApp(
+                eventKey: 'user_registered',
                 user: $user,
-                message: $message,
-                eventType: 'user_registered',
-                metadata: ['notifiable' => $user],
+                payload: $payload,
+                notifiable: $user,
+                legacyData: [
+                    'name' => $user->name,
+                    'dashboard_url' => url('/dashboard'),
+                ],
             );
         } catch (\Throwable $e) {
             Log::error('CreateNewUser: gagal kirim welcome whatsapp', ['error' => $e->getMessage()]);

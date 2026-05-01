@@ -7,8 +7,8 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Models\Payment;
 use App\Models\WhatsAppNotificationLog;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use App\Services\Settings\AppSettingService;
 use Illuminate\Console\Command;
 
@@ -20,8 +20,6 @@ class SendWhatsAppPaymentReminders extends Command
 
     public function handle(
         AppSettingService $settings,
-        WhatsAppNotificationService $service,
-        WhatsAppMessageTemplateService $templates,
     ): int {
         if (! (bool) $settings->getDripSender('enable_whatsapp_payment_reminder', false)) {
             $this->warn('WhatsApp payment reminder dinonaktifkan.');
@@ -59,17 +57,18 @@ class SendWhatsAppPaymentReminders extends Command
                 continue;
             }
 
-            $message = $templates->render('payment_reminder', [
-                'name' => $user->name,
-                'order_number' => $payment->order?->order_number,
-                'total_amount' => 'Rp '.number_format((float) $payment->amount, 0, ',', '.'),
-                'payment_url' => route('payments.show', $payment),
-            ]);
-
-            $service->sendToUser($user, $message, 'payment_reminder', [
-                'notifiable' => $payment,
-                'reminder_attempt' => $sentCount + 1,
-            ]);
+            app(NotificationDispatcher::class)->notifyMemberWhatsApp(
+                eventKey: 'payment_reminder',
+                user: $user,
+                payload: app(NotificationPayloadBuilder::class)->forPaymentReminder($payment, $sentCount + 1),
+                notifiable: $payment,
+                legacyData: [
+                    'name' => $user->name,
+                    'order_number' => $payment->order?->order_number,
+                    'total_amount' => 'Rp '.number_format((float) $payment->amount, 0, ',', '.'),
+                    'payment_url' => route('payments.show', $payment),
+                ],
+            );
 
             $sent++;
         }

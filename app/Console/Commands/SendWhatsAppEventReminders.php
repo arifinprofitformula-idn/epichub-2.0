@@ -5,8 +5,8 @@ namespace App\Console\Commands;
 use App\Enums\EventRegistrationStatus;
 use App\Models\EventRegistration;
 use App\Models\WhatsAppNotificationLog;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use App\Services\Settings\AppSettingService;
 use Illuminate\Console\Command;
 
@@ -18,8 +18,6 @@ class SendWhatsAppEventReminders extends Command
 
     public function handle(
         AppSettingService $settings,
-        WhatsAppNotificationService $service,
-        WhatsAppMessageTemplateService $templates,
     ): int {
         if (! (bool) $settings->getDripSender('enable_whatsapp_event_reminder', false)) {
             $this->warn('WhatsApp event reminder dinonaktifkan.');
@@ -31,8 +29,6 @@ class SendWhatsAppEventReminders extends Command
 
         if ((bool) $settings->getDripSender('event_reminder_day_before', true)) {
             $sent += $this->sendBatch(
-                service: $service,
-                templates: $templates,
                 eventType: 'event_reminder_day_before',
                 startFrom: now()->addDay()->subMinutes(30),
                 startTo: now()->addDay()->addMinutes(30),
@@ -41,8 +37,6 @@ class SendWhatsAppEventReminders extends Command
 
         if ((bool) $settings->getDripSender('event_reminder_hour_before', true)) {
             $sent += $this->sendBatch(
-                service: $service,
-                templates: $templates,
                 eventType: 'event_reminder_hour_before',
                 startFrom: now()->addHour()->subMinutes(15),
                 startTo: now()->addHour()->addMinutes(15),
@@ -55,8 +49,6 @@ class SendWhatsAppEventReminders extends Command
     }
 
     private function sendBatch(
-        WhatsAppNotificationService $service,
-        WhatsAppMessageTemplateService $templates,
         string $eventType,
         \DateTimeInterface $startFrom,
         \DateTimeInterface $startTo,
@@ -88,13 +80,17 @@ class SendWhatsAppEventReminders extends Command
                 continue;
             }
 
-            $message = $templates->render($eventType, [
-                'event_name' => $event->title,
-                'event_datetime' => $event->starts_at?->timezone($event->timezone ?: config('app.timezone', 'Asia/Jakarta'))->translatedFormat('d M Y, H:i').' '.($event->timezone ?: config('app.timezone', 'Asia/Jakarta')),
-                'event_url' => route('my-events.show', $registration),
-            ]);
-
-            $service->sendToUser($user, $message, $eventType, ['notifiable' => $registration]);
+            app(NotificationDispatcher::class)->notifyMemberWhatsApp(
+                eventKey: $eventType,
+                user: $user,
+                payload: app(NotificationPayloadBuilder::class)->forEventReminder($registration, $eventType),
+                notifiable: $registration,
+                legacyData: [
+                    'event_name' => $event->title,
+                    'event_datetime' => $event->starts_at?->timezone($event->timezone ?: config('app.timezone', 'Asia/Jakarta'))->translatedFormat('d M Y, H:i').' '.($event->timezone ?: config('app.timezone', 'Asia/Jakarta')),
+                    'event_url' => route('my-events.show', $registration),
+                ],
+            );
             $sent++;
         }
 

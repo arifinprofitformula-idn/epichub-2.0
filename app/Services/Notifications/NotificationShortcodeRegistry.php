@@ -38,7 +38,7 @@ class NotificationShortcodeRegistry
             'dashboard_url', 'login_url', 'sent_at',
         ],
         'password_reset_requested' => [
-            'member_name', 'member_email', 'login_url', 'sent_at',
+            'member_name', 'member_email', 'login_url', 'reset_url', 'sent_at',
         ],
         'order_created' => [
             'member_name', 'member_email', 'member_whatsapp',

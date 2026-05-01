@@ -194,8 +194,8 @@ class NotificationDispatcher
         }
 
         if ($template !== null) {
-            $subject = trim($this->registry->render($template->email_subject ?? '', $payload, $eventKey));
-            $body    = trim($this->registry->render($template->email_body ?? '', $payload, $eventKey));
+            $subject = trim($this->templateService->renderEmailSubject($eventKey, $targetKey, $payload));
+            $body    = trim($this->templateService->renderEmailBody($eventKey, $targetKey, $payload));
 
             if (! blank($subject) && ! blank($body)) {
                 $html = $this->wrapBodyAsHtml($body);
@@ -248,8 +248,8 @@ class NotificationDispatcher
         }
 
         if ($template !== null) {
-            $subject = trim($this->registry->render($template->email_subject ?? '', $payload, $eventKey));
-            $body    = trim($this->registry->render($template->email_body ?? '', $payload, $eventKey));
+            $subject = trim($this->templateService->renderEmailSubject($eventKey, 'admin', $payload));
+            $body    = trim($this->templateService->renderEmailBody($eventKey, 'admin', $payload));
 
             if (! blank($subject) && ! blank($body)) {
                 $this->emailService->sendRenderedAdminNotification(

@@ -8,6 +8,8 @@ use App\Enums\PaymentStatus;
 use App\Models\EmailNotificationLog;
 use App\Models\Payment;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use App\Services\Settings\AppSettingService;
 use Illuminate\Console\Command;
 
@@ -83,23 +85,29 @@ class SendPaymentReminders extends Command
 
             $products = $order->items->map(fn ($item) => $item->product?->title)->filter()->values()->all();
 
-            $emailService->sendTransactionalEmail(
-                recipient: ['email' => $user->email, 'name' => $user->name],
-                subject: 'Pengingat Pembayaran Order EPIC HUB',
-                view: 'emails.orders.payment-reminder',
-                data: [
-                    'userName' => $user->name,
-                    'orderNumber' => $order->order_number,
-                    'products' => $products,
-                    'totalAmount' => (float) $order->total_amount,
-                    'paymentUrl' => route('payments.show', $payment),
-                    'attemptNumber' => $count + 1,
-                ],
-                eventType: 'payment_reminder',
-                metadata: [
-                    'notifiable' => $payment,
-                    'reminder_attempt' => $count + 1,
-                ],
+            app(NotificationDispatcher::class)->notifyMemberEmail(
+                eventKey: 'payment_reminder',
+                user: $user,
+                payload: app(NotificationPayloadBuilder::class)->forPaymentReminder($payment, $count + 1),
+                notifiable: $payment,
+                fallback: fn () => $emailService->sendTransactionalEmail(
+                    recipient: ['email' => $user->email, 'name' => $user->name],
+                    subject: 'Pengingat Pembayaran Order EPIC HUB',
+                    view: 'emails.orders.payment-reminder',
+                    data: [
+                        'userName' => $user->name,
+                        'orderNumber' => $order->order_number,
+                        'products' => $products,
+                        'totalAmount' => (float) $order->total_amount,
+                        'paymentUrl' => route('payments.show', $payment),
+                        'attemptNumber' => $count + 1,
+                    ],
+                    eventType: 'payment_reminder',
+                    metadata: [
+                        'notifiable' => $payment,
+                        'reminder_attempt' => $count + 1,
+                    ],
+                ),
             );
 
             $sent++;

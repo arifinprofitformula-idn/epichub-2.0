@@ -6,6 +6,8 @@ use App\Enums\EventRegistrationStatus;
 use App\Models\EmailNotificationLog;
 use App\Models\EventRegistration;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 use App\Services\Settings\AppSettingService;
 use Illuminate\Console\Command;
 
@@ -88,21 +90,27 @@ class SendEventReminders extends Command
                 continue;
             }
 
-            $emailService->sendTransactionalEmail(
-                recipient: ['email' => $user->email, 'name' => $user->name],
-                subject: 'Reminder Event EPIC HUB',
-                view: 'emails.events.reminder',
-                data: [
-                    'userName' => $user->name,
-                    'eventName' => $event->title,
-                    'eventSchedule' => $event->starts_at?->timezone($event->timezone ?: config('app.timezone', 'Asia/Jakarta'))->translatedFormat('d M Y, H:i').' '.($event->timezone ?: config('app.timezone', 'Asia/Jakarta')),
-                    'eventLocation' => filled($event->zoom_url) ? 'Online / detail akses cek halaman Event Saya' : 'Lihat detail di halaman Event Saya',
-                    'reminderLabel' => $label,
-                    'myEventUrl' => route('my-events.show', $registration),
-                    'myEventsUrl' => route('my-events.index'),
-                ],
-                eventType: $eventType,
-                metadata: ['notifiable' => $registration],
+            app(NotificationDispatcher::class)->notifyMemberEmail(
+                eventKey: $eventType,
+                user: $user,
+                payload: app(NotificationPayloadBuilder::class)->forEventReminder($registration, $eventType),
+                notifiable: $registration,
+                fallback: fn () => $emailService->sendTransactionalEmail(
+                    recipient: ['email' => $user->email, 'name' => $user->name],
+                    subject: 'Reminder Event EPIC HUB',
+                    view: 'emails.events.reminder',
+                    data: [
+                        'userName' => $user->name,
+                        'eventName' => $event->title,
+                        'eventSchedule' => $event->starts_at?->timezone($event->timezone ?: config('app.timezone', 'Asia/Jakarta'))->translatedFormat('d M Y, H:i').' '.($event->timezone ?: config('app.timezone', 'Asia/Jakarta')),
+                        'eventLocation' => filled($event->zoom_url) ? 'Online / detail akses cek halaman Event Saya' : 'Lihat detail di halaman Event Saya',
+                        'reminderLabel' => $label,
+                        'myEventUrl' => route('my-events.show', $registration),
+                        'myEventsUrl' => route('my-events.index'),
+                    ],
+                    eventType: $eventType,
+                    metadata: ['notifiable' => $registration],
+                ),
             );
 
             $sent++;

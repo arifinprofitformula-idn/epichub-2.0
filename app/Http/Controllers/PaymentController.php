@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Services\Notifications\EmailNotificationService;
 use App\Services\Notifications\NotificationDispatcher;
 use App\Services\Notifications\NotificationPayloadBuilder;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -46,9 +47,12 @@ class PaymentController extends Controller
             default => 'file',
         };
 
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
         return view('payments.proof', [
             'payment' => $payment,
-            'proofUrl' => Storage::disk('public')->url($path),
+            'proofUrl' => $disk->url($path),
             'proofKind' => $proofKind,
         ]);
     }

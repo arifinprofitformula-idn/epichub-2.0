@@ -5,8 +5,8 @@ namespace App\Observers;
 use App\Enums\CommissionStatus;
 use App\Models\Commission;
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 
 class CommissionObserver
 {
@@ -15,8 +15,7 @@ class CommissionObserver
     public function created(Commission $commission): void
     {
         if ($this->isApproved($commission->status)) {
-            app(EmailNotificationService::class)->sendAffiliateCommissionCreatedEmail($commission);
-            $this->sendAffiliateCommissionCreatedWhatsApp($commission);
+            $this->notifyCommissionCreated($commission);
         }
     }
 
@@ -34,8 +33,7 @@ class CommissionObserver
             return;
         }
 
-        app(EmailNotificationService::class)->sendAffiliateCommissionCreatedEmail($commission);
-        $this->sendAffiliateCommissionCreatedWhatsApp($commission);
+        $this->notifyCommissionCreated($commission);
     }
 
     private function isApproved(mixed $status): bool
@@ -43,7 +41,7 @@ class CommissionObserver
         return ($status instanceof CommissionStatus ? $status : CommissionStatus::tryFrom((string) $status)) === CommissionStatus::Approved;
     }
 
-    public function sendAffiliateCommissionCreatedWhatsApp(Commission $commission): void
+    private function notifyCommissionCreated(Commission $commission): void
     {
         $commission->loadMissing(['epiChannel.user', 'product']);
 
@@ -54,15 +52,27 @@ class CommissionObserver
             return;
         }
 
-        app(WhatsAppNotificationService::class)->sendToUser(
+        $dispatcher = app(NotificationDispatcher::class);
+        $payload = app(NotificationPayloadBuilder::class)->forCommission($commission);
+
+        $dispatcher->notifySponsorEmail(
+            eventKey: 'affiliate_commission_created',
             user: $user,
-            message: app(WhatsAppMessageTemplateService::class)->render('affiliate_commission_created', [
+            payload: $payload,
+            notifiable: $commission,
+            fallback: fn () => app(EmailNotificationService::class)->sendAffiliateCommissionCreatedEmail($commission),
+        );
+
+        $dispatcher->notifySponsorWhatsApp(
+            eventKey: 'affiliate_commission_created',
+            user: $user,
+            payload: $payload,
+            notifiable: $commission,
+            legacyData: [
                 'product_name' => $product->title ?? $product->name,
                 'commission_amount' => 'Rp '.number_format((float) $commission->commission_amount, 0, ',', '.'),
                 'status' => ($commission->status instanceof CommissionStatus ? $commission->status->label() : (string) $commission->status),
-            ]),
-            eventType: 'affiliate_commission_created',
-            metadata: ['notifiable' => $commission],
+            ],
         );
     }
 }

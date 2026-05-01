@@ -5,8 +5,8 @@ namespace App\Observers;
 use App\Enums\PayoutStatus;
 use App\Models\CommissionPayout;
 use App\Services\Notifications\EmailNotificationService;
-use App\Services\Notifications\WhatsAppMessageTemplateService;
-use App\Services\Notifications\WhatsAppNotificationService;
+use App\Services\Notifications\NotificationDispatcher;
+use App\Services\Notifications\NotificationPayloadBuilder;
 
 class CommissionPayoutObserver
 {
@@ -41,34 +41,49 @@ class CommissionPayoutObserver
     private function notify(CommissionPayout $payout): void
     {
         $service = app(EmailNotificationService::class);
+        $dispatcher = app(NotificationDispatcher::class);
 
-        $service->sendPayoutPaidEmail($payout);
-        $service->sendAdminPayoutPaidNotification($payout);
+        $dispatcher->notifySponsorEmail(
+            eventKey: 'commission_payout_paid',
+            user: $payout->epiChannel?->user,
+            payload: app(NotificationPayloadBuilder::class)->forPayout($payout),
+            notifiable: $payout,
+            fallback: fn () => $service->sendPayoutPaidEmail($payout),
+        );
+
+        $dispatcher->notifyAdminEmail(
+            eventKey: 'admin_payout_paid',
+            payload: app(NotificationPayloadBuilder::class)->forAdminPayout($payout),
+            notifiable: $payout,
+            fallback: fn () => $service->sendAdminPayoutPaidNotification($payout),
+        );
 
         $payout->loadMissing(['epiChannel.user']);
 
         $user = $payout->epiChannel?->user;
 
         if ($user) {
-            app(WhatsAppNotificationService::class)->sendToUser(
+            $dispatcher->notifySponsorWhatsApp(
+                eventKey: 'commission_payout_paid',
                 user: $user,
-                message: app(WhatsAppMessageTemplateService::class)->render('commission_payout_paid', [
+                payload: app(NotificationPayloadBuilder::class)->forPayout($payout),
+                notifiable: $payout,
+                legacyData: [
                     'amount' => 'Rp '.number_format((float) $payout->total_amount, 0, ',', '.'),
                     'paid_at' => $payout->paid_at?->timezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y H:i') ?? '-',
-                ]),
-                eventType: 'commission_payout_paid',
-                metadata: ['notifiable' => $payout],
+                ],
             );
         }
 
-        app(WhatsAppNotificationService::class)->sendAdminAlert(
-            message: app(WhatsAppMessageTemplateService::class)->render('admin_payout_paid', [
+        $dispatcher->notifyAdminWhatsApp(
+            eventKey: 'admin_payout_paid',
+            payload: app(NotificationPayloadBuilder::class)->forAdminPayout($payout),
+            notifiable: $payout,
+            legacyData: [
                 'member_name' => $user?->name ?? 'Member EPI Channel',
                 'amount' => 'Rp '.number_format((float) $payout->total_amount, 0, ',', '.'),
                 'paid_at' => $payout->paid_at?->timezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y H:i') ?? '-',
-            ]),
-            eventType: 'admin_payout_paid',
-            metadata: ['notifiable' => $payout],
+            ],
         );
     }
 
