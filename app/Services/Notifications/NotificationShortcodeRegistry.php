@@ -30,6 +30,19 @@ class NotificationShortcodeRegistry
     ];
 
     /**
+     * Alias tambahan untuk menjaga template lama yang pernah memakai key
+     * canonical event lain pada konteks yang berbeda.
+     */
+    private const LEGACY_EVENT_ALIAS_MAP = [
+        'order_created' => [
+            'payment_amount' => 'total_amount',
+        ],
+        'admin_order_created' => [
+            'payment_amount' => 'total_amount',
+        ],
+    ];
+
+    /**
      * Mapping event => daftar canonical shortcode key yang relevan.
      */
     private const EVENT_SHORTCODES = [
@@ -236,7 +249,10 @@ class NotificationShortcodeRegistry
             'key'
         );
         $allKeys     = array_keys($this->definitions());
-        $aliasKeys   = array_keys(self::ALIASES);
+        $aliasKeys   = array_unique(array_merge(
+            array_keys(self::ALIASES),
+            array_keys(self::LEGACY_EVENT_ALIAS_MAP[$resolvedEventKey] ?? []),
+        ));
 
         $invalid    = [];
         $deprecated = [];
@@ -311,6 +327,10 @@ class NotificationShortcodeRegistry
             return self::STATUS_ALIAS_MAP[$eventKey] ?? 'status';
         }
 
+        if (isset(self::LEGACY_EVENT_ALIAS_MAP[$eventKey][$alias])) {
+            return self::LEGACY_EVENT_ALIAS_MAP[$eventKey][$alias];
+        }
+
         return self::ALIASES[$alias] ?? $alias;
     }
 
@@ -372,6 +392,12 @@ class NotificationShortcodeRegistry
             }
         }
 
+        foreach (self::LEGACY_EVENT_ALIAS_MAP[$eventKey ?? ''] ?? [] as $legacyAlias => $canonical) {
+            if (! isset($payload[$legacyAlias]) && isset($payload[$canonical])) {
+                $payload[$legacyAlias] = $payload[$canonical];
+            }
+        }
+
         return $payload;
     }
 
@@ -383,7 +409,7 @@ class NotificationShortcodeRegistry
 
         foreach ($candidates as $candidate) {
             similar_text($input, $candidate, $pct);
-            if ($pct > $score && $pct >= 50) {
+            if ($candidate !== $input && $pct > $score && $pct >= 50) {
                 $score = $pct;
                 $best  = $candidate;
             }

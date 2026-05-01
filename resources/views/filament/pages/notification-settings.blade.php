@@ -46,7 +46,7 @@
                 <button
                     type="button"
                     wire:click="saveAll"
-                    class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 transition shadow-sm"
+                    class="epic-save-button inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white"
                 >
                     <x-heroicon-o-check-circle class="w-4 h-4" />
                     Simpan Semua
@@ -256,20 +256,6 @@
         @endforelse
     </div>
 
-    {{-- ── Bottom Save Button ──────────────────────────────────────────── --}}
-    @if(count($activeTargets) > 0)
-        <div class="mt-8 flex justify-end">
-            <button
-                type="button"
-                wire:click="saveAll"
-                class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 transition shadow-sm"
-            >
-                <x-heroicon-o-check-circle class="w-4 h-4" />
-                Simpan Semua Pengaturan
-            </button>
-        </div>
-    @endif
-
     {{-- ── Shortcode Modal ─────────────────────────────────────────────── --}}
     <div
         x-data="{ open: false }"
@@ -374,5 +360,87 @@
 
     <style>
         [x-cloak] { display: none !important; }
+
+        .epic-save-button {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.9rem;
+            border: 1px solid color-mix(in oklab, var(--primary-700) 68%, #0f172a 32%);
+            background:
+                linear-gradient(180deg, color-mix(in oklab, var(--primary-400) 82%, white 18%) 0%, color-mix(in oklab, var(--primary-600) 88%, #0f172a 12%) 52%, color-mix(in oklab, var(--primary-700) 82%, #082f49 18%) 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.26),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+                0 1px 0 rgba(15, 23, 42, 0.16),
+                0 8px 18px color-mix(in oklab, var(--primary-700) 24%, transparent),
+                0 14px 28px rgba(14, 116, 144, 0.18);
+            transform: translateY(0);
+            transition:
+                transform 180ms ease,
+                box-shadow 180ms ease,
+                filter 180ms ease;
+        }
+
+        .epic-save-button::before {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            border-radius: 0.78rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03));
+            pointer-events: none;
+        }
+
+        .epic-save-button::after {
+            content: '';
+            position: absolute;
+            top: -140%;
+            left: -38%;
+            width: 34%;
+            height: 380%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 18%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.08) 82%, transparent 100%);
+            transform: rotate(24deg) translateX(-220%);
+            transition: transform 720ms ease;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .epic-save-button:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+                0 2px 0 rgba(15, 23, 42, 0.18),
+                0 14px 24px color-mix(in oklab, var(--primary-700) 28%, transparent),
+                0 18px 34px rgba(14, 116, 144, 0.22);
+            filter: saturate(1.06);
+        }
+
+        .epic-save-button:hover::after {
+            transform: rotate(24deg) translateX(520%);
+        }
+
+        .epic-save-button:active {
+            transform: translateY(1px);
+            box-shadow:
+                inset 0 2px 6px rgba(15, 23, 42, 0.18),
+                0 1px 0 rgba(15, 23, 42, 0.12),
+                0 6px 14px color-mix(in oklab, var(--primary-700) 18%, transparent);
+        }
+
+        .epic-save-button:focus-visible {
+            outline: none;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.26),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+                0 1px 0 rgba(15, 23, 42, 0.16),
+                0 8px 18px color-mix(in oklab, var(--primary-700) 24%, transparent),
+                0 14px 28px rgba(14, 116, 144, 0.18),
+                0 0 0 3px color-mix(in oklab, var(--primary-300) 36%, transparent);
+        }
+
+        .epic-save-button > * {
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </x-filament-panels::page>
