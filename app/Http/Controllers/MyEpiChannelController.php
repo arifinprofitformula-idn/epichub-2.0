@@ -316,6 +316,31 @@ class MyEpiChannelController extends Controller
         ]);
     }
 
+    public function updateProfile(Request $request): RedirectResponse
+    {
+        $channel = $this->resolveActiveChannel($request);
+
+        if (! $channel) {
+            return redirect()->route('epi-channel.dashboard');
+        }
+
+        $validated = $request->validate([
+            'payout_bank_name' => ['nullable', 'string', 'max:255', 'required_with:payout_bank_account_number,payout_bank_account_holder_name'],
+            'payout_bank_account_number' => ['nullable', 'string', 'max:50', 'required_with:payout_bank_name,payout_bank_account_holder_name'],
+            'payout_bank_account_holder_name' => ['nullable', 'string', 'max:255', 'required_with:payout_bank_name,payout_bank_account_number'],
+        ]);
+
+        $channel->update([
+            'payout_bank_name' => blank($validated['payout_bank_name'] ?? null) ? null : trim((string) $validated['payout_bank_name']),
+            'payout_bank_account_number' => blank($validated['payout_bank_account_number'] ?? null) ? null : preg_replace('/\s+/', '', (string) $validated['payout_bank_account_number']),
+            'payout_bank_account_holder_name' => blank($validated['payout_bank_account_holder_name'] ?? null) ? null : trim((string) $validated['payout_bank_account_holder_name']),
+        ]);
+
+        return redirect()
+            ->route('epi-channel.profile')
+            ->with('epi_channel_profile_notice', 'Data rekening payout berhasil diperbarui.');
+    }
+
     protected function resolveActiveChannel(Request $request): ?EpiChannel
     {
         $request->user()->loadMissing('epiChannel');

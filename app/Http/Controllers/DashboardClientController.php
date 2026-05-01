@@ -4,13 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Actions\Affiliates\ResolveReferrerContactAction;
 use App\Enums\AffiliateClientFollowUpStatus;
-use App\Enums\OrderStatus;
 use App\Models\AffiliateClientNote;
 use App\Models\Commission;
 use App\Models\EpiChannel;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Product;
 use App\Models\User;
 use App\Models\UserProduct;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,7 +56,6 @@ class DashboardClientController extends Controller
             'filters' => $filters,
             'statusOptions' => $this->statusOptions(),
             'sortOptions' => $this->sortOptions(),
-            'productOptions' => $this->productOptions($channel->id),
             'followUpStatusOptions' => AffiliateClientFollowUpStatus::options(),
             'notesEnabled' => $notesEnabled,
             'referrerContact' => $this->resolveReferrerContact->execute($request->user()),
@@ -241,7 +237,6 @@ class DashboardClientController extends Controller
             'filters' => $this->filtersFromRequest($request),
             'statusOptions' => $this->statusOptions(),
             'sortOptions' => $this->sortOptions(),
-            'productOptions' => [],
             'followUpStatusOptions' => AffiliateClientFollowUpStatus::options(),
             'notesEnabled' => Schema::hasTable('affiliate_client_notes'),
             'referrerContact' => $this->resolveReferrerContact->execute($request->user()),
@@ -284,39 +279,6 @@ class DashboardClientController extends Controller
                 'aktif' => $query->whereHas('userProducts', fn (Builder $userProductQuery) => $userProductQuery->active()),
                 default => null,
             };
-        }
-
-        if ((int) $filters['product_id'] > 0) {
-            $productId = (int) $filters['product_id'];
-
-            $query->whereHas('orders', function (Builder $orderQuery) use ($epiChannelId, $productId): void {
-                $this->applyPaidOrdersScope($orderQuery, $epiChannelId);
-                $orderQuery->whereHas('items', fn (Builder $itemQuery) => $itemQuery->where('product_id', $productId));
-            });
-        }
-
-        if (filled($filters['registered_from'])) {
-            $query->whereDate('users.created_at', '>=', $filters['registered_from']);
-        }
-
-        if (filled($filters['registered_to'])) {
-            $query->whereDate('users.created_at', '<=', $filters['registered_to']);
-        }
-
-        if (filled($filters['last_order_from'])) {
-            $query->whereIn('users.id', $this->lastOrderDateFilteredUserIdsSubquery(
-                epiChannelId: $epiChannelId,
-                operator: '>=',
-                date: $filters['last_order_from'],
-            ));
-        }
-
-        if (filled($filters['last_order_to'])) {
-            $query->whereIn('users.id', $this->lastOrderDateFilteredUserIdsSubquery(
-                epiChannelId: $epiChannelId,
-                operator: '<=',
-                date: $filters['last_order_to'],
-            ));
         }
     }
 
@@ -415,25 +377,6 @@ class DashboardClientController extends Controller
         ];
     }
 
-    protected function productOptions(int $epiChannelId): array
-    {
-        return OrderItem::query()
-            ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->leftJoin('referral_orders as scoped_referral_orders', 'scoped_referral_orders.order_id', '=', 'orders.id')
-            ->join('products', 'products.id', '=', 'order_items.product_id')
-            ->where('orders.status', OrderStatus::Paid->value)
-            ->where(function ($query) use ($epiChannelId): void {
-                $query
-                    ->where('orders.referrer_epi_channel_id', $epiChannelId)
-                    ->orWhere('scoped_referral_orders.epi_channel_id', $epiChannelId);
-            })
-            ->whereNotNull('order_items.product_id')
-            ->orderBy('products.title')
-            ->distinct()
-            ->pluck('products.title', 'products.id')
-            ->all();
-    }
-
     protected function paidOrdersCountSubquery(int $epiChannelId): Builder
     {
         return Order::query()
@@ -477,16 +420,6 @@ class DashboardClientController extends Controller
             ->attributedToEpiChannel($epiChannelId)
             ->groupBy('user_id')
             ->havingRaw('COUNT(*) > 1');
-    }
-
-    protected function lastOrderDateFilteredUserIdsSubquery(int $epiChannelId, string $operator, string $date): Builder
-    {
-        return Order::query()
-            ->select('user_id')
-            ->paid()
-            ->attributedToEpiChannel($epiChannelId)
-            ->groupBy('user_id')
-            ->havingRaw('MAX(COALESCE(paid_at, created_at)) '.$operator.' ?', [$date]);
     }
 
     protected function clientBelongsToChannel(int $clientUserId, int $epiChannelId): bool
@@ -549,11 +482,6 @@ class DashboardClientController extends Controller
         return [
             'search' => (string) $request->string('search'),
             'status' => (string) $request->string('status', 'all'),
-            'product_id' => (string) $request->string('product_id'),
-            'registered_from' => (string) $request->string('registered_from'),
-            'registered_to' => (string) $request->string('registered_to'),
-            'last_order_from' => (string) $request->string('last_order_from'),
-            'last_order_to' => (string) $request->string('last_order_to'),
             'sort' => (string) $request->string('sort', 'latest_registered'),
         ];
     }

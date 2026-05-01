@@ -16,6 +16,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'total_amount',
     'status',
     'notes',
+    'processed_by',
+    'processed_at',
+    'approved_by',
+    'approved_at',
     'paid_by',
     'paid_at',
     'metadata',
@@ -39,6 +43,16 @@ class CommissionPayout extends Model
         return $this->belongsTo(User::class, 'paid_by');
     }
 
+    public function processedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'processed_by');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
     public function scopePaid(Builder $query): void
     {
         $query->where('status', PayoutStatus::Paid);
@@ -49,6 +63,8 @@ class CommissionPayout extends Model
         return [
             'total_amount' => 'decimal:2',
             'status' => PayoutStatus::class,
+            'processed_at' => 'datetime',
+            'approved_at' => 'datetime',
             'paid_at' => 'datetime',
             'metadata' => 'array',
         ];

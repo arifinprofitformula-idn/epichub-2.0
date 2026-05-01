@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'store_name',
     'sponsor_epic_code',
     'sponsor_name',
+    'payout_bank_name',
+    'payout_bank_account_number',
+    'payout_bank_account_holder_name',
     'status',
     'source',
     'activated_at',
@@ -79,6 +82,28 @@ class EpiChannel extends Model
     public function isHouseChannel(): bool
     {
         return (bool) data_get($this->metadata, 'is_house_channel', false);
+    }
+
+    public function hasCompletePayoutBankInfo(): bool
+    {
+        return filled($this->payout_bank_name)
+            && filled($this->payout_bank_account_number)
+            && filled($this->payout_bank_account_holder_name);
+    }
+
+    public function maskedPayoutBankAccountNumber(): ?string
+    {
+        if (blank($this->payout_bank_account_number)) {
+            return null;
+        }
+
+        $value = preg_replace('/\s+/', '', (string) $this->payout_bank_account_number) ?? '';
+
+        if (strlen($value) <= 4) {
+            return $value;
+        }
+
+        return str_repeat('*', max(strlen($value) - 4, 0)).substr($value, -4);
     }
 
     protected function casts(): array

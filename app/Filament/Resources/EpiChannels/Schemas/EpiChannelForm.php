@@ -130,7 +130,35 @@ class EpiChannelForm
                 ])
                 ->columnSpanFull(),
 
-            /* ── 3. Tanggal Aktivasi (collapsed) ── */
+            /* ── 3. Data Rekening Payout ── */
+            Section::make('Data Rekening Payout')
+                ->description('Data rekening ini dipakai admin saat proses pencairan komisi.')
+                ->icon('heroicon-o-credit-card')
+                ->iconColor('success')
+                ->schema([
+                    Grid::make(3)->schema([
+                        TextInput::make('payout_bank_name')
+                            ->label('Nama Bank')
+                            ->maxLength(255)
+                            ->nullable()
+                            ->helperText('Contoh: BCA, Mandiri, BNI'),
+
+                        TextInput::make('payout_bank_account_number')
+                            ->label('Nomor Rekening')
+                            ->maxLength(50)
+                            ->nullable()
+                            ->helperText('Masukkan nomor rekening tanpa spasi jika memungkinkan'),
+
+                        TextInput::make('payout_bank_account_holder_name')
+                            ->label('Nama Pemilik Rekening')
+                            ->maxLength(255)
+                            ->nullable()
+                            ->helperText('Nama pemilik rekening untuk payout komisi'),
+                    ]),
+                ])
+                ->columnSpanFull(),
+
+            /* ── 4. Tanggal Aktivasi (collapsed) ── */
             Section::make('Riwayat Aktivasi')
                 ->description('Tanggal channel diaktifkan atau disuspend')
                 ->icon('heroicon-o-calendar-days')
@@ -154,7 +182,7 @@ class EpiChannelForm
                 ])
                 ->columnSpanFull(),
 
-            /* ── 4. Metadata (collapsed) ── */
+            /* ── 5. Metadata (collapsed) ── */
             Section::make('Metadata (opsional)')
                 ->description('Key-value tambahan untuk kebutuhan integrasi atau kustomisasi')
                 ->icon('heroicon-o-code-bracket')

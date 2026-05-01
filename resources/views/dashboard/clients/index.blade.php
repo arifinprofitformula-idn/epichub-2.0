@@ -57,8 +57,8 @@
 
             <div class="mt-5">
                 <x-ui.card class="p-5 md:p-6">
-                    <form method="GET" action="{{ route('dashboard.clients.index') }}" class="grid gap-4 xl:grid-cols-6">
-                        <div class="xl:col-span-2">
+                    <form method="GET" action="{{ route('dashboard.clients.index') }}" class="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(220px,0.8fr)_minmax(220px,0.8fr)_auto]">
+                        <div>
                             <label for="clients-search" class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cari Klien</label>
                             <input
                                 id="clients-search"
@@ -69,22 +69,12 @@
                                 class="mt-2 w-full rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
                             >
                         </div>
-
+                        
                         <div>
                             <label for="clients-status" class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Status Klien</label>
                             <select id="clients-status" name="status" class="mt-2 w-full rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100">
                                 @foreach ($statusOptions as $value => $label)
                                     <option value="{{ $value }}" @selected($filters['status'] === $value)>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="clients-product" class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Produk</label>
-                            <select id="clients-product" name="product_id" class="mt-2 w-full rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100">
-                                <option value="">Semua Produk</option>
-                                @foreach ($productOptions as $productId => $productTitle)
-                                    <option value="{{ $productId }}" @selected((string) $filters['product_id'] === (string) $productId)>{{ $productTitle }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -107,50 +97,6 @@
                                     Cari
                                 </x-ui.button>
                             </div>
-                        </div>
-
-                        <div>
-                            <label for="clients-registered-from" class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Daftar Dari</label>
-                            <input
-                                id="clients-registered-from"
-                                type="date"
-                                name="registered_from"
-                                value="{{ $filters['registered_from'] }}"
-                                class="mt-2 w-full rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
-                            >
-                        </div>
-
-                        <div>
-                            <label for="clients-registered-to" class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Daftar Sampai</label>
-                            <input
-                                id="clients-registered-to"
-                                type="date"
-                                name="registered_to"
-                                value="{{ $filters['registered_to'] }}"
-                                class="mt-2 w-full rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
-                            >
-                        </div>
-
-                        <div>
-                            <label for="clients-last-order-from" class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Order Terakhir Dari</label>
-                            <input
-                                id="clients-last-order-from"
-                                type="date"
-                                name="last_order_from"
-                                value="{{ $filters['last_order_from'] }}"
-                                class="mt-2 w-full rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
-                            >
-                        </div>
-
-                        <div>
-                            <label for="clients-last-order-to" class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Order Terakhir Sampai</label>
-                            <input
-                                id="clients-last-order-to"
-                                type="date"
-                                name="last_order_to"
-                                value="{{ $filters['last_order_to'] }}"
-                                class="mt-2 w-full rounded-[1rem] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100"
-                            >
                         </div>
                     </form>
                 </x-ui.card>
@@ -205,24 +151,61 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5">
-                                                <div class="flex flex-col items-end gap-2">
+                                                <div class="flex items-center justify-end gap-2">
                                                     @if ($client->whatsapp_url)
-                                                        <x-ui.button variant="primary" size="sm" :href="$client->whatsapp_url" target="_blank" rel="noopener noreferrer">
-                                                            WhatsApp Klien
-                                                        </x-ui.button>
+                                                        <a
+                                                            href="{{ $client->whatsapp_url }}"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            class="inline-flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 hover:text-emerald-700"
+                                                            title="WhatsApp Klien"
+                                                            aria-label="WhatsApp Klien"
+                                                        >
+                                                            <svg viewBox="0 0 24 24" fill="none" class="size-4.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                                <path d="M12 4.75C8.00594 4.75 4.75 8.00594 4.75 12C4.75 13.3769 5.13832 14.666 5.81265 15.7654L4.75 19.25L8.38052 18.2263C9.44352 18.8367 10.6811 19.25 12 19.25C15.9941 19.25 19.25 15.9941 19.25 12C19.25 8.00594 15.9941 4.75 12 4.75Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                                                <path d="M9.8 9.35C9.55 8.8 9.28 8.79 9.05 8.78C8.85 8.77 8.63 8.77 8.42 8.77C8.21 8.77 7.87 8.85 7.58 9.16C7.29 9.47 6.46 10.23 6.46 11.79C6.46 13.36 7.61 14.87 7.77 15.08C7.92 15.28 9.96 18.43 13.15 19.67C15.79 20.69 16.33 20.49 16.91 20.44C17.49 20.39 18.78 19.68 19.05 18.93C19.32 18.18 19.32 17.55 19.24 17.42C19.16 17.29 18.95 17.21 18.64 17.06C18.34 16.91 16.84 16.17 16.56 16.06C16.28 15.96 16.08 15.91 15.88 16.22C15.68 16.53 15.09 17.21 14.92 17.41C14.74 17.62 14.57 17.64 14.27 17.49C13.97 17.33 13.01 17.02 11.87 15.99C10.99 15.2 10.39 14.22 10.21 13.91C10.04 13.6 10.19 13.43 10.34 13.28C10.48 13.14 10.64 12.91 10.79 12.73C10.94 12.55 10.99 12.42 11.09 12.22C11.19 12.01 11.14 11.83 11.06 11.67C10.99 11.5 10.39 9.99 9.8 9.35Z" fill="currentColor"/>
+                                                            </svg>
+                                                            <span class="sr-only">WhatsApp Klien</span>
+                                                        </a>
                                                     @endif
-                                                    <x-ui.button variant="ghost" size="sm" :href="route('dashboard.clients.show', $client)">
-                                                        Lihat Detail
-                                                    </x-ui.button>
-                                                    <x-ui.button variant="ghost" size="sm" :href="route('dashboard.clients.show', $client).'#catatan-baru'">
-                                                        Tambah Catatan
-                                                    </x-ui.button>
+                                                    <a
+                                                        href="{{ route('dashboard.clients.show', $client) }}"
+                                                        class="inline-flex size-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200 hover:text-slate-800"
+                                                        title="Lihat Detail"
+                                                        aria-label="Lihat Detail"
+                                                    >
+                                                        <svg viewBox="0 0 24 24" fill="none" class="size-4.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                            <path d="M2.75 12S6.5 6.75 12 6.75S21.25 12 21.25 12S17.5 17.25 12 17.25S2.75 12 2.75 12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                                            <circle cx="12" cy="12" r="2.75" stroke="currentColor" stroke-width="1.5"/>
+                                                        </svg>
+                                                        <span class="sr-only">Lihat Detail</span>
+                                                    </a>
+                                                    <a
+                                                        href="{{ route('dashboard.clients.show', $client).'#catatan-baru' }}"
+                                                        class="inline-flex size-9 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 transition hover:bg-cyan-100 hover:text-cyan-700"
+                                                        title="Tambah Catatan"
+                                                        aria-label="Tambah Catatan"
+                                                    >
+                                                        <svg viewBox="0 0 24 24" fill="none" class="size-4.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                            <path d="M4.75 19.25H8.25L18.25 9.25C18.9404 8.55964 18.9404 7.44036 18.25 6.75V6.75C17.5596 6.05964 16.4404 6.05964 15.75 6.75L5.75 16.75V19.25Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                                            <path d="M13.75 8.75L16.25 11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                        </svg>
+                                                        <span class="sr-only">Tambah Catatan</span>
+                                                    </a>
                                                     @if ($notesEnabled)
                                                         <form method="POST" action="{{ route('dashboard.clients.follow-up.store', $client) }}">
                                                             @csrf
-                                                            <x-ui.button variant="secondary" size="sm" type="submit">
-                                                                Tandai Sudah Follow Up
-                                                            </x-ui.button>
+                                                            <button
+                                                                type="submit"
+                                                                class="inline-flex size-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 hover:text-amber-700"
+                                                                title="Tandai Sudah Follow Up"
+                                                                aria-label="Tandai Sudah Follow Up"
+                                                            >
+                                                                <svg viewBox="0 0 24 24" fill="none" class="size-4.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                                    <path d="M5 12.5L9.25 16.75L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                </svg>
+                                                                <span class="sr-only">Tandai Sudah Follow Up</span>
+                                                            </button>
                                                         </form>
                                                     @endif
                                                 </div>
@@ -287,24 +270,61 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-4 grid grid-cols-2 gap-2">
+                                <div class="mt-4 flex flex-wrap gap-2">
                                     @if ($client->whatsapp_url)
-                                        <x-ui.button variant="primary" size="sm" :href="$client->whatsapp_url" target="_blank" rel="noopener noreferrer">
-                                            WhatsApp
-                                        </x-ui.button>
+                                        <a
+                                            href="{{ $client->whatsapp_url }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="inline-flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition hover:bg-emerald-100 hover:text-emerald-700"
+                                            title="WhatsApp Klien"
+                                            aria-label="WhatsApp Klien"
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" class="size-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                <path d="M12 4.75C8.00594 4.75 4.75 8.00594 4.75 12C4.75 13.3769 5.13832 14.666 5.81265 15.7654L4.75 19.25L8.38052 18.2263C9.44352 18.8367 10.6811 19.25 12 19.25C15.9941 19.25 19.25 15.9941 19.25 12C19.25 8.00594 15.9941 4.75 12 4.75Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                                <path d="M9.8 9.35C9.55 8.8 9.28 8.79 9.05 8.78C8.85 8.77 8.63 8.77 8.42 8.77C8.21 8.77 7.87 8.85 7.58 9.16C7.29 9.47 6.46 10.23 6.46 11.79C6.46 13.36 7.61 14.87 7.77 15.08C7.92 15.28 9.96 18.43 13.15 19.67C15.79 20.69 16.33 20.49 16.91 20.44C17.49 20.39 18.78 19.68 19.05 18.93C19.32 18.18 19.32 17.55 19.24 17.42C19.16 17.29 18.95 17.21 18.64 17.06C18.34 16.91 16.84 16.17 16.56 16.06C16.28 15.96 16.08 15.91 15.88 16.22C15.68 16.53 15.09 17.21 14.92 17.41C14.74 17.62 14.57 17.64 14.27 17.49C13.97 17.33 13.01 17.02 11.87 15.99C10.99 15.2 10.39 14.22 10.21 13.91C10.04 13.6 10.19 13.43 10.34 13.28C10.48 13.14 10.64 12.91 10.79 12.73C10.94 12.55 10.99 12.42 11.09 12.22C11.19 12.01 11.14 11.83 11.06 11.67C10.99 11.5 10.39 9.99 9.8 9.35Z" fill="currentColor"/>
+                                            </svg>
+                                            <span class="sr-only">WhatsApp Klien</span>
+                                        </a>
                                     @endif
-                                    <x-ui.button variant="ghost" size="sm" :href="route('dashboard.clients.show', $client)">
-                                        Detail
-                                    </x-ui.button>
-                                    <x-ui.button variant="ghost" size="sm" :href="route('dashboard.clients.show', $client).'#catatan-baru'">
-                                        Catatan
-                                    </x-ui.button>
+                                    <a
+                                        href="{{ route('dashboard.clients.show', $client) }}"
+                                        class="inline-flex size-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200 hover:text-slate-800"
+                                        title="Lihat Detail"
+                                        aria-label="Lihat Detail"
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" class="size-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path d="M2.75 12S6.5 6.75 12 6.75S21.25 12 21.25 12S17.5 17.25 12 17.25S2.75 12 2.75 12Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                            <circle cx="12" cy="12" r="2.75" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                        <span class="sr-only">Lihat Detail</span>
+                                    </a>
+                                    <a
+                                        href="{{ route('dashboard.clients.show', $client).'#catatan-baru' }}"
+                                        class="inline-flex size-10 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 transition hover:bg-cyan-100 hover:text-cyan-700"
+                                        title="Tambah Catatan"
+                                        aria-label="Tambah Catatan"
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" class="size-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path d="M4.75 19.25H8.25L18.25 9.25C18.9404 8.55964 18.9404 7.44036 18.25 6.75V6.75C17.5596 6.05964 16.4404 6.05964 15.75 6.75L5.75 16.75V19.25Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                            <path d="M13.75 8.75L16.25 11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                        <span class="sr-only">Tambah Catatan</span>
+                                    </a>
                                     @if ($notesEnabled)
                                         <form method="POST" action="{{ route('dashboard.clients.follow-up.store', $client) }}">
                                             @csrf
-                                            <x-ui.button variant="secondary" size="sm" type="submit" class="w-full">
-                                                Follow Up
-                                            </x-ui.button>
+                                            <button
+                                                type="submit"
+                                                class="inline-flex size-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 transition hover:bg-amber-100 hover:text-amber-700"
+                                                title="Tandai Sudah Follow Up"
+                                                aria-label="Tandai Sudah Follow Up"
+                                            >
+                                                <svg viewBox="0 0 24 24" fill="none" class="size-5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                    <path d="M5 12.5L9.25 16.75L19 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                <span class="sr-only">Tandai Sudah Follow Up</span>
+                                            </button>
                                         </form>
                                     @endif
                                 </div>

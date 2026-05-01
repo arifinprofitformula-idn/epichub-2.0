@@ -75,6 +75,14 @@ class Commission extends Model
         $query->where('status', CommissionStatus::Approved);
     }
 
+    public function scopeEligibleForPayout(Builder $query): void
+    {
+        $query
+            ->where('status', CommissionStatus::Approved)
+            ->whereNull('commission_payout_id')
+            ->whereNull('paid_at');
+    }
+
     protected function casts(): array
     {
         return [

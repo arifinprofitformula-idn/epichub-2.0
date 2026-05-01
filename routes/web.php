@@ -76,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/payouts', [MyEpiChannelController::class, 'payouts'])->name('payouts');
         Route::get('/promo-assets', [MyEpiChannelController::class, 'promoAssets'])->name('promo-assets');
         Route::get('/profile', [MyEpiChannelController::class, 'profile'])->name('profile');
+        Route::post('/profile', [MyEpiChannelController::class, 'updateProfile'])->name('profile.update');
     });
 
     Route::prefix('produk-saya')->name('my-products.')->group(function () {
