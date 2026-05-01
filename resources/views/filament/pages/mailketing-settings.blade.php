@@ -146,6 +146,12 @@
                             ['notify_payment_approved',        'Pembayaran Disetujui',         'Email akses aktif ke user'],
                             ['notify_payment_rejected',        'Pembayaran Ditolak',           'Email penolakan ke user'],
                             ['notify_access_granted',          'Akses Produk Diberikan',       'Email akses manual ke user'],
+                            ['notify_event_registration',      'Registrasi Event',             'Email konfirmasi registrasi event ke peserta'],
+                            ['notify_admin_event_registration','Admin: Registrasi Event Baru', 'Alert registrasi event baru ke admin'],
+                            ['notify_course_enrollment',       'Enrollment Kelas',             'Email saat user mendapat akses course'],
+                            ['notify_commission_created',      'Komisi Affiliate Baru',        'Email komisi approved ke member EPI Channel'],
+                            ['notify_payout_paid',             'Payout Komisi Paid',           'Email payout paid ke member EPI Channel'],
+                            ['notify_admin_payout_paid',       'Admin: Payout Paid',           'Alert payout paid ke admin'],
                             ['notify_admin_order_created',     'Admin: Order Baru',            'Notifikasi order baru ke admin'],
                             ['notify_admin_payment_submitted', 'Admin: Bukti Pembayaran Baru', 'Notifikasi bukti baru ke admin'],
                         ] as [$field, $label, $hint])

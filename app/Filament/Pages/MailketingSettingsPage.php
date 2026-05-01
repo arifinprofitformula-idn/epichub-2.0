@@ -63,6 +63,12 @@ class MailketingSettingsPage extends Page implements HasForms
     public bool $notify_access_granted          = true;
     public bool $notify_admin_order_created     = true;
     public bool $notify_admin_payment_submitted = true;
+    public bool $notify_event_registration      = true;
+    public bool $notify_admin_event_registration = true;
+    public bool $notify_course_enrollment       = true;
+    public bool $notify_commission_created      = true;
+    public bool $notify_payout_paid             = true;
+    public bool $notify_admin_payout_paid       = true;
 
     public function mount(): void
     {
@@ -91,6 +97,12 @@ class MailketingSettingsPage extends Page implements HasForms
         $this->notify_access_granted          = (bool) $settings->getMailketing('notify_access_granted', true);
         $this->notify_admin_order_created     = (bool) $settings->getMailketing('notify_admin_order_created', true);
         $this->notify_admin_payment_submitted = (bool) $settings->getMailketing('notify_admin_payment_submitted', true);
+        $this->notify_event_registration      = (bool) $settings->getMailketing('notify_event_registration', true);
+        $this->notify_admin_event_registration = (bool) $settings->getMailketing('notify_admin_event_registration', true);
+        $this->notify_course_enrollment       = (bool) $settings->getMailketing('notify_course_enrollment', true);
+        $this->notify_commission_created      = (bool) $settings->getMailketing('notify_commission_created', true);
+        $this->notify_payout_paid             = (bool) $settings->getMailketing('notify_payout_paid', true);
+        $this->notify_admin_payout_paid       = (bool) $settings->getMailketing('notify_admin_payout_paid', true);
 
         // Token tidak ditampilkan penuh — hanya ditampilkan sebagai placeholder masked di view
         // Field mailketing_api_token sengaja dibiarkan kosong di form state agar tidak bocor ke UI
@@ -136,6 +148,12 @@ class MailketingSettingsPage extends Page implements HasForms
         $settings->setMailketing('notify_access_granted',          $this->notify_access_granted,          false, 'boolean');
         $settings->setMailketing('notify_admin_order_created',     $this->notify_admin_order_created,     false, 'boolean');
         $settings->setMailketing('notify_admin_payment_submitted', $this->notify_admin_payment_submitted, false, 'boolean');
+        $settings->setMailketing('notify_event_registration',      $this->notify_event_registration,      false, 'boolean');
+        $settings->setMailketing('notify_admin_event_registration', $this->notify_admin_event_registration, false, 'boolean');
+        $settings->setMailketing('notify_course_enrollment',       $this->notify_course_enrollment,       false, 'boolean');
+        $settings->setMailketing('notify_commission_created',      $this->notify_commission_created,      false, 'boolean');
+        $settings->setMailketing('notify_payout_paid',             $this->notify_payout_paid,             false, 'boolean');
+        $settings->setMailketing('notify_admin_payout_paid',       $this->notify_admin_payout_paid,       false, 'boolean');
 
         // Simpan token hanya jika diisi (tidak kosong)
         if (filled($this->mailketing_api_token)) {

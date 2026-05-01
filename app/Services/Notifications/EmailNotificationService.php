@@ -2,9 +2,16 @@
 
 namespace App\Services\Notifications;
 
+use App\Enums\CommissionStatus;
+use App\Models\Commission;
+use App\Models\CommissionPayout;
 use App\Models\EmailNotificationLog;
+use App\Models\Event;
+use App\Models\EventRegistration;
+use App\Models\UserProduct;
 use App\Services\Mailketing\MailketingClient;
 use App\Services\Settings\AppSettingService;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\View;
@@ -62,28 +69,33 @@ class EmailNotificationService
         string $eventType,
         array $metadata = [],
     ): void {
-        $adminEmail = (string) $this->settings->getMailketing('admin_notification_email', '');
+        $adminRecipients = $this->adminRecipients();
 
-        if (blank($adminEmail)) {
+        if ($adminRecipients === []) {
             Log::info("EmailNotificationService: admin_notification_email tidak diset, skip event [{$eventType}]");
             return;
         }
 
         if (! $this->shouldSend($eventType)) {
-            $this->logSkipped($adminEmail, $subject, $eventType, $metadata);
+            foreach ($adminRecipients as $adminEmail) {
+                $this->logSkipped($adminEmail, $subject, $eventType, $metadata);
+            }
+
             return;
         }
 
-        $this->dispatch(
-            recipientEmail: $adminEmail,
-            recipientName: 'Admin EPIC HUB',
-            subject: $subject,
-            view: $view,
-            data: $data,
-            eventType: $eventType,
-            metadata: $metadata,
-            notifiable: $metadata['notifiable'] ?? null,
-        );
+        foreach ($adminRecipients as $adminEmail) {
+            $this->dispatch(
+                recipientEmail: $adminEmail,
+                recipientName: 'Admin EPIC HUB',
+                subject: $subject,
+                view: $view,
+                data: $data,
+                eventType: $eventType,
+                metadata: $metadata,
+                notifiable: $metadata['notifiable'] ?? null,
+            );
+        }
     }
 
     public function shouldSend(string $eventType): bool
@@ -95,6 +107,192 @@ class EmailNotificationService
         }
 
         return (bool) $this->settings->getMailketing($settingKey, true);
+    }
+
+    public function sendEventRegistrationConfirmed(EventRegistration $registration): void
+    {
+        $registration->loadMissing(['event.product', 'user', 'userProduct']);
+
+        $event = $registration->event;
+        $user = $registration->user;
+
+        if (! $event || ! $user || blank($user->email)) {
+            return;
+        }
+
+        $this->sendTransactionalEmail(
+            recipient: ['email' => $user->email, 'name' => $user->name],
+            subject: 'Registrasi Event Berhasil',
+            view: 'emails.events.registration-confirmed',
+            data: [
+                'userName' => $user->name,
+                'eventName' => $event->title,
+                'eventSchedule' => $this->formatEventSchedule($event),
+                'eventLocation' => $this->eventLocationLabel($event),
+                'accessGuidance' => $this->eventAccessGuidance($event),
+                'myEventUrl' => route('my-events.show', $registration),
+                'myEventsUrl' => route('my-events.index'),
+            ],
+            eventType: 'event_registration_confirmed',
+            metadata: ['notifiable' => $registration],
+        );
+    }
+
+    public function sendAdminEventRegistrationNotification(EventRegistration $registration): void
+    {
+        $registration->loadMissing(['event.product', 'user', 'userProduct.order']);
+
+        $event = $registration->event;
+        $user = $registration->user;
+
+        if (! $event || ! $user) {
+            return;
+        }
+
+        $sourceLabel = match (true) {
+            $registration->order_id !== null => 'Order paid / pembelian event',
+            $registration->user_product_id !== null => 'Grant akses produk',
+            default => 'Registrasi admin / manual',
+        };
+
+        $this->sendAdminNotification(
+            subject: 'Pendaftaran Event Baru',
+            view: 'emails.events.admin-new-registration',
+            data: [
+                'participantName' => $user->name,
+                'participantEmail' => $user->email,
+                'eventName' => $event->title,
+                'eventSchedule' => $this->formatEventSchedule($event),
+                'eventLocation' => $this->eventLocationLabel($event),
+                'sourceLabel' => $sourceLabel,
+                'registeredAt' => $this->formatDateTime($registration->registered_at, config('app.timezone', 'Asia/Jakarta')),
+                'adminEventRegistrationUrl' => url('/admin/event-registrations/'.$registration->id.'/edit'),
+            ],
+            eventType: 'admin_event_registration',
+            metadata: ['notifiable' => $registration],
+        );
+    }
+
+    public function sendCourseEnrollmentEmail(UserProduct $userProduct): void
+    {
+        $userProduct->loadMissing(['user', 'product.course']);
+
+        $user = $userProduct->user;
+        $product = $userProduct->product;
+        $course = $product?->course;
+
+        if (! $user || blank($user->email) || ! $product || ! $course) {
+            return;
+        }
+
+        $this->sendTransactionalEmail(
+            recipient: ['email' => $user->email, 'name' => $user->name],
+            subject: 'Anda Terdaftar di Kelas Baru',
+            view: 'emails.courses.enrolled',
+            data: [
+                'userName' => $user->name,
+                'courseName' => $course->title,
+                'courseDescription' => $course->short_description,
+                'courseUrl' => route('my-courses.show', $userProduct),
+                'myCoursesUrl' => route('my-courses.index'),
+            ],
+            eventType: 'course_enrolled',
+            metadata: ['notifiable' => $userProduct],
+        );
+    }
+
+    public function sendAffiliateCommissionCreatedEmail(Commission $commission): void
+    {
+        $commission->loadMissing(['epiChannel.user', 'product']);
+
+        $channelUser = $commission->epiChannel?->user;
+        $product = $commission->product;
+
+        if (! $channelUser || blank($channelUser->email) || ! $product) {
+            return;
+        }
+
+        $status = $commission->status instanceof CommissionStatus
+            ? $commission->status->label()
+            : (string) $commission->status;
+
+        $this->sendTransactionalEmail(
+            recipient: ['email' => $channelUser->email, 'name' => $channelUser->name],
+            subject: 'Komisi Affiliate Baru Masuk',
+            view: 'emails.affiliate.commission-created',
+            data: [
+                'userName' => $channelUser->name,
+                'productName' => $product->title,
+                'commissionAmount' => $this->formatCurrency((float) $commission->commission_amount),
+                'commissionStatus' => $status,
+                'commissionUrl' => route('epi-channel.commissions'),
+            ],
+            eventType: 'affiliate_commission_created',
+            metadata: ['notifiable' => $commission],
+        );
+    }
+
+    public function sendPayoutPaidEmail(CommissionPayout $payout): void
+    {
+        $payout->loadMissing(['epiChannel.user']);
+
+        $channel = $payout->epiChannel;
+        $channelUser = $channel?->user;
+
+        if (! $channel || ! $channelUser || blank($channelUser->email)) {
+            return;
+        }
+
+        $bankSnapshot = (array) data_get($payout->metadata, 'bank_account_snapshot', []);
+        $maskedDestination = $this->maskedPayoutDestination(
+            bankName: (string) ($bankSnapshot['bank_name'] ?? $channel->payout_bank_name ?? ''),
+            accountNumber: (string) ($bankSnapshot['bank_account_number'] ?? $channel->payout_bank_account_number ?? ''),
+            accountHolder: (string) ($bankSnapshot['bank_account_holder_name'] ?? $channel->payout_bank_account_holder_name ?? ''),
+        );
+
+        $this->sendTransactionalEmail(
+            recipient: ['email' => $channelUser->email, 'name' => $channelUser->name],
+            subject: 'Payout Komisi Telah Diproses',
+            view: 'emails.payouts.paid',
+            data: [
+                'userName' => $channelUser->name,
+                'payoutNumber' => $payout->payout_number,
+                'payoutAmount' => $this->formatCurrency((float) $payout->total_amount),
+                'paidAt' => $this->formatDateTime($payout->paid_at, config('app.timezone', 'Asia/Jakarta')),
+                'paymentDestination' => $maskedDestination,
+                'payoutUrl' => route('epi-channel.payouts'),
+            ],
+            eventType: 'commission_payout_paid',
+            metadata: ['notifiable' => $payout],
+        );
+    }
+
+    public function sendAdminPayoutPaidNotification(CommissionPayout $payout): void
+    {
+        $payout->loadMissing(['epiChannel.user']);
+
+        $channel = $payout->epiChannel;
+        $channelUser = $channel?->user;
+
+        if (! $channel) {
+            return;
+        }
+
+        $this->sendAdminNotification(
+            subject: 'Payout Komisi Diproses',
+            view: 'emails.admin.payout-paid',
+            data: [
+                'memberName' => $channelUser?->name ?? 'Member EPI Channel',
+                'memberEmail' => $channelUser?->email ?? '-',
+                'epicCode' => $channel->epic_code,
+                'payoutNumber' => $payout->payout_number,
+                'payoutAmount' => $this->formatCurrency((float) $payout->total_amount),
+                'paidAt' => $this->formatDateTime($payout->paid_at, config('app.timezone', 'Asia/Jakarta')),
+                'adminPayoutUrl' => url('/admin/commission-payouts'),
+            ],
+            eventType: 'admin_commission_payout_paid',
+            metadata: ['notifiable' => $payout],
+        );
     }
 
     // ── Internals ────────────────────────────────────────────────────────────
@@ -326,7 +524,113 @@ class EmailNotificationService
             'payment_rejected'         => 'notify_payment_rejected',
             'access_granted'           => 'notify_access_granted',
             'admin_order_created'      => 'notify_admin_order_created',
+            'event_registration_confirmed' => 'notify_event_registration',
+            'admin_event_registration' => 'notify_admin_event_registration',
+            'course_enrolled'          => 'notify_course_enrollment',
+            'affiliate_commission_created' => 'notify_commission_created',
+            'commission_payout_paid'   => 'notify_payout_paid',
+            'admin_commission_payout_paid' => 'notify_admin_payout_paid',
             default                    => null,
         };
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function adminRecipients(): array
+    {
+        $raw = (string) $this->settings->getMailketing('admin_notification_email', '');
+
+        return collect(preg_split('/[\s,;]+/', $raw) ?: [])
+            ->map(fn (string $email): string => trim($email))
+            ->filter(fn (string $email): bool => $email !== '')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function formatEventSchedule(Event $event): string
+    {
+        if (! $event->starts_at) {
+            return 'Jadwal akan diinformasikan segera';
+        }
+
+        $timezone = $event->timezone ?: config('app.timezone', 'Asia/Jakarta');
+        $startsAt = $event->starts_at->timezone($timezone);
+        $schedule = $startsAt->translatedFormat('d M Y, H:i');
+
+        if ($event->ends_at) {
+            $schedule .= ' - '.$event->ends_at->timezone($timezone)->translatedFormat('H:i');
+        }
+
+        return trim($schedule.' '.$timezone);
+    }
+
+    private function eventLocationLabel(Event $event): string
+    {
+        $metadataKeys = ['location', 'location_label', 'venue', 'venue_name'];
+
+        foreach ($metadataKeys as $key) {
+            $value = trim((string) data_get($event->metadata, $key, ''));
+
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        if (filled($event->zoom_url)) {
+            return 'Online';
+        }
+
+        return 'Detail lokasi akan diinformasikan di halaman event';
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function eventAccessGuidance(Event $event): array
+    {
+        $guidance = [];
+
+        if (filled($event->zoom_url)) {
+            $guidance[] = 'Akses Zoom mengikuti jadwal dan aturan event. Gunakan tombol di halaman Event Saya saat akses sudah dibuka.';
+        }
+
+        if (filled($event->replay_url)) {
+            $guidance[] = 'Replay akan muncul di halaman Event Saya setelah tersedia sesuai pengaturan event.';
+        }
+
+        if ($guidance === []) {
+            $guidance[] = 'Detail akses event akan diinformasikan melalui halaman Event Saya.';
+        }
+
+        return $guidance;
+    }
+
+    private function formatDateTime(?CarbonInterface $dateTime, string $timezone): string
+    {
+        if (! $dateTime) {
+            return '-';
+        }
+
+        return $dateTime->timezone($timezone)->translatedFormat('d M Y, H:i').' '.$timezone;
+    }
+
+    private function formatCurrency(float $amount): string
+    {
+        return 'Rp '.number_format($amount, 0, ',', '.');
+    }
+
+    private function maskedPayoutDestination(string $bankName, string $accountNumber, string $accountHolder): string
+    {
+        $cleanNumber = preg_replace('/\s+/', '', $accountNumber) ?? '';
+
+        if (strlen($cleanNumber) > 4) {
+            $cleanNumber = str_repeat('*', max(strlen($cleanNumber) - 4, 0)).substr($cleanNumber, -4);
+        }
+
+        return collect([$bankName, $cleanNumber, $accountHolder])
+            ->filter(fn (string $value): bool => trim($value) !== '')
+            ->implode(' / ');
     }
 }

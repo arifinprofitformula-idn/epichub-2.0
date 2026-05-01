@@ -2,6 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Commission;
+use App\Models\CommissionPayout;
+use App\Models\EventRegistration;
+use App\Models\UserProduct;
+use App\Observers\CommissionObserver;
+use App\Observers\CommissionPayoutObserver;
+use App\Observers\EventRegistrationObserver;
+use App\Observers\UserProductObserver;
 use App\Support\WindowsSafeFilesystem;
 use Carbon\CarbonImmutable;
 use Illuminate\Filesystem\Filesystem;
@@ -30,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->registerObservers();
     }
 
     /**
@@ -54,5 +63,13 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    protected function registerObservers(): void
+    {
+        EventRegistration::observe(EventRegistrationObserver::class);
+        UserProduct::observe(UserProductObserver::class);
+        Commission::observe(CommissionObserver::class);
+        CommissionPayout::observe(CommissionPayoutObserver::class);
     }
 }
