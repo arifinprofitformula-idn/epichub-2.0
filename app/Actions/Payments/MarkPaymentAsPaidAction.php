@@ -13,6 +13,7 @@ use App\Enums\ProductType;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -85,6 +86,7 @@ class MarkPaymentAsPaidAction
             // Catatan: future payment gateway callback harus memakai alur yang sama agar grant akses konsisten dan idempotent.
 
             $this->sendPaymentApprovedEmail($payment->refresh(), $order);
+            $this->queueCustomerListAutomation($order);
 
             return $payment;
         });
@@ -156,6 +158,24 @@ class MarkPaymentAsPaidAction
         }
         $pt = $product->product_type;
         return ($pt instanceof ProductType ? $pt : ProductType::tryFrom((string) $pt)) === $type;
+    }
+
+    protected function queueCustomerListAutomation(Order $order): void
+    {
+        DB::afterCommit(function () use ($order): void {
+            try {
+                $order->loadMissing('user');
+
+                if ($order->user) {
+                    app(MailketingSubscriberService::class)->addCustomerToCustomerList($order->user);
+                }
+            } catch (\Throwable $e) {
+                Log::error('MarkPaymentAsPaidAction: gagal customer list automation', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        });
     }
 }
 

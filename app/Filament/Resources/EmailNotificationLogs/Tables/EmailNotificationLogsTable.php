@@ -3,6 +3,10 @@
 namespace App\Filament\Resources\EmailNotificationLogs\Tables;
 
 use App\Filament\Resources\EmailNotificationLogs\EmailNotificationLogResource;
+use App\Models\EmailNotificationLog;
+use App\Services\Notifications\EmailRetryService;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -33,7 +37,7 @@ class EmailNotificationLogsTable
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'mailketing'   => 'primary',
-                        'laravel_mail' => 'info',
+                        'laravel'      => 'info',
                         default        => 'gray',
                     }),
 
@@ -93,7 +97,7 @@ class EmailNotificationLogsTable
                     ->label('Provider')
                     ->options([
                         'mailketing'   => 'Mailketing',
-                        'laravel_mail' => 'Laravel Mail',
+                        'laravel'      => 'Laravel Mail',
                     ]),
 
                 SelectFilter::make('event_type')
@@ -118,6 +122,28 @@ class EmailNotificationLogsTable
                     }),
             ])
             ->recordActions([
+                Action::make('retry')
+                    ->label('')
+                    ->tooltip('Retry email failed')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->visible(fn (EmailNotificationLog $record): bool => $record->status === 'failed')
+                    ->requiresConfirmation()
+                    ->action(function (EmailNotificationLog $record): void {
+                        $result = app(EmailRetryService::class)->retry($record);
+
+                        $notification = Notification::make()
+                            ->title($result['success'] ? 'Retry berhasil' : 'Retry gagal')
+                            ->body($result['message']);
+
+                        if ($result['success']) {
+                            $notification->success();
+                        } else {
+                            $notification->danger();
+                        }
+
+                        $notification->send();
+                    }),
                 ViewAction::make()->label('')->tooltip('Lihat detail'),
             ])
             ->defaultSort('created_at', 'desc')

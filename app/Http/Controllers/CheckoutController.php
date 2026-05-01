@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -134,6 +135,15 @@ class CheckoutController extends Controller
         } catch (\Throwable $e) {
             Log::error('CheckoutController: gagal kirim welcome email', ['error' => $e->getMessage()]);
         }
+
+        try {
+            app(MailketingSubscriberService::class)->addUserToDefaultList($user);
+        } catch (\Throwable $e) {
+            Log::error('CheckoutController: gagal subscriber automation default list', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function sendOrderCreatedEmails(User $user, Payment $payment): void
@@ -190,4 +200,3 @@ class CheckoutController extends Controller
         }
     }
 }
-

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Enums\EventRegistrationStatus;
 use App\Models\EventRegistration;
+use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
 
 class EventRegistrationObserver
@@ -44,6 +45,15 @@ class EventRegistrationObserver
 
         $service->sendEventRegistrationConfirmed($eventRegistration);
         $service->sendAdminEventRegistrationNotification($eventRegistration);
+
+        $eventRegistration->loadMissing(['event', 'user']);
+
+        if ($eventRegistration->event && $eventRegistration->user) {
+            app(MailketingSubscriberService::class)->addEventParticipantToList(
+                $eventRegistration->user,
+                $eventRegistration->event,
+            );
+        }
     }
 
     private function shouldNotify(EventRegistration $eventRegistration): bool

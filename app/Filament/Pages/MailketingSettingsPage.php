@@ -52,6 +52,13 @@ class MailketingSettingsPage extends Page implements HasForms
     public bool   $enable_email_logs   = true;
     public bool   $enable_email_queue  = false;
     public string $test_recipient_email = '';
+    public bool $enable_subscriber_automation = false;
+    public bool $enable_retry_failed_email = false;
+    public bool $enable_payment_reminder = false;
+    public int $payment_reminder_after_hours = 24;
+    public bool $enable_event_reminder = false;
+    public bool $event_reminder_day_before = true;
+    public bool $event_reminder_hour_before = true;
 
     // Notification toggles
     public bool $notify_user_registered         = true;
@@ -87,6 +94,13 @@ class MailketingSettingsPage extends Page implements HasForms
         $this->enable_email_logs   = (bool) $settings->getMailketing('enable_email_logs', true);
         $this->enable_email_queue  = (bool) $settings->getMailketing('enable_email_queue', false);
         $this->test_recipient_email = (string) $settings->getMailketing('test_recipient_email', '');
+        $this->enable_subscriber_automation = (bool) $settings->getMailketing('enable_subscriber_automation', false);
+        $this->enable_retry_failed_email = (bool) $settings->getMailketing('enable_retry_failed_email', false);
+        $this->enable_payment_reminder = (bool) $settings->getMailketing('enable_payment_reminder', false);
+        $this->payment_reminder_after_hours = (int) $settings->getMailketing('payment_reminder_after_hours', 24);
+        $this->enable_event_reminder = (bool) $settings->getMailketing('enable_event_reminder', false);
+        $this->event_reminder_day_before = (bool) $settings->getMailketing('event_reminder_day_before', true);
+        $this->event_reminder_hour_before = (bool) $settings->getMailketing('event_reminder_hour_before', true);
 
         $this->notify_user_registered         = (bool) $settings->getMailketing('notify_user_registered', true);
         $this->notify_password_reset          = (bool) $settings->getMailketing('notify_password_reset', true);
@@ -138,6 +152,13 @@ class MailketingSettingsPage extends Page implements HasForms
         $settings->setMailketing('enable_email_logs',  $this->enable_email_logs,  false, 'boolean');
         $settings->setMailketing('enable_email_queue', $this->enable_email_queue, false, 'boolean');
         $settings->setMailketing('test_recipient_email', $this->test_recipient_email);
+        $settings->setMailketing('enable_subscriber_automation', $this->enable_subscriber_automation, false, 'boolean');
+        $settings->setMailketing('enable_retry_failed_email', $this->enable_retry_failed_email, false, 'boolean');
+        $settings->setMailketing('enable_payment_reminder', $this->enable_payment_reminder, false, 'boolean');
+        $settings->setMailketing('payment_reminder_after_hours', $this->payment_reminder_after_hours, false, 'integer');
+        $settings->setMailketing('enable_event_reminder', $this->enable_event_reminder, false, 'boolean');
+        $settings->setMailketing('event_reminder_day_before', $this->event_reminder_day_before, false, 'boolean');
+        $settings->setMailketing('event_reminder_hour_before', $this->event_reminder_hour_before, false, 'boolean');
 
         $settings->setMailketing('notify_user_registered',         $this->notify_user_registered,         false, 'boolean');
         $settings->setMailketing('notify_password_reset',          $this->notify_password_reset,          false, 'boolean');

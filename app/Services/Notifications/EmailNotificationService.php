@@ -354,7 +354,16 @@ class EmailNotificationService
                 eventType: $eventType,
                 notifiableType: $notifiableType,
                 notifiableId: $notifiableId,
-                metadata: $metadata,
+                metadata: $this->metadataWithRetryPayload(
+                    metadata: $metadata,
+                    recipientName: $recipientName,
+                    subject: $subject,
+                    content: $content,
+                    eventType: $eventType,
+                    notifiableType: $notifiableType,
+                    notifiableId: $notifiableId,
+                    provider: 'mailketing',
+                ),
             );
 
             return;
@@ -368,7 +377,16 @@ class EmailNotificationService
             eventType: $eventType,
             notifiableType: $notifiableType,
             notifiableId: $notifiableId,
-            metadata: $metadata,
+            metadata: $this->metadataWithRetryPayload(
+                metadata: $metadata,
+                recipientName: $recipientName,
+                subject: $subject,
+                content: $content,
+                eventType: $eventType,
+                notifiableType: $notifiableType,
+                notifiableId: $notifiableId,
+                provider: 'laravel',
+            ),
         );
     }
 
@@ -391,6 +409,7 @@ class EmailNotificationService
                 'event_type'      => $eventType,
                 'notifiable_type' => $notifiableType,
                 'notifiable_id'   => $notifiableId,
+                'log_metadata'    => $metadata,
             ]);
         } catch (Throwable $e) {
             Log::error("EmailNotificationService: Mailketing gagal [{$eventType}]", [
@@ -530,8 +549,36 @@ class EmailNotificationService
             'affiliate_commission_created' => 'notify_commission_created',
             'commission_payout_paid'   => 'notify_payout_paid',
             'admin_commission_payout_paid' => 'notify_admin_payout_paid',
+            'payment_reminder'         => 'enable_payment_reminder',
+            'event_reminder_day_before' => 'enable_event_reminder',
+            'event_reminder_hour_before' => 'enable_event_reminder',
             default                    => null,
         };
+    }
+
+    private function metadataWithRetryPayload(
+        array $metadata,
+        ?string $recipientName,
+        string $subject,
+        string $content,
+        string $eventType,
+        ?string $notifiableType,
+        mixed $notifiableId,
+        string $provider,
+    ): array {
+        $metadata['retry_payload'] = [
+            'recipient_name' => $recipientName,
+            'subject' => $subject,
+            'content' => $content,
+            'event_type' => $eventType,
+            'notifiable_type' => $notifiableType,
+            'notifiable_id' => $notifiableId,
+            'provider' => $provider,
+        ];
+        $metadata['retry_count'] = (int) ($metadata['retry_count'] ?? 0);
+        $metadata['max_retry'] = (int) ($metadata['max_retry'] ?? 3);
+
+        return $metadata;
     }
 
     /**

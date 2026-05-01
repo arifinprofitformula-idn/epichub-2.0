@@ -8,6 +8,7 @@ use App\Actions\Support\NormalizeWhatsappNumberAction;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -59,6 +60,7 @@ class CreateNewUser implements CreatesNewUsers
             );
 
             $this->sendWelcomeEmail($user);
+            $this->queueSubscriberAutomation($user);
 
             return $user;
         });
@@ -83,5 +85,19 @@ class CreateNewUser implements CreatesNewUsers
         } catch (\Throwable $e) {
             Log::error('CreateNewUser: gagal kirim welcome email', ['error' => $e->getMessage()]);
         }
+    }
+
+    private function queueSubscriberAutomation(User $user): void
+    {
+        DB::afterCommit(function () use ($user): void {
+            try {
+                app(MailketingSubscriberService::class)->addUserToDefaultList($user);
+            } catch (\Throwable $e) {
+                Log::error('CreateNewUser: gagal subscriber automation', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        });
     }
 }

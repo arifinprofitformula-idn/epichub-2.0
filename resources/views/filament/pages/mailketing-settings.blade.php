@@ -65,6 +65,38 @@
                     </div>
                 </div>
 
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">Automation & Reminder</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                        @foreach([
+                            ['enable_subscriber_automation', 'Subscriber Automation', 'Masukkan user/customer/peserta ke list Mailketing secara otomatis'],
+                            ['enable_retry_failed_email', 'Retry Failed Email', 'Aktifkan command retry untuk email gagal'],
+                            ['enable_payment_reminder', 'Payment Reminder', 'Kirim reminder order yang belum dibayar'],
+                            ['enable_event_reminder', 'Event Reminder', 'Kirim reminder H-1 dan 1 jam sebelum event'],
+                            ['event_reminder_day_before', 'Event H-1', 'Reminder sehari sebelum event'],
+                            ['event_reminder_hour_before', 'Event 1 Jam', 'Reminder satu jam sebelum event'],
+                        ] as [$field, $label, $hint])
+                        <div class="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50">
+                            <div class="mr-3">
+                                <p class="font-medium text-sm text-gray-700">{{ $label }}</p>
+                                <p class="text-xs text-gray-500">{{ $hint }}</p>
+                            </div>
+                            <input type="checkbox" wire:model="{{ $field }}" id="{{ $field }}"
+                                class="shrink-0 rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500">
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div class="space-y-1">
+                            <label for="payment_reminder_after_hours" class="text-sm font-medium text-gray-700">Payment Reminder After Hours</label>
+                            <input type="number" min="1" id="payment_reminder_after_hours" wire:model="payment_reminder_after_hours"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 focus:outline-none">
+                            <p class="text-xs text-gray-500">Default 24 jam setelah order/pembayaran pending.</p>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- API Credentials --------------------------------------------- --}}
                 <div>
                     <h4 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">Kredensial API</h4>

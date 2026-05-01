@@ -53,7 +53,7 @@ class MailketingClient
     /**
      * Kirim email via Mailketing.
      *
-     * @param  array{recipient: string, subject: string, content: string, recipient_name?: string, event_type?: string, notifiable_type?: string, notifiable_id?: mixed}  $payload
+     * @param  array{recipient: string, subject: string, content: string, recipient_name?: string, event_type?: string, notifiable_type?: string, notifiable_id?: mixed, log_metadata?: array<string, mixed>, suppress_logging?: bool}  $payload
      * @return array{success: bool, status: string, message: string, raw: array}
      */
     public function sendEmail(array $payload): array
@@ -63,15 +63,20 @@ class MailketingClient
             return $this->failure($validation['message']);
         }
 
-        $logEntry = EmailNotificationLog::record([
-            'event_type'      => $payload['event_type'] ?? null,
-            'notifiable_type' => $payload['notifiable_type'] ?? null,
-            'notifiable_id'   => $payload['notifiable_id'] ?? null,
-            'recipient_email' => $payload['recipient'],
-            'recipient_name'  => $payload['recipient_name'] ?? null,
-            'subject'         => $payload['subject'],
-            'status'          => 'pending',
-        ]);
+        $logEntry = null;
+
+        if (! (bool) ($payload['suppress_logging'] ?? false)) {
+            $logEntry = EmailNotificationLog::record([
+                'event_type'      => $payload['event_type'] ?? null,
+                'notifiable_type' => $payload['notifiable_type'] ?? null,
+                'notifiable_id'   => $payload['notifiable_id'] ?? null,
+                'recipient_email' => $payload['recipient'],
+                'recipient_name'  => $payload['recipient_name'] ?? null,
+                'subject'         => $payload['subject'],
+                'status'          => 'pending',
+                'metadata'        => $payload['log_metadata'] ?? [],
+            ]);
+        }
 
         $post = [
             'api_token'  => $this->apiToken(),
@@ -91,13 +96,13 @@ class MailketingClient
         $result = $this->post('/send', $post);
 
         if ($result['success']) {
-            $logEntry->update([
+            $logEntry?->update([
                 'status'            => 'sent',
                 'provider_response' => $result['raw'],
                 'sent_at'           => now(),
             ]);
         } else {
-            $logEntry->update([
+            $logEntry?->update([
                 'status'            => 'failed',
                 'provider_response' => $result['raw'],
                 'error_message'     => $result['message'],

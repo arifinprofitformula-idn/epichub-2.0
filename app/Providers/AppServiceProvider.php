@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Models\Commission;
 use App\Models\CommissionPayout;
+use App\Models\EpiChannel;
 use App\Models\EventRegistration;
 use App\Models\UserProduct;
 use App\Observers\CommissionObserver;
 use App\Observers\CommissionPayoutObserver;
+use App\Observers\EpiChannelObserver;
 use App\Observers\EventRegistrationObserver;
 use App\Observers\UserProductObserver;
 use App\Support\WindowsSafeFilesystem;
@@ -69,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
     {
         EventRegistration::observe(EventRegistrationObserver::class);
         UserProduct::observe(UserProductObserver::class);
+        EpiChannel::observe(EpiChannelObserver::class);
         Commission::observe(CommissionObserver::class);
         CommissionPayout::observe(CommissionPayoutObserver::class);
     }

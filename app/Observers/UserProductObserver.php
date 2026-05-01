@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\ProductType;
 use App\Enums\UserProductStatus;
 use App\Models\UserProduct;
+use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
 use Carbon\Carbon;
 
@@ -16,6 +17,7 @@ class UserProductObserver
     {
         if ($this->shouldNotify($userProduct, wasActiveBefore: false)) {
             app(EmailNotificationService::class)->sendCourseEnrollmentEmail($userProduct);
+            $this->subscribeCourseStudent($userProduct);
         }
     }
 
@@ -25,7 +27,22 @@ class UserProductObserver
 
         if ($this->shouldNotify($userProduct, $wasActiveBefore)) {
             app(EmailNotificationService::class)->sendCourseEnrollmentEmail($userProduct);
+            $this->subscribeCourseStudent($userProduct);
         }
+    }
+
+    private function subscribeCourseStudent(UserProduct $userProduct): void
+    {
+        $userProduct->loadMissing(['user', 'product.course']);
+
+        if (! $userProduct->user || ! $userProduct->product?->course) {
+            return;
+        }
+
+        app(MailketingSubscriberService::class)->addCourseStudentToList(
+            $userProduct->user,
+            $userProduct->product->course,
+        );
     }
 
     private function shouldNotify(UserProduct $userProduct, bool $wasActiveBefore): bool
