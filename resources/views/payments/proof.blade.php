@@ -1,4 +1,8 @@
 <x-layouts::app :title="'Bukti Pembayaran '.$payment->payment_number">
+    @php
+        $currentUser = auth()->user();
+        $order = $payment->order;
+    @endphp
     <div class="mx-auto flex min-h-[calc(100vh-1rem)] w-full max-w-[min(1520px,calc(100vw-40px))] flex-col px-0 pb-6 pt-0 md:min-h-screen md:pb-8">
         <section class="sticky top-0 z-20 mb-[10px] hidden flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 bg-white/95 px-1 py-5 backdrop-blur md:-mt-8 md:-mx-6 md:px-0 md:flex lg:-mx-8">
             <div class="flex items-center gap-3 md:pl-6 lg:pl-8">
@@ -11,9 +15,9 @@
 
             <div class="flex items-center gap-4 md:pr-6 lg:pr-8">
                 <div class="text-right">
-                    <div class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</div>
+                    <div class="text-sm font-semibold text-slate-900">{{ $currentUser?->name ?? 'Pengguna' }}</div>
                     <div class="mt-0.5 text-xs font-medium text-slate-500">
-                        {{ auth()->user()->hasVerifiedEmail() ? 'Pengguna terverifikasi' : 'Menunggu verifikasi' }}
+                        {{ $currentUser?->hasVerifiedEmail() ? 'Pengguna terverifikasi' : 'Menunggu verifikasi' }}
                     </div>
                 </div>
 
@@ -22,7 +26,7 @@
                     class="group inline-flex size-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] text-sm font-semibold text-white shadow-[0_12px_25px_rgba(37,99,235,0.18)] transition hover:brightness-110"
                     aria-label="Buka profil pengguna"
                 >
-                    <span class="group-hover:scale-105 transition">{{ auth()->user()->initials() }}</span>
+                    <span class="group-hover:scale-105 transition">{{ $currentUser?->initials() ?? 'U' }}</span>
                 </a>
             </div>
         </section>
@@ -45,7 +49,7 @@
                 <div class="border-b border-slate-200/80 px-5 py-4 md:px-8">
                     <div class="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">Preview Bukti Pembayaran</div>
                     <div class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{{ $payment->payment_number }}</div>
-                    <div class="mt-1 text-sm text-slate-500">Order {{ $payment->order->order_number }}</div>
+                    <div class="mt-1 text-sm text-slate-500">Order {{ $order?->order_number ?? '-' }}</div>
                 </div>
 
                 <div class="p-4 md:p-6">

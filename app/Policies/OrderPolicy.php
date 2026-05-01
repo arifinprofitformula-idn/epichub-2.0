@@ -13,7 +13,14 @@ class OrderPolicy
             return true;
         }
 
-        return $order->user_id !== null && $order->user_id === $user->id;
+        if ($order->user_id !== null && $order->user_id === $user->id) {
+            return true;
+        }
+
+        $customerEmail = trim((string) $order->customer_email);
+
+        return $customerEmail !== ''
+            && strcasecmp($customerEmail, (string) $user->email) === 0;
     }
 
     public function cancel(User $user, Order $order): bool
@@ -22,7 +29,7 @@ class OrderPolicy
             return true;
         }
 
-        return $order->user_id !== null && $order->user_id === $user->id && ! $order->isPaid();
+        return $this->view($user, $order) && ! $order->isPaid();
     }
 }
 

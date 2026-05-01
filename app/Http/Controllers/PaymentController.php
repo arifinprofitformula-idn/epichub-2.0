@@ -15,9 +15,9 @@ class PaymentController extends Controller
 {
     public function show(Payment $payment): View
     {
-        $this->authorize('view', $payment);
+        $payment->loadMissing(['order.items.product', 'order.user', 'verifiedBy']);
 
-        $payment->load(['order.items.product', 'verifiedBy']);
+        $this->authorize('view', $payment);
 
         return view('payments.show', [
             'payment' => $payment,
@@ -26,6 +26,8 @@ class PaymentController extends Controller
 
     public function proof(Payment $payment): View|RedirectResponse
     {
+        $payment->loadMissing(['order', 'verifiedBy']);
+
         $this->authorize('view', $payment);
 
         if (! $payment->proof_of_payment) {
@@ -43,7 +45,7 @@ class PaymentController extends Controller
         };
 
         return view('payments.proof', [
-            'payment' => $payment->load(['order', 'verifiedBy']),
+            'payment' => $payment,
             'proofUrl' => Storage::disk('public')->url($path),
             'proofKind' => $proofKind,
         ]);
@@ -117,4 +119,3 @@ class PaymentController extends Controller
         }
     }
 }
-

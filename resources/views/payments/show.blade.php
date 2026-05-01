@@ -11,6 +11,11 @@
             default => 'bg-amber-100 text-amber-700',
         };
     @endphp
+    @php
+        $order = $payment->order;
+        $currentUser = auth()->user();
+        $backUrl = $order ? route('orders.show', $order) : route('orders.index');
+    @endphp
 
     <div class="mx-auto flex min-h-[calc(100vh-1rem)] w-full max-w-[min(1520px,calc(100vw-40px))] flex-col px-0 pb-6 pt-0 md:min-h-screen md:pb-8">
         <section class="sticky top-0 z-20 mb-[10px] hidden flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 bg-white/95 px-1 py-5 backdrop-blur md:-mt-8 md:-mx-6 md:px-0 md:flex lg:-mx-8">
@@ -24,9 +29,9 @@
 
             <div class="flex items-center gap-4 md:pr-6 lg:pr-8">
                 <div class="text-right">
-                    <div class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</div>
+                    <div class="text-sm font-semibold text-slate-900">{{ $currentUser?->name ?? 'Pengguna' }}</div>
                     <div class="mt-0.5 text-xs font-medium text-slate-500">
-                        {{ auth()->user()->hasVerifiedEmail() ? 'Pengguna terverifikasi' : 'Menunggu verifikasi' }}
+                        {{ $currentUser?->hasVerifiedEmail() ? 'Pengguna terverifikasi' : 'Menunggu verifikasi' }}
                     </div>
                 </div>
 
@@ -35,14 +40,14 @@
                     class="group inline-flex size-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] text-sm font-semibold text-white shadow-[0_12px_25px_rgba(37,99,235,0.18)] transition hover:brightness-110"
                     aria-label="Buka profil pengguna"
                 >
-                    <span class="group-hover:scale-105 transition">{{ auth()->user()->initials() }}</span>
+                    <span class="group-hover:scale-105 transition">{{ $currentUser?->initials() ?? 'U' }}</span>
                 </a>
             </div>
         </section>
 
         <section class="rounded-[1.75rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f4f7fb_100%)] px-4 py-5 shadow-[0_18px_45px_rgba(148,163,184,0.10)] md:rounded-[2rem] md:px-8 md:py-8">
             <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <a href="{{ route('orders.show', $payment->order) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900">
+                <a href="{{ $backUrl }}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900">
                     <svg viewBox="0 0 24 24" fill="none" class="size-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -70,7 +75,7 @@
                         <div class="mt-6 grid gap-3 rounded-[1.4rem] border border-slate-200/80 bg-slate-50/80 p-4 text-sm md:p-5">
                             <div class="flex items-center justify-between gap-4">
                                 <div class="text-slate-500">Order No.</div>
-                                <div class="font-semibold text-slate-900">{{ $payment->order->order_number }}</div>
+                                <div class="font-semibold text-slate-900">{{ $order?->order_number ?? '-' }}</div>
                             </div>
                             <div class="flex items-center justify-between gap-4">
                                 <div class="text-slate-500">Payment No.</div>
@@ -150,7 +155,7 @@
                                     </x-ui.button>
 
                                     <div class="text-xs text-slate-400">
-                                        Pastikan `php artisan storage:link` sudah aktif agar preview bukti bekerja dengan baik.
+                                        Pastikan storage publik aktif agar preview bukti bekerja dengan baik.
                                     </div>
                                 </form>
                             @endif
@@ -161,4 +166,3 @@
         </section>
     </div>
 </x-layouts::app>
-
