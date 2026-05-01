@@ -10,6 +10,8 @@ use App\Concerns\ProfileValidationRules;
 use App\Models\User;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -84,6 +86,22 @@ class CreateNewUser implements CreatesNewUsers
             );
         } catch (\Throwable $e) {
             Log::error('CreateNewUser: gagal kirim welcome email', ['error' => $e->getMessage()]);
+        }
+
+        try {
+            $message = app(WhatsAppMessageTemplateService::class)->render('user_registered', [
+                'name' => $user->name,
+                'dashboard_url' => url('/dashboard'),
+            ]);
+
+            app(WhatsAppNotificationService::class)->sendToUser(
+                user: $user,
+                message: $message,
+                eventType: 'user_registered',
+                metadata: ['notifiable' => $user],
+            );
+        } catch (\Throwable $e) {
+            Log::error('CreateNewUser: gagal kirim welcome whatsapp', ['error' => $e->getMessage()]);
         }
     }
 

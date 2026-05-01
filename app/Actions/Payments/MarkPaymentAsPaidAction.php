@@ -15,6 +15,8 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -146,8 +148,19 @@ class MarkPaymentAsPaidAction
                 eventType: 'payment_approved',
                 metadata: ['notifiable' => $payment],
             );
+
+            $message = app(WhatsAppMessageTemplateService::class)->render('payment_approved', [
+                'produk_saya_url' => url('/produk-saya'),
+            ]);
+
+            app(WhatsAppNotificationService::class)->sendToUser(
+                user: $user,
+                message: $message,
+                eventType: 'payment_approved',
+                metadata: ['notifiable' => $payment],
+            );
         } catch (\Throwable $e) {
-            Log::error('MarkPaymentAsPaidAction: gagal kirim payment approved email', ['error' => $e->getMessage()]);
+            Log::error('MarkPaymentAsPaidAction: gagal kirim payment approved notification', ['error' => $e->getMessage()]);
         }
     }
 

@@ -14,6 +14,8 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\UserProduct;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -171,8 +173,18 @@ class GrantProductAccessAction
                 eventType: 'access_granted',
                 metadata: ['notifiable' => $userProduct],
             );
+
+            app(WhatsAppNotificationService::class)->sendToUser(
+                user: $user,
+                message: app(WhatsAppMessageTemplateService::class)->render('access_granted', [
+                    'product_name' => $product->name,
+                    'produk_saya_url' => url('/produk-saya'),
+                ]),
+                eventType: 'access_granted',
+                metadata: ['notifiable' => $userProduct],
+            );
         } catch (\Throwable $e) {
-            Log::error('GrantProductAccessAction: gagal kirim access granted email', ['error' => $e->getMessage()]);
+            Log::error('GrantProductAccessAction: gagal kirim access granted notification', ['error' => $e->getMessage()]);
         }
     }
 

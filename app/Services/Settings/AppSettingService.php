@@ -57,4 +57,31 @@ class AppSettingService
             })
             ->toArray();
     }
+
+    public function getDripSender(string $key, mixed $default = null): mixed
+    {
+        return $this->get($key, $default, 'dripsender');
+    }
+
+    public function setDripSender(string $key, mixed $value, bool $encrypted = false, ?string $type = null): void
+    {
+        $this->set($key, $value, 'dripsender', $encrypted, $type);
+    }
+
+    /** @return array<string, mixed> */
+    public function getAllDripSender(): array
+    {
+        if (! $this->tableExists) {
+            return [];
+        }
+
+        return AppSetting::where('group', 'dripsender')
+            ->get()
+            ->mapWithKeys(function (AppSetting $row): array {
+                $value = AppSetting::get($row->key, null, 'dripsender');
+
+                return [$row->key => $value];
+            })
+            ->toArray();
+    }
 }

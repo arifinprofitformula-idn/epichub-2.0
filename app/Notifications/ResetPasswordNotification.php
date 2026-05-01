@@ -3,6 +3,8 @@
 namespace App\Notifications;
 
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Illuminate\Auth\Notifications\ResetPassword as BaseResetPassword;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -33,6 +35,23 @@ class ResetPasswordNotification extends BaseResetPassword
             );
         } catch (\Throwable $e) {
             Log::error('ResetPasswordNotification: gagal kirim via EmailNotificationService', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        try {
+            $message = app(WhatsAppMessageTemplateService::class)->render('password_reset_requested', [
+                'name' => $notifiable->name ?? $notifiable->email,
+            ]);
+
+            app(WhatsAppNotificationService::class)->sendToUser(
+                user: $notifiable,
+                message: $message,
+                eventType: 'password_reset_requested',
+                metadata: ['notifiable' => $notifiable],
+            );
+        } catch (\Throwable $e) {
+            Log::error('ResetPasswordNotification: gagal kirim WhatsApp reset password', [
                 'error' => $e->getMessage(),
             ]);
         }

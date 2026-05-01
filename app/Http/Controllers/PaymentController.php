@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Payments\UploadPaymentProofRequest;
 use App\Models\Payment;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -114,8 +116,32 @@ class PaymentController extends Controller
                 eventType: 'admin_payment_submitted',
                 metadata: ['notifiable' => $payment],
             );
+
+            $whatsAppSvc = app(WhatsAppNotificationService::class);
+            $templateSvc = app(WhatsAppMessageTemplateService::class);
+            $amount = 'Rp '.number_format((float) $payment->amount, 0, ',', '.');
+
+            $whatsAppSvc->sendToUser(
+                user: $user,
+                message: $templateSvc->render('payment_submitted', [
+                    'name' => $user->name,
+                    'payment_number' => $payment->payment_number,
+                ]),
+                eventType: 'payment_submitted',
+                metadata: ['notifiable' => $payment],
+            );
+
+            $whatsAppSvc->sendAdminAlert(
+                message: $templateSvc->render('admin_payment_submitted', [
+                    'payment_number' => $payment->payment_number,
+                    'member_name' => $user->name,
+                    'amount' => $amount,
+                ]),
+                eventType: 'admin_payment_submitted',
+                metadata: ['notifiable' => $payment],
+            );
         } catch (\Throwable $e) {
-            Log::error('PaymentController: gagal kirim payment submitted email', ['error' => $e->getMessage()]);
+            Log::error('PaymentController: gagal kirim payment submitted notification', ['error' => $e->getMessage()]);
         }
     }
 }

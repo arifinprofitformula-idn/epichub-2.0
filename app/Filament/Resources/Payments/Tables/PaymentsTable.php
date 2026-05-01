@@ -8,6 +8,8 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Models\Payment;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
@@ -170,9 +172,20 @@ class PaymentsTable
                                                         eventType: 'payment_rejected',
                                                         metadata: ['notifiable' => $record],
                                                     );
+
+                                                    app(WhatsAppNotificationService::class)->sendToUser(
+                                                        user: $user,
+                                                        message: app(WhatsAppMessageTemplateService::class)->render('payment_rejected', [
+                                                            'name' => $user->name,
+                                                            'reason' => $data['notes'] ?? '-',
+                                                            'payment_url' => route('payments.show', $record),
+                                                        ]),
+                                                        eventType: 'payment_rejected',
+                                                        metadata: ['notifiable' => $record],
+                                                    );
                                                 }
                                             } catch (\Throwable $e) {
-                                                \Illuminate\Support\Facades\Log::error('PaymentsTable: gagal kirim payment rejected email', ['error' => $e->getMessage()]);
+                                                \Illuminate\Support\Facades\Log::error('PaymentsTable: gagal kirim payment rejected notification', ['error' => $e->getMessage()]);
                                             }
                                         }),
                                 ]

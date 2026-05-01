@@ -5,6 +5,8 @@ namespace App\Observers;
 use App\Enums\PayoutStatus;
 use App\Models\CommissionPayout;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 
 class CommissionPayoutObserver
 {
@@ -42,6 +44,32 @@ class CommissionPayoutObserver
 
         $service->sendPayoutPaidEmail($payout);
         $service->sendAdminPayoutPaidNotification($payout);
+
+        $payout->loadMissing(['epiChannel.user']);
+
+        $user = $payout->epiChannel?->user;
+
+        if ($user) {
+            app(WhatsAppNotificationService::class)->sendToUser(
+                user: $user,
+                message: app(WhatsAppMessageTemplateService::class)->render('commission_payout_paid', [
+                    'amount' => 'Rp '.number_format((float) $payout->total_amount, 0, ',', '.'),
+                    'paid_at' => $payout->paid_at?->timezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y H:i') ?? '-',
+                ]),
+                eventType: 'commission_payout_paid',
+                metadata: ['notifiable' => $payout],
+            );
+        }
+
+        app(WhatsAppNotificationService::class)->sendAdminAlert(
+            message: app(WhatsAppMessageTemplateService::class)->render('admin_payout_paid', [
+                'member_name' => $user?->name ?? 'Member EPI Channel',
+                'amount' => 'Rp '.number_format((float) $payout->total_amount, 0, ',', '.'),
+                'paid_at' => $payout->paid_at?->timezone(config('app.timezone', 'Asia/Jakarta'))->format('d M Y H:i') ?? '-',
+            ]),
+            eventType: 'admin_payout_paid',
+            metadata: ['notifiable' => $payout],
+        );
     }
 
     private function isPaid(mixed $status): bool

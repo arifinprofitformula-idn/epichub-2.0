@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 Schedule::command('mailketing:retry-failed --limit=50')->hourly();
 Schedule::command('notifications:send-payment-reminders')->hourly();
 Schedule::command('notifications:send-event-reminders')->everyFifteenMinutes();
+Schedule::command('dripsender:retry-failed --limit=50')->hourly();
+Schedule::command('whatsapp:send-payment-reminders')->hourly();
+Schedule::command('whatsapp:send-event-reminders')->everyFifteenMinutes();

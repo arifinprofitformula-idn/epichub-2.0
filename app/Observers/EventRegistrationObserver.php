@@ -6,6 +6,8 @@ use App\Enums\EventRegistrationStatus;
 use App\Models\EventRegistration;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 
 class EventRegistrationObserver
 {
@@ -49,6 +51,26 @@ class EventRegistrationObserver
         $eventRegistration->loadMissing(['event', 'user']);
 
         if ($eventRegistration->event && $eventRegistration->user) {
+            app(WhatsAppNotificationService::class)->sendToUser(
+                user: $eventRegistration->user,
+                message: app(WhatsAppMessageTemplateService::class)->render('event_registration_confirmed', [
+                    'event_name' => $eventRegistration->event->title,
+                    'event_datetime' => $eventRegistration->event->starts_at?->timezone($eventRegistration->event->timezone ?: config('app.timezone', 'Asia/Jakarta'))->translatedFormat('d M Y, H:i').' '.($eventRegistration->event->timezone ?: config('app.timezone', 'Asia/Jakarta')),
+                    'event_url' => route('my-events.show', $eventRegistration),
+                ]),
+                eventType: 'event_registration_confirmed',
+                metadata: ['notifiable' => $eventRegistration],
+            );
+
+            app(WhatsAppNotificationService::class)->sendAdminAlert(
+                message: app(WhatsAppMessageTemplateService::class)->render('admin_event_registration', [
+                    'event_name' => $eventRegistration->event->title,
+                    'member_name' => $eventRegistration->user->name,
+                ]),
+                eventType: 'admin_event_registration',
+                metadata: ['notifiable' => $eventRegistration],
+            );
+
             app(MailketingSubscriberService::class)->addEventParticipantToList(
                 $eventRegistration->user,
                 $eventRegistration->event,

@@ -7,6 +7,8 @@ use App\Enums\UserProductStatus;
 use App\Models\UserProduct;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Carbon\Carbon;
 
 class UserProductObserver
@@ -37,6 +39,20 @@ class UserProductObserver
 
         if (! $userProduct->user || ! $userProduct->product?->course) {
             return;
+        }
+
+        try {
+            app(WhatsAppNotificationService::class)->sendToUser(
+                user: $userProduct->user,
+                message: app(WhatsAppMessageTemplateService::class)->render('course_enrolled', [
+                    'course_name' => $userProduct->product->course->title,
+                    'course_url' => route('my-courses.show', $userProduct),
+                ]),
+                eventType: 'course_enrolled',
+                metadata: ['notifiable' => $userProduct],
+            );
+        } catch (\Throwable) {
+            // Observer ini tidak boleh memblokir flow grant akses.
         }
 
         app(MailketingSubscriberService::class)->addCourseStudentToList(

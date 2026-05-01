@@ -14,6 +14,8 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
+use App\Services\Notifications\WhatsAppMessageTemplateService;
+use App\Services\Notifications\WhatsAppNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -137,6 +139,22 @@ class CheckoutController extends Controller
         }
 
         try {
+            $message = app(WhatsAppMessageTemplateService::class)->render('user_registered', [
+                'name' => $user->name,
+                'dashboard_url' => url('/dashboard'),
+            ]);
+
+            app(WhatsAppNotificationService::class)->sendToUser(
+                user: $user,
+                message: $message,
+                eventType: 'user_registered',
+                metadata: ['notifiable' => $user],
+            );
+        } catch (\Throwable $e) {
+            Log::error('CheckoutController: gagal kirim welcome whatsapp', ['error' => $e->getMessage()]);
+        }
+
+        try {
             app(MailketingSubscriberService::class)->addUserToDefaultList($user);
         } catch (\Throwable $e) {
             Log::error('CheckoutController: gagal subscriber automation default list', [
@@ -195,8 +213,34 @@ class CheckoutController extends Controller
                 eventType: 'admin_order_created',
                 metadata: ['notifiable' => $order],
             );
+
+            $whatsAppSvc = app(WhatsAppNotificationService::class);
+            $templateSvc = app(WhatsAppMessageTemplateService::class);
+            $amount = 'Rp '.number_format((float) $order->total_amount, 0, ',', '.');
+
+            $whatsAppSvc->sendToUser(
+                user: $user,
+                message: $templateSvc->render('order_created', [
+                    'name' => $user->name,
+                    'order_number' => $order->order_number,
+                    'total_amount' => $amount,
+                    'payment_url' => route('payments.show', $payment),
+                ]),
+                eventType: 'order_created',
+                metadata: ['notifiable' => $order],
+            );
+
+            $whatsAppSvc->sendAdminAlert(
+                message: $templateSvc->render('admin_order_created', [
+                    'order_number' => $order->order_number,
+                    'member_name' => $user->name,
+                    'total_amount' => $amount,
+                ]),
+                eventType: 'admin_order_created',
+                metadata: ['notifiable' => $order],
+            );
         } catch (\Throwable $e) {
-            Log::error('CheckoutController: gagal kirim order email', ['error' => $e->getMessage()]);
+            Log::error('CheckoutController: gagal kirim order notification', ['error' => $e->getMessage()]);
         }
     }
 }
