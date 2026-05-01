@@ -119,17 +119,26 @@ class NotificationSettingsPage extends Page
 
         foreach ($this->templates as $eventKey => $targets) {
             foreach ($targets as $targetKey => $fields) {
+                $normalizedFields = [
+                    ...$fields,
+                    'email_subject' => $registry->normalizeContent((string) ($fields['email_subject'] ?? ''), $eventKey, $targetKey),
+                    'email_body' => $registry->normalizeContent((string) ($fields['email_body'] ?? ''), $eventKey, $targetKey),
+                    'whatsapp_body' => $registry->normalizeContent((string) ($fields['whatsapp_body'] ?? ''), $eventKey, $targetKey),
+                ];
+
+                $this->templates[$eventKey][$targetKey] = $normalizedFields;
+
                 $service->saveTemplate([
                     'event_key'       => $eventKey,
                     'target_key'      => $targetKey,
-                    'email_enabled'   => $fields['email_enabled'] ?? true,
-                    'whatsapp_enabled'=> $fields['whatsapp_enabled'] ?? true,
-                    'email_subject'   => $fields['email_subject'] ?? '',
-                    'email_body'      => $fields['email_body'] ?? '',
-                    'whatsapp_body'   => $fields['whatsapp_body'] ?? '',
+                    'email_enabled'   => $normalizedFields['email_enabled'] ?? true,
+                    'whatsapp_enabled'=> $normalizedFields['whatsapp_enabled'] ?? true,
+                    'email_subject'   => $normalizedFields['email_subject'] ?? '',
+                    'email_body'      => $normalizedFields['email_body'] ?? '',
+                    'whatsapp_body'   => $normalizedFields['whatsapp_body'] ?? '',
                 ]);
 
-                $validation = $service->validateTemplateFields($eventKey, $targetKey, $fields);
+                $validation = $service->validateTemplateFields($eventKey, $targetKey, $normalizedFields);
                 $this->validationResults[$eventKey][$targetKey] = $validation;
 
                 if (! empty($validation['invalid'])) {

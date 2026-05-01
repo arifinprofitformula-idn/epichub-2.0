@@ -315,6 +315,31 @@ class NotificationShortcodeRegistry
         return $result ?? $content;
     }
 
+    public function normalizeContent(string $content, string $eventKey, ?string $targetKey = null): string
+    {
+        if ($content === '') {
+            return '';
+        }
+
+        $resolvedEventKey = $targetKey !== null
+            ? $this->resolveEventKeyForTarget($eventKey, $this->normalizeTarget($targetKey))
+            : $eventKey;
+        $aliasMap = $this->canonicalAliasMap($resolvedEventKey);
+
+        if ($aliasMap === []) {
+            return $content;
+        }
+
+        $result = preg_replace_callback('/\{([a-z0-9_]+)\}/i', function (array $matches) use ($aliasMap): string {
+            $key = strtolower($matches[1]);
+            $canonical = $aliasMap[$key] ?? null;
+
+            return $canonical !== null ? '{'.$canonical.'}' : $matches[0];
+        }, $content);
+
+        return $result ?? $content;
+    }
+
     // ── Internals ────────────────────────────────────────────────────────────
 
     private function resolveAlias(string $alias, string $eventKey): string
@@ -332,6 +357,28 @@ class NotificationShortcodeRegistry
         }
 
         return self::ALIASES[$alias] ?? $alias;
+    }
+
+    /** @return array<string, string> */
+    private function canonicalAliasMap(string $eventKey): array
+    {
+        $aliases = [];
+
+        foreach (array_keys(self::ALIASES) as $alias) {
+            $canonical = $this->resolveAlias($alias, $eventKey);
+
+            if ($canonical !== $alias) {
+                $aliases[$alias] = $canonical;
+            }
+        }
+
+        foreach (self::LEGACY_EVENT_ALIAS_MAP[$eventKey] ?? [] as $alias => $canonical) {
+            if ($canonical !== $alias) {
+                $aliases[$alias] = $canonical;
+            }
+        }
+
+        return $aliases;
     }
 
     public function resolveEventKeyForTarget(string $eventKey, string $targetKey): string
