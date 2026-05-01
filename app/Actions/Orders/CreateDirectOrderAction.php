@@ -46,6 +46,10 @@ class CreateDirectOrderAction
             throw new RuntimeException('Produk belum tersedia untuk checkout.');
         }
 
+        if ($this->hasUnpaidOrderForProduct($user, $product)) {
+            throw new RuntimeException('Anda sudah memiliki invoice untuk produk ini yang belum selesai pembayarannya. Silakan selesaikan pembayaran sebelum membuat invoice baru.');
+        }
+
         $type = $product->product_type instanceof ProductType ? $product->product_type->value : (string) $product->product_type;
 
         if ($type === ProductType::Event->value) {
@@ -119,6 +123,17 @@ class CreateDirectOrderAction
     protected function normalizeAmount(float|int|string $amount): string
     {
         return number_format((float) $amount, 2, '.', '');
+    }
+
+    protected function hasUnpaidOrderForProduct(User $user, Product $product): bool
+    {
+        return Order::query()
+            ->where('user_id', $user->id)
+            ->whereIn('status', [OrderStatus::Pending, OrderStatus::Unpaid])
+            ->whereHas('items', function ($query) use ($product) {
+                $query->where('product_id', $product->id);
+            })
+            ->exists();
     }
 
     protected function isUniqueConstraintViolation(QueryException $e): bool
