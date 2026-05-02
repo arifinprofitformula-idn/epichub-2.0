@@ -63,7 +63,7 @@ class CommissionsTable
                     ->requiresConfirmation()
                     ->visible(fn (Commission $record): bool => $record->status === CommissionStatus::Pending)
                     ->action(function (Commission $record): void {
-                        $actor = auth()->user();
+                        $actor = \Illuminate\Support\Facades\Auth::user();
 
                         if (! $actor instanceof User) {
                             throw new \RuntimeException('Unauthorized.');
@@ -84,7 +84,7 @@ class CommissionsTable
                     ])
                     ->visible(fn (Commission $record): bool => in_array($record->status, [CommissionStatus::Pending, CommissionStatus::Approved], true))
                     ->action(function (Commission $record, array $data): void {
-                        $actor = auth()->user();
+                        $actor = \Illuminate\Support\Facades\Auth::user();
 
                         if (! $actor instanceof User) {
                             throw new \RuntimeException('Unauthorized.');

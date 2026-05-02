@@ -128,6 +128,19 @@ class NotificationSettingsPage extends Page
 
                 $this->templates[$eventKey][$targetKey] = $normalizedFields;
 
+                $validation = $service->validateTemplateFields($eventKey, $targetKey, $normalizedFields);
+                $this->validationResults[$eventKey][$targetKey] = $validation;
+
+                if (! empty($validation['invalid'])) {
+                    $hasInvalid = true;
+                    $allWarnings = array_merge($allWarnings, $validation['invalid']);
+                    continue;
+                }
+
+                if (! empty($validation['deprecated'])) {
+                    $hasDeprecated = true;
+                }
+
                 $service->saveTemplate([
                     'event_key'       => $eventKey,
                     'target_key'      => $targetKey,
@@ -137,18 +150,6 @@ class NotificationSettingsPage extends Page
                     'email_body'      => $normalizedFields['email_body'] ?? '',
                     'whatsapp_body'   => $normalizedFields['whatsapp_body'] ?? '',
                 ]);
-
-                $validation = $service->validateTemplateFields($eventKey, $targetKey, $normalizedFields);
-                $this->validationResults[$eventKey][$targetKey] = $validation;
-
-                if (! empty($validation['invalid'])) {
-                    $hasInvalid = true;
-                    $allWarnings = array_merge($allWarnings, $validation['invalid']);
-                }
-
-                if (! empty($validation['deprecated'])) {
-                    $hasDeprecated = true;
-                }
             }
         }
 
@@ -281,7 +282,25 @@ class NotificationSettingsPage extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasAnyRole(['super_admin', 'admin']) ?? false;
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if (method_exists($user, 'hasAnyRole')) {
+            return $user->hasAnyRole(['super_admin', 'admin']);
+        }
+
+        if (method_exists($user, 'hasRole')) {
+            return $user->hasRole('super_admin') || $user->hasRole('admin');
+        }
+
+        if (isset($user->role)) {
+            return in_array($user->role, ['super_admin', 'admin'], true);
+        }
+
+        return false;
     }
 
     public function getHeading(): string
