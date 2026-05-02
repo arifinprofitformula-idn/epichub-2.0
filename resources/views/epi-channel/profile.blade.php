@@ -22,8 +22,12 @@
                 <div class="absolute -right-8 -top-8 size-40 rounded-full bg-white/10 blur-2xl"></div>
                 <div class="absolute -bottom-6 -left-6 size-32 rounded-full bg-white/10 blur-2xl"></div>
                 <div class="relative flex items-center gap-4">
-                    <div class="flex size-14 shrink-0 items-center justify-center rounded-full bg-white/20 text-2xl font-bold uppercase shadow-inner">
-                        {{ mb_substr($user->name ?? $channel->store_name ?? $channel->epic_code, 0, 1) }}
+                    <div class="flex size-14 shrink-0 items-center justify-center rounded-full bg-white/20 text-2xl font-bold uppercase shadow-inner overflow-hidden">
+                        @if ($user->profile_photo_url)
+                            <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="size-full object-cover">
+                        @else
+                            {{ mb_substr($user->name ?? $channel->store_name ?? $channel->epic_code, 0, 1) }}
+                        @endif
                     </div>
                     <div>
                         <div class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100">Nama Pengguna</div>

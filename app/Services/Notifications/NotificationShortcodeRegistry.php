@@ -538,6 +538,17 @@ class NotificationShortcodeRegistry
                 'safe_for_email'   => true,
                 'safe_for_whatsapp'=> true,
             ],
+            'reset_url' => [
+                'key'              => 'reset_url',
+                'shortcode'        => '{reset_url}',
+                'label'            => 'URL Reset Password',
+                'description'      => 'Link untuk mereset kata sandi pengguna.',
+                'example'          => 'https://epichub.id/password/reset/abc123',
+                'events'           => ['password_reset_requested'],
+                'targets'          => ['member'],
+                'safe_for_email'   => true,
+                'safe_for_whatsapp'=> false,
+            ],
 
             // ── Product / Order / Payment ────────────────────────────────────
             'product_name' => [

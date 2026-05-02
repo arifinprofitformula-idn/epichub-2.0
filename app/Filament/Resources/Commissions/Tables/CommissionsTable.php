@@ -56,7 +56,9 @@ class CommissionsTable
             ])
             ->recordActions([
                 Action::make('approve')
-                    ->label('Approve')
+                    ->icon('heroicon-o-check-badge')
+                    ->iconButton()
+                    ->tooltip('Approve')
                     ->color('success')
                     ->requiresConfirmation()
                     ->visible(fn (Commission $record): bool => $record->status === CommissionStatus::Pending)
@@ -70,7 +72,9 @@ class CommissionsTable
                         app(ApproveCommissionAction::class)->execute($record, $actor);
                     }),
                 Action::make('reject')
-                    ->label('Reject')
+                    ->icon('heroicon-o-x-circle')
+                    ->iconButton()
+                    ->tooltip('Reject')
                     ->color('danger')
                     ->form([
                         Textarea::make('reason')
@@ -88,6 +92,7 @@ class CommissionsTable
 
                         app(RejectCommissionAction::class)->execute($record, $actor, (string) ($data['reason'] ?? ''));
                     }),
-            ]);
+            ])
+            ->actionsColumnLabel('Action');
     }
 }
