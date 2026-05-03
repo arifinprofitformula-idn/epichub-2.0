@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadi Kaya dengan Nabung Emas - Ebook Edukasi Emas untuk Pemula</title>
+  <meta name="description" content="Panduan praktis untuk mulai menabung emas secara bertahap, memahami strategi emas fisik/digital, dan menyusun tujuan keuangan jangka panjang.">
+  <meta property="og:title" content="Jadi Kaya dengan Nabung Emas - Ebook Edukasi Emas untuk Pemula">
+  <meta property="og:description" content="Panduan praktis untuk mulai menabung emas secara bertahap, memahami strategi emas fisik/digital, dan menyusun tujuan keuangan jangka panjang.">
+  <meta property="og:type" content="product">
+  <meta property="og:image" content="https://epichub.id/og-jadi-kaya-nabung-emas.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Jadi Kaya dengan Nabung Emas - Ebook Edukasi Emas untuk Pemula">
+  <meta name="twitter:description" content="Panduan praktis untuk mulai menabung emas secara bertahap, memahami strategi emas fisik/digital, dan menyusun tujuan keuangan jangka panjang.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script src="assets/tailwind-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ── CSS Custom Properties ── */
+    :root {
+      --gold:       #C9A227;
+      --gold-light: #F5D485;
+      --gold-dark:  #8B6914;
+      --gold-glow:  rgba(201,162,39,0.35);
+      --bg-base:    #0A0A0A;
+      --bg-alt:     #111111;
+      --bg-card:    #1A1A1A;
+      --bg-card2:   #232323;
+      --text-hi:    #F0F0F0;
+      --text-lo:    #A0A0A0;
+      --text-dim:   #666666;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-hi);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Utility ── */
+    .gold-text {
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    .section-pad  { padding: 72px 0; }
+
+    .gold-divider {
+      width: 56px; height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 2px;
+      margin: 14px auto 0;
+    }
+    .gold-divider-left { margin-left: 0; }
+
+    /* ── CTA Button ── */
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-dark) 100%);
+      color: #0A0A0A;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.2px;
+      padding: 14px 30px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+      box-shadow: 0 4px 22px var(--gold-glow);
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+    }
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(201,162,39,0.55);
+      background: linear-gradient(135deg, #FFE49A 0%, var(--gold-light) 40%, var(--gold) 100%);
+    }
+    .btn-cta-lg { font-size: 1.1rem; padding: 16px 38px; }
+    .btn-cta-full { width: 100%; justify-content: center; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 22px;
+    }
+    .card-gold {
+      background: var(--bg-card);
+      border: 1px solid rgba(201,162,39,0.22);
+      border-radius: 12px;
+      padding: 22px;
+    }
+
+    /* ── Ebook Cover ── */
+    .cover-wrap {
+      perspective: 900px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .cover-book {
+      width: 210px;
+      height: 295px;
+      position: relative;
+      transform: rotateY(-14deg);
+      border-radius: 3px 10px 10px 3px;
+      overflow: hidden;
+      box-shadow:
+        18px 18px 50px rgba(0,0,0,0.65),
+        -3px 0 10px rgba(0,0,0,0.4),
+        inset -2px 0 6px rgba(0,0,0,0.3);
+    }
+    .cover-spine {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 9px;
+      background: linear-gradient(180deg, #1C1500 0%, #3C2A00 50%, #1C1500 100%);
+      z-index: 2;
+    }
+    .cover-face {
+      position: absolute; left: 9px; right: 0; top: 0; bottom: 0;
+      background: linear-gradient(160deg, #1A1400 0%, #2C2000 25%, #4A3800 55%, #7A5A10 78%, #C9A227 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 16px 16px;
+    }
+    .cover-badge {
+      display: inline-block;
+      background: rgba(201,162,39,0.18);
+      border: 1px solid rgba(245,212,133,0.45);
+      color: var(--gold-light);
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+    .cover-mid {
+      text-align: center;
+      font-size: 52px;
+      line-height: 1;
+      filter: drop-shadow(0 0 12px rgba(201,162,39,0.5));
+    }
+    .cover-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--gold-light);
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .cover-author {
+      font-size: 9.5px;
+      color: rgba(245,212,133,0.65);
+      letter-spacing: 0.5px;
+    }
+    .cover-glow {
+      position: absolute;
+      bottom: 0; left: 9px; right: 0; height: 40%;
+      background: linear-gradient(to top, rgba(201,162,39,0.12), transparent);
+      pointer-events: none;
+    }
+
+    /* ── Checkmark ── */
+    .check-circle {
+      width: 22px; height: 22px;
+      background: rgba(201,162,39,0.14);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .check-svg { width: 11px; height: 11px; }
+
+    /* ── Icon Orb ── */
+    .icon-orb {
+      width: 52px; height: 52px;
+      background: rgba(201,162,39,0.1);
+      border: 1px solid rgba(201,162,39,0.22);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.5rem;
+    }
+
+    /* ── FAQ Accordion ── */
+    details {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    details[open] { border-color: rgba(201,162,39,0.28); }
+
+    details summary {
+      padding: 18px 20px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--text-hi);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      gap: 12px;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::after {
+      content: '+';
+      font-size: 1.4rem;
+      color: var(--gold);
+      font-weight: 300;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    details[open] summary::after { content: '−'; }
+
+    .faq-body {
+      padding: 0 20px 18px;
+      color: #999;
+      font-size: 0.875rem;
+      line-height: 1.75;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 14px;
+    }
+
+    /* ── TOC ── */
+    .toc-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 8px 8px 0;
+    }
+    .toc-num {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #0A0A0A;
+      font-size: 10px;
+      font-weight: 800;
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Pillar Card ── */
+    .pillar-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(201,162,39,0.18);
+      border-radius: 16px;
+      padding: 28px 22px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .pillar-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 14px 44px rgba(201,162,39,0.1);
+    }
+
+    /* ── Before/After ── */
+    .col-before {
+      background: rgba(239,68,68,0.05);
+      border: 1px solid rgba(239,68,68,0.18);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .col-after {
+      background: rgba(201,162,39,0.05);
+      border: 1px solid rgba(201,162,39,0.22);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    /* ── Audience Card ── */
+    .audience-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 22px 18px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .audience-card:hover {
+      border-color: rgba(201,162,39,0.25);
+      transform: translateY(-3px);
+    }
+
+    /* ── Highlight Box ── */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(201,162,39,0.07), rgba(139,105,20,0.04));
+      border: 1px solid rgba(201,162,39,0.18);
+      border-radius: 16px;
+      padding: 28px 24px;
+    }
+
+    /* ── Sticky Mobile CTA ── */
+    .sticky-cta-bar {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 200;
+      padding: 12px 16px;
+      background: rgba(10,10,10,0.96);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(201,162,39,0.18);
+    }
+
+    /* ── Offer Box ── */
+    .offer-box {
+      background: var(--bg-card);
+      border: 1px solid rgba(201,162,39,0.22);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 460px;
+      margin: 0 auto;
+    }
+    .offer-price {
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    /* ── Nav ── */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,10,10,0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(201,162,39,0.12);
+      padding: 12px 20px;
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #0A0A0A;
+      font-weight: 800;
+    }
+    .nav-logo-text {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--gold-light);
+    }
+
+    /* ── Grids ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .grid-hero { display: grid; grid-template-columns: 1fr auto; gap: 56px; align-items: center; }
+
+    @media (max-width: 1023px) {
+      .grid-hero { grid-template-columns: 1fr; text-align: center; }
+      .cover-wrap { margin-top: 8px; }
+      .hero-bullets { display: inline-block; text-align: left; }
+      .gold-divider-left { margin-left: auto; }
+    }
+    @media (max-width: 767px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .sticky-cta-bar { display: block; }
+      body { padding-bottom: 74px; }
+      .section-pad { padding: 56px 0; }
+      .offer-box { padding: 24px 18px; }
+    }
+    @media (min-width: 640px) and (max-width: 767px) {
+      .grid-3 { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (min-width: 768px) {
+      .grid-3 { grid-template-columns: repeat(3,1fr); }
+      .hero-author-grid { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     STICKY MOBILE CTA BAR
+     ══════════════════════════════════════════════ -->
+<div class="sticky-cta-bar">
+  <a href="{{checkout_url}}" class="btn-cta btn-cta-full">
+    Dapatkan Ebook Sekarang &rarr;
+  </a>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     NAVIGATION
+     ══════════════════════════════════════════════ -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="{{checkout_url}}" class="nav-logo">
+      <div class="nav-logo-icon">E</div>
+      <span class="nav-logo-text">EPIC Hub 2.0</span>
+    </a>
+    <a href="{{checkout_url}}" class="btn-cta" style="padding:9px 20px;font-size:0.82rem;">
+      Dapatkan Sekarang
+    </a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 1 — HERO
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,162,39,0.13) 0%, transparent 65%), var(--bg-alt); min-height: 88vh; display: flex; align-items: center;">
+  <div class="section-wrap" style="width:100%;">
+    <div class="grid-hero">
+
+      <!-- LEFT: Copy -->
+      <div>
+        <!-- Badge -->
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(201,162,39,0.1);border:1px solid rgba(201,162,39,0.28);border-radius:100px;padding:6px 14px;margin-bottom:22px;">
+          <span style="width:7px;height:7px;background:var(--gold);border-radius:50%;flex-shrink:0;"></span>
+          <span style="color:var(--gold-light);font-size:0.72rem;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;">Ebook Edukasi Emas untuk Pemula</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 style="font-size:clamp(1.9rem,4.5vw,2.8rem);font-weight:800;line-height:1.2;margin-bottom:18px;">
+          <span class="gold-text">Mulai Bangun Aset Emas</span><br>
+          Pertama Anda dengan Cara<br>yang Sederhana dan Terarah
+        </h1>
+
+        <!-- Subheadline -->
+        <p style="color:var(--text-lo);font-size:0.97rem;line-height:1.75;max-width:540px;margin-bottom:28px;">
+          Ebook <strong style="color:var(--gold-light);font-weight:600;">Jadi Kaya dengan Nabung Emas</strong>
+          membantu Anda memahami cara menabung emas secara bertahap, menghindari kesalahan pemula, dan menyusun tujuan keuangan jangka panjang dengan lebih percaya diri.
+        </p>
+
+        <!-- Bullet benefits -->
+        <ul class="hero-bullets" style="list-style:none;margin-bottom:32px;">
+          <li style="display:flex;align-items:center;gap:10px;margin-bottom:11px;">
+            <div class="check-circle">
+              <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span style="font-size:0.88rem;color:#E0E0E0;">Mudah dipahami pemula, tanpa jargon investasi</span>
+          </li>
+          <li style="display:flex;align-items:center;gap:10px;margin-bottom:11px;">
+            <div class="check-circle">
+              <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span style="font-size:0.88rem;color:#E0E0E0;">Bisa mulai dari nominal kecil, tanpa modal besar</span>
+          </li>
+          <li style="display:flex;align-items:center;gap:10px;margin-bottom:11px;">
+            <div class="check-circle">
+              <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span style="font-size:0.88rem;color:#E0E0E0;">Cocok untuk tujuan pendidikan, ibadah, usaha &amp; pensiun</span>
+          </li>
+          <li style="display:flex;align-items:center;gap:10px;">
+            <div class="check-circle">
+              <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span style="font-size:0.88rem;color:#E0E0E0;">Membahas strategi emas fisik dan digital</span>
+          </li>
+        </ul>
+
+        <!-- CTA -->
+        <div style="margin-bottom:12px;">
+          <a href="{{checkout_url}}" class="btn-cta btn-cta-lg">
+            Dapatkan Ebook Sekarang
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l7 7-7 7M2 9h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+        <p style="font-size:0.76rem;color:var(--text-dim);">
+          Akses ebook tersedia melalui akun EPIC Hub setelah checkout dan pembayaran terverifikasi.
+        </p>
+      </div>
+
+      <!-- RIGHT: Ebook Cover -->
+      <div class="cover-wrap">
+        <div class="cover-book">
+          <div class="cover-spine"></div>
+          <div class="cover-face">
+            <div>
+              <div class="cover-badge">Ebook Premium</div>
+            </div>
+            <div class="cover-mid">🪙</div>
+            <div>
+              <div class="cover-title">Jadi Kaya dengan<br>Nabung Emas</div>
+              <div class="cover-author">Bustanul Arifin</div>
+            </div>
+          </div>
+          <div class="cover-glow"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 2 — PROBLEM
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--bg-base);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        Kenapa Banyak Orang Ingin
+        <span class="gold-text">Nabung Emas</span>,<br>Tapi Tidak Pernah Mulai?
+      </h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:36px;">
+
+      <div class="card" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="icon-orb">⚠️</div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:5px;">Takut salah beli emas</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Khawatir tidak bisa membedakan produk resmi dan tidak resmi.</p>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="icon-orb">❓</div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:5px;">Bingung pilih emas fisik atau digital</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Tidak tahu mana yang lebih cocok untuk kondisi finansial saat ini.</p>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="icon-orb">⏳</div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:5px;">Menunggu harga turun, tapi tidak pernah mulai</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Terus menunda sambil menunggu waktu yang dianggap "tepat".</p>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="icon-orb">🎯</div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:5px;">Tidak punya target keuangan yang jelas</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Nabung emas tanpa tujuan membuat semangat cepat hilang.</p>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="icon-orb">💰</div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:5px;">Menganggap perlu modal besar</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Merasa menabung emas hanya bisa dilakukan setelah punya uang banyak.</p>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="icon-orb">🔒</div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:5px;">Khawatir tertipu penyedia tidak resmi</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Maraknya penipuan membuat ragu untuk memulai langkah pertama.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Conclusion box -->
+    <div class="highlight-box" style="text-align:center;">
+      <p style="font-size:0.98rem;color:#E0E0E0;line-height:1.85;">
+        Masalahnya bukan karena Anda tidak mampu.<br>
+        <strong class="gold-text" style="font-size:1.06rem;">Sering kali, yang kurang hanyalah peta jalan yang sederhana.</strong>
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 3 — SOLUTION
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--bg-alt);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        Ebook Ini Menjadi <span class="gold-text">Panduan Awal</span><br>
+        Anda untuk Lebih Melek Emas
+      </h2>
+      <div class="gold-divider"></div>
+      <p style="color:var(--text-lo);margin-top:20px;font-size:0.92rem;line-height:1.75;max-width:580px;margin-left:auto;margin-right:auto;">
+        Tanpa jargon rumit, tanpa teori yang membingungkan. Ebook ini membantu Anda memahami konsep dasar, strategi bertahap, simulasi nyata, dan kesalahan yang perlu dihindari &mdash; semua dalam bahasa yang mudah dicerna.
+      </p>
+    </div>
+
+    <div class="grid-3">
+
+      <div class="pillar-card">
+        <div style="font-size:2.6rem;margin-bottom:14px;">📖</div>
+        <div class="gold-text" style="font-size:1.45rem;font-weight:800;margin-bottom:8px;">Paham</div>
+        <h3 style="font-weight:700;font-size:0.9rem;color:#E0E0E0;margin-bottom:8px;">Memahami Mengapa Emas Relevan</h3>
+        <p style="color:#888;font-size:0.82rem;line-height:1.65;">Pelajari mengapa emas dikenal sebagai penyimpan nilai dan pelindung dari inflasi dalam jangka panjang.</p>
+      </div>
+
+      <div class="pillar-card">
+        <div style="font-size:2.6rem;margin-bottom:14px;">🌱</div>
+        <div class="gold-text" style="font-size:1.45rem;font-weight:800;margin-bottom:8px;">Mulai</div>
+        <h3 style="font-weight:700;font-size:0.9rem;color:#E0E0E0;margin-bottom:8px;">Mengetahui Cara Memulai</h3>
+        <p style="color:#888;font-size:0.82rem;line-height:1.65;">Ketahui langkah konkret untuk mulai menabung emas secara berkala, dari nominal berapa pun yang Anda miliki.</p>
+      </div>
+
+      <div class="pillar-card">
+        <div style="font-size:2.6rem;margin-bottom:14px;">🧭</div>
+        <div class="gold-text" style="font-size:1.45rem;font-weight:800;margin-bottom:8px;">Terarah</div>
+        <h3 style="font-weight:700;font-size:0.9rem;color:#E0E0E0;margin-bottom:8px;">Menyesuaikan dengan Tujuan</h3>
+        <p style="color:#888;font-size:0.82rem;line-height:1.65;">Hubungkan rencana menabung emas dengan tujuan keuangan nyata: pendidikan, ibadah, usaha, atau pensiun.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 4 — BENEFITS
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--bg-base);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        Apa yang Akan Anda <span class="gold-text">Dapatkan</span><br>dari Ebook Ini?
+      </h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div class="grid-2">
+
+      <div class="card-gold" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="check-circle" style="margin-top:3px;">
+          <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:4px;">Memahami peran emas sebagai pelindung nilai</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Kenali mengapa banyak orang menjadikan emas sebagai aset jangka panjang yang relevan.</p>
+        </div>
+      </div>
+
+      <div class="card-gold" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="check-circle" style="margin-top:3px;">
+          <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:4px;">Belajar menabung emas secara berkala</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Tanpa harus menunggu punya modal besar terlebih dahulu.</p>
+        </div>
+      </div>
+
+      <div class="card-gold" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="check-circle" style="margin-top:3px;">
+          <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:4px;">Simulasi sederhana menabung emas</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Lihat gambaran nyata bagaimana tabungan emas Anda bisa tumbuh untuk target tertentu.</p>
+        </div>
+      </div>
+
+      <div class="card-gold" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="check-circle" style="margin-top:3px;">
+          <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:4px;">Perbandingan emas fisik dan digital</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Ketahui kelebihan dan pertimbangan masing-masing agar sesuai kebutuhan Anda.</p>
+        </div>
+      </div>
+
+      <div class="card-gold" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="check-circle" style="margin-top:3px;">
+          <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:4px;">Menghindari kesalahan umum pemula</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Waspadai jebakan yang sering dialami investor emas pemula agar tidak mengulanginya.</p>
+        </div>
+      </div>
+
+      <div class="card-gold" style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="check-circle" style="margin-top:3px;">
+          <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:4px;">Strategi pemanfaatan emas secara produktif</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Pelajari konsep gadai emas, diversifikasi aset, dan rencana keuangan jangka panjang.</p>
+        </div>
+      </div>
+
+      <div class="card-gold" style="display:flex;align-items:flex-start;gap:14px;grid-column:span 2;">
+        <div class="check-circle" style="margin-top:3px;">
+          <svg class="check-svg" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#C9A227" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:4px;">FAQ praktis untuk pemula yang masih ragu</p>
+          <p style="font-size:0.8rem;color:#888;line-height:1.6;">Jawaban langsung atas pertanyaan-pertanyaan yang paling sering muncul sebelum memulai nabung emas.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 5 — TABLE OF CONTENTS
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--bg-alt);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        Isi Ebook yang <span class="gold-text">Akan Anda Pelajari</span>
+      </h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div style="background:var(--bg-card);border:1px solid rgba(201,162,39,0.18);border-radius:18px;overflow:hidden;max-width:700px;margin:0 auto;">
+
+      <!-- Header bar -->
+      <div style="background:linear-gradient(135deg,rgba(201,162,39,0.14),rgba(139,105,20,0.08));padding:20px 24px;border-bottom:1px solid rgba(201,162,39,0.12);">
+        <p style="font-size:0.7rem;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-light);">Daftar Materi</p>
+        <p style="font-size:0.82rem;color:#888;margin-top:3px;">Jadi Kaya dengan Nabung Emas &mdash; Ebook Edukasi</p>
+      </div>
+
+      <div style="padding:18px;display:flex;flex-direction:column;gap:10px;">
+
+        <div class="toc-row">
+          <div class="toc-num">1</div>
+          <div>
+            <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;">Mengapa Emas?</p>
+            <p style="font-size:0.78rem;color:#888;margin-top:3px;">Memahami peran emas sebagai aset bernilai dan pelindung inflasi</p>
+          </div>
+        </div>
+
+        <div class="toc-row">
+          <div class="toc-num">2</div>
+          <div>
+            <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;">Menabung Emas untuk Masa Depan</p>
+            <p style="font-size:0.78rem;color:#888;margin-top:3px;">Cara berkala, simulasi tujuan finansial, dan strategi jangka panjang</p>
+          </div>
+        </div>
+
+        <div class="toc-row">
+          <div class="toc-num">3</div>
+          <div>
+            <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;">Strategi Cerdas Nabung Emas</p>
+            <p style="font-size:0.78rem;color:#888;margin-top:3px;">Emas fisik vs digital, cara memilih, dan menghindari kesalahan pemula</p>
+          </div>
+        </div>
+
+        <div class="toc-row">
+          <div class="toc-num">4</div>
+          <div>
+            <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;">Memanfaatkan Emas untuk Jadi Kaya</p>
+            <p style="font-size:0.78rem;color:#888;margin-top:3px;">Gadai emas, diversifikasi aset, dan strategi keuangan produktif</p>
+          </div>
+        </div>
+
+        <div class="toc-row" style="border-left-color:var(--gold-light);">
+          <div class="toc-num" style="background:linear-gradient(135deg,var(--gold-light),var(--gold));font-size:1rem;">✦</div>
+          <div>
+            <p style="font-weight:700;font-size:0.88rem;color:var(--gold-light);">Penutup: Mulai Nabung Emas Hari Ini</p>
+            <p style="font-size:0.78rem;color:#888;margin-top:3px;">Rangkuman dan langkah awal yang bisa Anda ambil sekarang juga</p>
+          </div>
+        </div>
+
+        <div class="toc-row" style="border-left-color:#555;">
+          <div class="toc-num" style="background:rgba(255,255,255,0.08);color:#E0E0E0;">?</div>
+          <div>
+            <p style="font-weight:700;font-size:0.88rem;color:#E0E0E0;">FAQ: Hal yang Sering Ditanyakan</p>
+            <p style="font-size:0.78rem;color:#888;margin-top:3px;">Jawaban praktis untuk pertanyaan pemula sebelum memulai</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:36px;">
+      <a href="{{checkout_url}}" class="btn-cta btn-cta-lg">
+        Saya Ingin Mulai Belajar Emas &rarr;
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 6 — TRANSFORMATION
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--bg-base);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        <span class="gold-text">Sebelum dan Sesudah</span><br>Membaca Ebook Ini
+      </h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div class="grid-2" style="max-width:880px;margin:0 auto;">
+
+      <!-- Before -->
+      <div class="col-before">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+          <div style="width:38px;height:38px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;">😟</div>
+          <h3 style="font-weight:800;font-size:1rem;color:#FCA5A5;">Sebelum</h3>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;">
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:#F87171;font-size:1rem;flex-shrink:0;line-height:1.5;">✕</span>
+            <span style="font-size:0.85rem;color:#999;line-height:1.6;">Bingung mulai dari mana</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:#F87171;font-size:1rem;flex-shrink:0;line-height:1.5;">✕</span>
+            <span style="font-size:0.85rem;color:#999;line-height:1.6;">Takut salah beli emas</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:#F87171;font-size:1rem;flex-shrink:0;line-height:1.5;">✕</span>
+            <span style="font-size:0.85rem;color:#999;line-height:1.6;">Menganggap emas hanya untuk orang bermodal besar</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:#F87171;font-size:1rem;flex-shrink:0;line-height:1.5;">✕</span>
+            <span style="font-size:0.85rem;color:#999;line-height:1.6;">Tidak punya target menabung yang jelas</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:#F87171;font-size:1rem;flex-shrink:0;line-height:1.5;">✕</span>
+            <span style="font-size:0.85rem;color:#999;line-height:1.6;">Mudah panik melihat harga naik turun</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- After -->
+      <div class="col-after">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+          <div style="width:38px;height:38px;background:rgba(201,162,39,0.12);border:1px solid rgba(201,162,39,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;">😊</div>
+          <h3 style="font-weight:800;font-size:1rem;color:var(--gold-light);">Sesudah</h3>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;">
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:var(--gold);font-size:1rem;flex-shrink:0;line-height:1.5;">✓</span>
+            <span style="font-size:0.85rem;color:#E0E0E0;line-height:1.6;">Punya gambaran langkah awal yang jelas</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:var(--gold);font-size:1rem;flex-shrink:0;line-height:1.5;">✓</span>
+            <span style="font-size:0.85rem;color:#E0E0E0;line-height:1.6;">Lebih paham cara memilih penyedia emas yang terpercaya</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:var(--gold);font-size:1rem;flex-shrink:0;line-height:1.5;">✓</span>
+            <span style="font-size:0.85rem;color:#E0E0E0;line-height:1.6;">Tahu cara mulai dari nominal kecil sekalipun</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:var(--gold);font-size:1rem;flex-shrink:0;line-height:1.5;">✓</span>
+            <span style="font-size:0.85rem;color:#E0E0E0;line-height:1.6;">Bisa menyusun target keuangan dengan emas</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:10px;">
+            <span style="color:var(--gold);font-size:1rem;flex-shrink:0;line-height:1.5;">✓</span>
+            <span style="font-size:0.85rem;color:#E0E0E0;line-height:1.6;">Lebih siap menabung emas untuk jangka panjang</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 7 — AUDIENCE
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--bg-alt);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        Ebook Ini <span class="gold-text">Cocok untuk Siapa</span>?
+      </h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div class="grid-3">
+
+      <div class="audience-card">
+        <div style="font-size:2.1rem;margin-bottom:12px;">🌱</div>
+        <h3 style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:6px;">Pemula yang Baru Ingin Belajar</h3>
+        <p style="font-size:0.8rem;color:#888;line-height:1.6;">Belum pernah beli emas sama sekali dan ingin memulai dari nol.</p>
+      </div>
+
+      <div class="audience-card">
+        <div style="font-size:2.1rem;margin-bottom:12px;">💼</div>
+        <h3 style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:6px;">Karyawan &amp; Profesional</h3>
+        <p style="font-size:0.8rem;color:#888;line-height:1.6;">Ingin punya aset jangka panjang selain tabungan biasa.</p>
+      </div>
+
+      <div class="audience-card">
+        <div style="font-size:2.1rem;margin-bottom:12px;">👨‍👩‍👧</div>
+        <h3 style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:6px;">Orang Tua &amp; Keluarga</h3>
+        <p style="font-size:0.8rem;color:#888;line-height:1.6;">Menyiapkan dana pendidikan anak dan masa depan keluarga.</p>
+      </div>
+
+      <div class="audience-card">
+        <div style="font-size:2.1rem;margin-bottom:12px;">🕌</div>
+        <h3 style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:6px;">Keluarga Muslim</h3>
+        <p style="font-size:0.8rem;color:#888;line-height:1.6;">Menyiapkan dana ibadah seperti umroh dan haji secara terencana.</p>
+      </div>
+
+      <div class="audience-card">
+        <div style="font-size:2.1rem;margin-bottom:12px;">🏪</div>
+        <h3 style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:6px;">Pebisnis Kecil &amp; UMKM</h3>
+        <p style="font-size:0.8rem;color:#888;line-height:1.6;">Memahami emas sebagai aset cadangan dan diversifikasi usaha.</p>
+      </div>
+
+      <div class="audience-card">
+        <div style="font-size:2.1rem;margin-bottom:12px;">🤝</div>
+        <h3 style="font-weight:700;font-size:0.88rem;color:#E0E0E0;margin-bottom:6px;">EPI Channel &amp; Calon Member</h3>
+        <p style="font-size:0.8rem;color:#888;line-height:1.6;">Butuh bekal edukasi yang kuat sebelum menawarkan atau menjelaskan emas kepada orang lain.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 8 — AUTHOR
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--bg-base);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        Ditulis oleh <span class="gold-text">Bustanul Arifin</span>
+      </h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div class="highlight-box" style="max-width:680px;margin:0 auto;">
+      <div class="hero-author-grid">
+        <!-- Avatar -->
+        <div style="text-align:center;">
+          <div style="width:80px;height:80px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.4rem;color:#0A0A0A;border:2px solid rgba(201,162,39,0.35);margin:0 auto;">BA</div>
+        </div>
+        <!-- Bio -->
+        <div>
+          <h3 style="font-weight:800;font-size:1.05rem;color:var(--gold-light);margin-bottom:10px;">Bustanul Arifin</h3>
+          <p style="font-size:0.875rem;color:#A0A0A0;line-height:1.8;">
+            Bustanul Arifin menyusun ebook ini sebagai panduan sederhana bagi masyarakat yang ingin mulai memahami emas sebagai bagian dari perencanaan keuangan. Materinya disajikan dengan bahasa ringan, praktis, dan mudah diterapkan oleh pemula &mdash; tanpa asumsi bahwa pembaca sudah punya latar belakang investasi sebelumnya.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 9 — OFFER
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background: radial-gradient(ellipse 80% 60% at 50% 110%, rgba(201,162,39,0.1) 0%, transparent 65%), var(--bg-alt);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:36px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        Dapatkan Ebook <span class="gold-text">Jadi Kaya dengan Nabung Emas</span> Hari Ini
+      </h2>
+      <div class="gold-divider"></div>
+      <p style="color:var(--text-lo);margin-top:20px;font-size:0.92rem;line-height:1.75;">
+        Anda tidak perlu menunggu punya uang besar untuk mulai belajar.<br>
+        <em style="color:#E0E0E0;font-style:normal;">Langkah kecil yang dilakukan hari ini bisa menjadi awal dari kebiasaan finansial yang lebih kuat.</em>
+      </p>
+    </div>
+
+    <!-- Offer Box -->
+    <div class="offer-box">
+
+      <!-- Product title row -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div style="width:52px;height:52px;background:linear-gradient(135deg,rgba(201,162,39,0.15),rgba(139,105,20,0.1));border:1px solid rgba(201,162,39,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">📘</div>
+        <div>
+          <p style="font-weight:800;font-size:1rem;color:var(--gold-light);">Jadi Kaya dengan Nabung Emas</p>
+          <p style="font-size:0.76rem;color:#888;margin-top:2px;">Ebook Edukasi Digital &bull; Format PDF</p>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div style="margin-bottom:22px;">
+        <div class="offer-price gold-text">{{product_effective_price}}</div>
+        <p style="font-size:0.78rem;color:#666;margin-top:4px;">Harga produk</p>
+      </div>
+
+      <!-- Includes -->
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+        <li style="display:flex;align-items:center;gap:10px;">
+          <span style="color:var(--gold);font-size:0.9rem;flex-shrink:0;">✓</span>
+          <span style="font-size:0.84rem;color:#E0E0E0;">Ebook digital format PDF</span>
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;">
+          <span style="color:var(--gold);font-size:0.9rem;flex-shrink:0;">✓</span>
+          <span style="font-size:0.84rem;color:#E0E0E0;">Materi edukasi menabung emas lengkap</span>
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;">
+          <span style="color:var(--gold);font-size:0.9rem;flex-shrink:0;">✓</span>
+          <span style="font-size:0.84rem;color:#E0E0E0;">Studi kasus dan simulasi tabungan emas</span>
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;">
+          <span style="color:var(--gold);font-size:0.9rem;flex-shrink:0;">✓</span>
+          <span style="font-size:0.84rem;color:#E0E0E0;">FAQ khusus pemula</span>
+        </li>
+        <li style="display:flex;align-items:center;gap:10px;">
+          <span style="color:var(--gold);font-size:0.9rem;flex-shrink:0;">✓</span>
+          <span style="font-size:0.84rem;color:#E0E0E0;">Akses melalui EPIC Hub 2.0 setelah pembayaran</span>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <a href="{{checkout_url}}" class="btn-cta btn-cta-lg btn-cta-full">
+        Dapatkan Ebook Sekarang
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l7 7-7 7M2 9h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+
+      <p style="font-size:0.74rem;color:#555;text-align:center;margin-top:12px;line-height:1.6;">
+        Akses ebook tersedia di menu <strong style="color:#888;">Produk Saya</strong> pada akun EPIC Hub setelah checkout dan pembayaran terverifikasi oleh admin.
+      </p>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 10 — FAQ
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background:var(--bg-base);">
+  <div class="section-wrap">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);font-weight:800;line-height:1.3;">
+        Pertanyaan yang <span class="gold-text">Sering Ditanyakan</span>
+      </h2>
+      <div class="gold-divider"></div>
+    </div>
+
+    <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:10px;">
+
+      <details>
+        <summary>Apakah ebook ini cocok untuk pemula?</summary>
+        <div class="faq-body">
+          Ya. Ebook ini dirancang khusus untuk pemula yang belum pernah membeli emas atau baru ingin mulai belajar. Semua materi disajikan dengan bahasa yang mudah dipahami tanpa asumsi latar belakang investasi sebelumnya.
+        </div>
+      </details>
+
+      <details>
+        <summary>Apakah saya harus punya modal besar untuk mulai?</summary>
+        <div class="faq-body">
+          Tidak. Ebook ini justru membahas cara mulai menabung emas dari nominal kecil sekalipun. Prinsip utamanya adalah konsistensi dan perencanaan, bukan besarnya modal awal.
+        </div>
+      </details>
+
+      <details>
+        <summary>Apakah ebook ini membahas emas fisik dan digital?</summary>
+        <div class="faq-body">
+          Ya. Ebook ini membahas keduanya: emas fisik (batangan, koin) dan emas digital. Anda akan mendapatkan gambaran perbandingan, kelebihan, serta pertimbangan masing-masing agar bisa memilih yang paling sesuai dengan kebutuhan dan kondisi Anda.
+        </div>
+      </details>
+
+      <details>
+        <summary>Apakah ebook ini menjamin keuntungan dari investasi emas?</summary>
+        <div class="faq-body">
+          Tidak. Ebook ini adalah materi edukasi dan tidak menjamin keuntungan. Harga emas bisa naik dan turun dalam jangka pendek. Tujuan ebook ini adalah membantu Anda memahami konsep dasar dan mengurangi kesalahan sebagai pemula &mdash; bukan memberikan janji hasil investasi.
+        </div>
+      </details>
+
+      <details>
+        <summary>Bagaimana cara mendapatkan akses ebook setelah membeli?</summary>
+        <div class="faq-body">
+          Setelah menyelesaikan checkout dan pembayaran terverifikasi oleh admin, akses ebook akan tersedia di akun EPIC Hub Anda pada menu <strong style="color:#E0E0E0;">Produk Saya</strong>. Anda bisa mengunduh atau membaca ebook langsung dari sana.
+        </div>
+      </details>
+
+      <details>
+        <summary>Apakah bisa dibeli melalui link referral EPI Channel?</summary>
+        <div class="faq-body">
+          Ya. Halaman ini menggunakan link checkout referral resmi EPIC Hub 2.0. Jika Anda datang dari link referral EPI Channel tertentu, kode referral tersebut akan terbawa secara otomatis ke proses checkout sehingga tidak hilang.
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 11 — FINAL CTA
+     ══════════════════════════════════════════════ -->
+<section class="section-pad" style="background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(201,162,39,0.12) 0%, transparent 65%), var(--bg-alt);">
+  <div class="section-wrap" style="text-align:center;">
+
+    <div style="font-size:3rem;margin-bottom:18px;filter:drop-shadow(0 0 16px rgba(201,162,39,0.4));">🪙</div>
+    <h2 style="font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800;line-height:1.25;margin-bottom:18px;">
+      Mulai <span class="gold-text">Melek Emas</span> Sekarang,<br>Bukan Nanti
+    </h2>
+    <p style="color:var(--text-lo);font-size:0.95rem;line-height:1.8;margin-bottom:36px;max-width:520px;margin-left:auto;margin-right:auto;">
+      Anda tidak harus langsung membeli emas dalam jumlah besar. Mulailah dengan ilmu yang benar, strategi yang masuk akal, dan langkah kecil yang konsisten.
+    </p>
+
+    <a href="{{checkout_url}}" class="btn-cta btn-cta-lg">
+      Dapatkan Ebook Sekarang
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2l7 7-7 7M2 9h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+
+    <p style="font-size:0.76rem;color:#555;margin-top:14px;">
+      Akses tersedia di akun EPIC Hub setelah pembayaran terverifikasi.
+    </p>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════════ -->
+<footer style="background:#050505;border-top:1px solid rgba(255,255,255,0.05);padding:36px 20px 28px;">
+  <div style="max-width:1100px;margin:0 auto;">
+
+    <!-- Top row -->
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#0A0A0A;">E</div>
+        <span style="font-weight:700;color:var(--gold-light);font-size:0.9rem;">EPIC Hub 2.0</span>
+      </div>
+      <a href="{{checkout_url}}" style="font-size:0.82rem;color:var(--gold);text-decoration:none;font-weight:600;">Dapatkan Ebook &rarr;</a>
+    </div>
+
+    <!-- Disclaimer box -->
+    <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+      <p style="font-size:0.74rem;color:#555;line-height:1.75;text-align:center;">
+        <strong style="color:#777;">Disclaimer:</strong>
+        Ebook ini bersifat edukasi dan bukan nasihat keuangan personal. Keputusan membeli, menjual, menyimpan, atau menggadaikan emas tetap menjadi tanggung jawab masing-masing pembaca. Nilai emas dapat berfluktuasi dan tidak ada jaminan keuntungan dari kepemilikan emas.
+      </p>
+    </div>
+
+    <p style="text-align:center;font-size:0.72rem;color:#333;">&copy; 2025 EPIC Hub 2.0. Semua hak dilindungi.</p>
+  </div>
+</footer>
+
+</body>
+</html>
