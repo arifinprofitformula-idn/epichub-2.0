@@ -141,10 +141,7 @@
                     <div class="grid gap-4">
                         {{-- Name --}}
                         <div>
-                            <label for="name" class="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-zinc-700">
-                                <svg class="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 20 20" fill="currentColor"><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z"/></svg>
-                                Nama Lengkap
-                            </label>
+                            <label for="name" class="sr-only">Nama Lengkap</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
                                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z"/></svg>
@@ -168,10 +165,7 @@
 
                         {{-- Email --}}
                         <div>
-                            <label for="email" class="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-zinc-700">
-                                <svg class="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z"/><path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z"/></svg>
-                                Email
-                            </label>
+                            <label for="email" class="sr-only">Email</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
                                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z"/><path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z"/></svg>
@@ -195,10 +189,7 @@
 
                         {{-- WhatsApp --}}
                         <div>
-                            <label for="whatsapp_number" class="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-zinc-700">
-                                <svg class="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 0 1 3.5 2h1.148a1.5 1.5 0 0 1 1.465 1.175l.716 3.223a1.5 1.5 0 0 1-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 0 0 6.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 0 1 1.767-1.052l3.223.716A1.5 1.5 0 0 1 18 16.352V17.5a1.5 1.5 0 0 1-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 0 1 2.43 8.326 13.019 13.019 0 0 1 2 5V3.5Z" clip-rule="evenodd"/></svg>
-                                WhatsApp
-                            </label>
+                            <label for="whatsapp_number" class="sr-only">WhatsApp</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
                                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 0 1 3.5 2h1.148a1.5 1.5 0 0 1 1.465 1.175l.716 3.223a1.5 1.5 0 0 1-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 0 0 6.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 0 1 1.767-1.052l3.223.716A1.5 1.5 0 0 1 18 16.352V17.5a1.5 1.5 0 0 1-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 0 1 2.43 8.326 13.019 13.019 0 0 1 2 5V3.5Z" clip-rule="evenodd"/></svg>
@@ -214,7 +205,7 @@
                             </div>
                             <div class="mt-1.5 flex items-center gap-1.5 text-[11px] text-zinc-500">
                                 <svg class="h-3 w-3 text-zinc-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd"/></svg>
-                                Format internasional. Contoh: 628123456789
+                                Contoh format penulisan no. Whatsapp: 628123456789
                             </div>
                             @error('whatsapp_number')
                                 <div class="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-rose-600">
@@ -227,10 +218,7 @@
                         {{-- Passwords --}}
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <label for="password" class="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-zinc-700">
-                                    <svg class="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 7a5 5 0 1 1 3.61 4.804l-1.903 1.903A1 1 0 0 1 9 14H8v1a1 1 0 0 1-1 1H6v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2a1 1 0 0 1 .293-.707L7.196 10.39A5.002 5.002 0 0 1 8 7Zm5-3a.75.75 0 0 0 0 1.5A1.5 1.5 0 0 1 14.5 7 .75.75 0 0 0 16 7a3 3 0 0 0-3-3Z" clip-rule="evenodd"/></svg>
-                                    Password Baru
-                                </label>
+                                <label for="password" class="sr-only">Password Baru</label>
                                 <div class="relative">
                                     <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
                                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd"/></svg>
@@ -248,10 +236,7 @@
                                 @enderror
                             </div>
                             <div>
-                                <label for="password_confirmation" class="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-zinc-700">
-                                    <svg class="h-3.5 w-3.5 text-zinc-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd"/></svg>
-                                    Konfirmasi
-                                </label>
+                                <label for="password_confirmation" class="sr-only">Konfirmasi Password</label>
                                 <div class="relative">
                                     <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
                                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd"/></svg>
@@ -276,7 +261,7 @@
                                 <div>
                                     <div class="text-sm font-bold text-sky-900">Sudah punya akun?</div>
                                     <div class="mt-0.5 text-xs text-sky-800">Login terlebih dahulu untuk checkout dengan data yang sudah terdaftar.</div>
-                                    <a href="{{ route('login') }}" class="btn-3d-nav mt-3 inline-flex items-center gap-1.5 rounded-lg border border-sky-200 bg-white px-3 py-1.5 text-xs font-bold text-sky-700">
+                                    <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}" class="btn-3d-nav mt-3 inline-flex items-center gap-1.5 rounded-lg border border-sky-200 bg-white px-3 py-1.5 text-xs font-bold text-sky-700">
                                         <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 0 1 5.25 2h5.5A2.25 2.25 0 0 1 13 4.25v2a.75.75 0 0 1-1.5 0v-2a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 0 0 .75-.75v-2a.75.75 0 0 1 1.5 0v2A2.25 2.25 0 0 1 10.75 18h-5.5A2.25 2.25 0 0 1 3 15.75V4.25Z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M19 10a.75.75 0 0 0-.75-.75H8.704l1.048-.943a.75.75 0 1 0-1.004-1.114l-2.5 2.25a.75.75 0 0 0 0 1.114l2.5 2.25a.75.75 0 1 0 1.004-1.114l-1.048-.943h9.546A.75.75 0 0 0 19 10Z" clip-rule="evenodd"/></svg>
                                         Login ke Akun Saya
                                     </a>
@@ -318,6 +303,25 @@
                 @endauth
             </div>
         </div>
+
+        @guest
+            <div class="overflow-hidden rounded-2xl border border-sky-200/70 bg-sky-50 shadow-[0_4px_20px_rgba(56,189,248,0.12)]">
+                <div class="p-5">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <div class="text-sm font-semibold text-sky-900">Sudah punya akun?</div>
+                            <p class="mt-1 text-sm text-sky-700">Klik disini untuk LOGIN dan lanjutkan pembayaran di halaman checkout.</p>
+                        </div>
+                        <a
+                            href="{{ route('login', ['redirect' => request()->fullUrl()]) }}"
+                            class="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-semibold text-sky-700 shadow-sm transition hover:bg-sky-50"
+                        >
+                            LOGIN
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endguest
 
         {{-- Payment method card --}}
         <div class="overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.06)]">

@@ -53,7 +53,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn (): Response => $this->noStoreView('pages::auth.login'));
+        Fortify::loginView(fn (Request $request): Response => $this->prepareLoginView($request));
         Fortify::verifyEmailView(fn (): Response => $this->noStoreView('pages::auth.verify-email'));
         Fortify::twoFactorChallengeView(fn (): Response => $this->noStoreView('pages::auth.two-factor-challenge'));
         Fortify::confirmPasswordView(fn (): Response => $this->noStoreView('pages::auth.confirm-password'));
@@ -62,6 +62,19 @@ class FortifyServiceProvider extends ServiceProvider
         ]));
         Fortify::resetPasswordView(fn (): Response => $this->noStoreView('pages::auth.reset-password'));
         Fortify::requestPasswordResetLinkView(fn (): Response => $this->noStoreView('pages::auth.forgot-password'));
+    }
+
+    private function prepareLoginView(Request $request): Response
+    {
+        $redirectUrl = $request->query('redirect');
+
+        if (filled($redirectUrl) && (Str::startsWith($redirectUrl, url('/')) || Str::startsWith($redirectUrl, '/'))) {
+            $request->session()->put('url.intended', $redirectUrl);
+        }
+
+        return $this->noStoreView('pages::auth.login', [
+            'redirectUrl' => $redirectUrl,
+        ]);
     }
 
     /**
