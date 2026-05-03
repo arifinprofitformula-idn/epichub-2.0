@@ -33,15 +33,28 @@
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_360px]">
             <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex flex-wrap items-start justify-between gap-4">
-                    <div class="min-w-0">
-                        <div class="text-sm font-medium text-gray-500">Pengguna</div>
-                        <h1 class="mt-2 text-2xl font-semibold text-gray-950">{{ $record->name }}</h1>
-                        <div class="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                            <span>{{ $record->email }}</span>
-                            @if (filled($record->whatsapp_number))
-                                <span>•</span>
-                                <span>{{ $record->whatsapp_number }}</span>
+                    <div class="flex min-w-0 items-center gap-4">
+                        <div class="shrink-0">
+                            @if (filled($record->profile_photo_url))
+                                <img src="{{ $record->profile_photo_url }}"
+                                     alt="{{ $record->name }}"
+                                     class="size-16 rounded-full object-cover ring-2 ring-gray-100">
+                            @else
+                                <div class="flex size-16 items-center justify-center rounded-full bg-gray-100 text-xl font-semibold text-gray-500 ring-2 ring-gray-100">
+                                    {{ $record->initials() }}
+                                </div>
                             @endif
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-sm font-medium text-gray-500">Pengguna</div>
+                            <h1 class="mt-1 text-2xl font-semibold text-gray-950">{{ $record->name }}</h1>
+                            <div class="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                                <span>{{ $record->email }}</span>
+                                @if (filled($record->whatsapp_number))
+                                    <span>•</span>
+                                    <span>{{ $record->whatsapp_number }}</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 

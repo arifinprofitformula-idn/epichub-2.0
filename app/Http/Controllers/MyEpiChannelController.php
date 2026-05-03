@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Affiliates\ResolveReferrerContactAction;
 use App\Enums\CommissionStatus;
 use App\Enums\PayoutStatus;
+use App\Models\AppSetting;
 use App\Models\Commission;
 use App\Models\CommissionPayout;
 use App\Models\EpiChannel;
@@ -355,15 +356,33 @@ class MyEpiChannelController extends Controller
         $user = $request->user();
         $user->loadMissing('epiChannel');
 
-        return view('epi-channel.index', [
-            'channel' => $user->epiChannel,
-            'stats' => null,
-            'recentCommissions' => collect(),
-            'topProductsByClick' => collect(),
-            'featuredProducts' => collect(),
-            'whatsappReminderNeeded' => false,
-            'mainReferralLink' => null,
-            'referrerContact' => $this->resolveReferrerContact->execute($user),
+        $referrerContact = $this->resolveReferrerContact->execute($user);
+
+        $joinMessage = "Assalamu'alaikum, saya tertarik bergabung menjadi EPI Channel. "
+            . 'Mohon dibantu penjelasan paket, manfaat, dan langkah bergabungnya.';
+
+        $ctaWhatsappNumber = $referrerContact['whatsapp_number'];
+
+        if (blank($ctaWhatsappNumber)) {
+            $houseChannel = EpiChannel::query()
+                ->with('user')
+                ->where('epic_code', config('epichub.default_referrer_epic_code', 'EPIC-HOUSE'))
+                ->first();
+            $ctaWhatsappNumber = $houseChannel?->user?->whatsapp_number_for_url;
+        }
+
+        if (blank($ctaWhatsappNumber)) {
+            $ctaWhatsappNumber = AppSetting::get('platform_whatsapp_number', null, 'general');
+        }
+
+        $ctaWhatsappUrl = filled($ctaWhatsappNumber)
+            ? 'https://wa.me/'.$ctaWhatsappNumber.'?text='.rawurlencode($joinMessage)
+            : null;
+
+        return view('epi-channel.landing', [
+            'channel'         => $user->epiChannel,
+            'referrerContact' => $referrerContact,
+            'ctaWhatsappUrl'  => $ctaWhatsappUrl,
         ]);
     }
 
