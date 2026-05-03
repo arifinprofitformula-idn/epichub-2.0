@@ -128,7 +128,18 @@ class ProductForm
                                         ->directory('products/thumbnails')
                                         ->image()
                                         ->imageEditor()
-                                        ->nullable(),
+                                        ->nullable()
+                                        ->getUploadedFileUrlUsing(function (?string $state): ?string {
+                                            if (! filled($state)) {
+                                                return null;
+                                            }
+
+                                            if (Str::startsWith($state, ['http://', 'https://'])) {
+                                                return $state;
+                                            }
+
+                                            return asset('storage/'.$state);
+                                        }),
 
                                     TextInput::make('sort_order')
                                         ->label('Urutan Tampil')
