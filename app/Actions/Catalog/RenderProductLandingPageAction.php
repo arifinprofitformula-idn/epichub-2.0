@@ -55,8 +55,22 @@ class RenderProductLandingPageAction
                 '',
                 320,
             ),
+            'metaImage' => $this->resolveMetaImage($product),
             'shortcodes' => $shortcodes,
         ];
+    }
+
+    protected function resolveMetaImage(Product $product): string
+    {
+        if (! filled($product->thumbnail)) {
+            return '';
+        }
+
+        if (Str::startsWith($product->thumbnail, ['http://', 'https://'])) {
+            return $product->thumbnail;
+        }
+
+        return asset('storage/'.$product->thumbnail);
     }
 
     /**
