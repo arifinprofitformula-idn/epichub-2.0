@@ -129,7 +129,7 @@ class ProductForm
                                         ->image()
                                         ->imageEditor()
                                         ->nullable()
-                                        ->getUploadedFileUsing(function (BaseFileUpload $component, string $file, string | array | null $storedFileNames): ?array {
+                                        ->getUploadedFileUsing(function (FileUpload $component, string $file, string | array | null $storedFileNames): ?array {
                                             if (! filled($file)) {
                                                 return null;
                                             }
