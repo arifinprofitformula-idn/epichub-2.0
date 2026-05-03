@@ -291,7 +291,7 @@ test('links page menampilkan landing page affiliate link jika landing page enabl
     $this->actingAs($user)
         ->get(route('epi-channel.links'))
         ->assertOk()
-        ->assertSee(route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]), false);
+        ->assertSee(route('offer.show', $product->slug).'?ref='.$channel->epic_code, false);
 });
 
 test('links page mengganti tombol beli sekarang menjadi akses produk jika user sudah punya akses', function () {

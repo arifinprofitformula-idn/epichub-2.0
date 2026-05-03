@@ -174,7 +174,7 @@ test('affiliate shortcode is rendered on affiliate landing page', function () {
     $zipPath = createLandingZip('product-landings/zips/test-affiliate.zip', sampleLandingEntries());
     extractLandingZip($product, $zipPath);
 
-    $this->get(route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]))
+    $this->get(route('offer.show', $product->slug).'?ref='.$channel->epic_code)
         ->assertOk()
         ->assertSee('Affiliate ZIP')
         ->assertSee('ZIP-AFF')
@@ -195,7 +195,7 @@ test('affiliate checkout url contains ref epic code', function () {
     $zipPath = createLandingZip('product-landings/zips/test-checkout.zip', sampleLandingEntries());
     extractLandingZip($product, $zipPath);
 
-    $this->get(route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]))
+    $this->get(route('offer.show', $product->slug).'?ref='.$channel->epic_code)
         ->assertOk()
         ->assertSee(route('checkout.show', $product->slug).'?ref=ZIP-CHECKOUT', false);
 });
@@ -214,7 +214,7 @@ test('affiliate landing valid tracks referral visit and sets cookie', function (
     $zipPath = createLandingZip('product-landings/zips/test-track.zip', sampleLandingEntries());
     extractLandingZip($product, $zipPath);
 
-    $response = $this->get(route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]));
+    $response = $this->get(route('offer.show', $product->slug).'?ref='.$channel->epic_code);
 
     $response->assertOk()
         ->assertCookie('epic_ref')
@@ -233,7 +233,7 @@ test('invalid affiliate code returns 404', function () {
     $zipPath = createLandingZip('product-landings/zips/test-invalid-aff.zip', sampleLandingEntries());
     extractLandingZip($product, $zipPath);
 
-    $this->get(route('offer.affiliate', ['product' => $product->slug, 'epicCode' => 'INVALID-ZIP']))
+    $this->get(route('offer.show', $product->slug).'?ref=INVALID-ZIP')
         ->assertNotFound();
 });
 

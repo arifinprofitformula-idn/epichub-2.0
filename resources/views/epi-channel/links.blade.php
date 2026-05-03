@@ -82,7 +82,7 @@
             <div class="mt-6 grid gap-5 xl:grid-cols-2">
                 @foreach ($products as $product)
                     @php($productLink = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code)
-                    @php($landingLink = $product->landing_page_enabled ? route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code]) : null)
+                    @php($landingLink = $product->landing_page_enabled ? route('offer.show', $product->slug).'?ref='.$channel->epic_code : null)
                     @php($checkoutLink = route('checkout.show', $product->slug).'?ref='.$channel->epic_code)
                     @php($ownedUserProduct = $ownedUserProducts->get($product->id))
                     @php($productPalette = $colorSets[$loop->index % count($colorSets)])
@@ -157,7 +157,7 @@
                                                     <path d="M12 16.25V19.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                                                 </svg>
                                             </div>
-                                            <span class="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Landing Page</span>
+                                            <span class="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Landing Page / Sales Page</span>
                                         </div>
                                         @include('epi-channel.partials.copy-field', [
                                             'label' => '',

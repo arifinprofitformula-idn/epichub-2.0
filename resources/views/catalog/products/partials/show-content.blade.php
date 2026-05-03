@@ -143,7 +143,7 @@
                         && $product->is_affiliate_enabled
                         && $viewerChannel?->isActive()
                     )
-                        <x-ui.button variant="secondary" size="md" :href="route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $viewerChannel->epic_code])">
+                        <x-ui.button variant="secondary" size="md" :href="route('offer.show', $product->slug).'?ref='.$viewerChannel->epic_code">
                             Link Landing Page Affiliate
                         </x-ui.button>
                     @endif

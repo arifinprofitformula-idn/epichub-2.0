@@ -28,7 +28,7 @@
                     @php
                         $productLink  = route('catalog.products.show', $product->slug).'?ref='.$channel->epic_code;
                         $landingLink  = $product->landing_page_enabled
-                            ? route('offer.affiliate', ['product' => $product->slug, 'epicCode' => $channel->epic_code])
+                            ? route('offer.show', $product->slug).'?ref='.$channel->epic_code
                             : null;
                         $effectivePrice    = (float) $product->effective_price;
                         $commissionValue   = (float) $product->affiliate_commission_value;

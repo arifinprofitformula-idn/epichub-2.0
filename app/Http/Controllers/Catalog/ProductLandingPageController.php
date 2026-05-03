@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EpiChannel;
 use App\Models\Product;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -20,9 +21,14 @@ class ProductLandingPageController extends Controller
     ) {
     }
 
-    public function show(Product $product): View
+    public function show(Request $request, Product $product): Response|View
     {
         $product = $this->resolveProduct($product);
+        $affiliateCode = $request->query('ref');
+
+        if (filled($affiliateCode)) {
+            return $this->renderAffiliateLandingPage($request, $product, (string) $affiliateCode);
+        }
 
         return view('catalog.products.landing', [
             'product' => $product,
@@ -31,10 +37,13 @@ class ProductLandingPageController extends Controller
         ]);
     }
 
-    public function showAffiliate(Request $request, Product $product, string $epicCode): Response
+    public function showAffiliate(Request $request, Product $product, string $epicCode): RedirectResponse
     {
-        $product = $this->resolveProduct($product);
+        return redirect()->to(route('offer.show', ['product' => $product->slug]).'?ref='.urlencode($epicCode), 301);
+    }
 
+    protected function renderAffiliateLandingPage(Request $request, Product $product, string $epicCode): Response
+    {
         $channel = EpiChannel::query()
             ->with('user')
             ->where('epic_code', $epicCode)
@@ -49,10 +58,9 @@ class ProductLandingPageController extends Controller
             request: $request,
             channel: $channel,
             product: $product,
-            landingUrl: route('offer.affiliate', [
+            landingUrl: route('offer.show', [
                 'product' => $product->slug,
-                'epicCode' => $channel->epic_code,
-            ], false),
+            ], false).'?ref='.urlencode($channel->epic_code),
         );
 
         $request->session()->put('epic_ref', $tracked['ref']);
