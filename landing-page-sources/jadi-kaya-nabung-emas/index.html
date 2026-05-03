@@ -361,21 +361,41 @@
     .nav-logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       text-decoration: none;
     }
-    .nav-logo-icon {
-      width: 30px; height: 30px;
-      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; color: #0A0A0A;
-      font-weight: 800;
+    .nav-logo-img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      padding: 6px;
+      display: block;
+      flex-shrink: 0;
     }
-    .nav-logo-text {
-      font-weight: 700;
-      font-size: 0.875rem;
+    .nav-logo-text-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1.1;
+    }
+    .nav-logo-title {
+      font-weight: 800;
+      font-size: 0.95rem;
       color: var(--gold-light);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      display: block;
+    }
+    .nav-logo-subtitle {
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: #E0E0E0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-top: 2px;
     }
 
     /* ── Grids ── */
@@ -392,7 +412,6 @@
     @media (max-width: 767px) {
       .grid-2 { grid-template-columns: 1fr; }
       .grid-3 { grid-template-columns: 1fr; }
-      .sticky-cta-bar { display: block; }
       body { padding-bottom: 74px; }
       .section-pad { padding: 56px 0; }
       .offer-box { padding: 24px 18px; }
@@ -411,11 +430,6 @@
 <!-- ══════════════════════════════════════════════
      STICKY MOBILE CTA BAR
      ══════════════════════════════════════════════ -->
-<div class="sticky-cta-bar">
-  <a href="{{checkout_url}}" class="btn-cta btn-cta-full">
-    Dapatkan Ebook Sekarang &rarr;
-  </a>
-</div>
 
 <!-- ══════════════════════════════════════════════
      NAVIGATION
@@ -423,8 +437,11 @@
 <nav class="site-nav">
   <div class="nav-inner">
     <a href="{{checkout_url}}" class="nav-logo">
-      <div class="nav-logo-icon">E</div>
-      <span class="nav-logo-text">EPIC Hub 2.0</span>
+      <img src="/icons/icon-192.png" alt="EPIC HUB logo" class="nav-logo-img" />
+      <div class="nav-logo-text-wrapper">
+        <span class="nav-logo-title">EPIC HUB</span>
+        <span class="nav-logo-subtitle">Connect Grow Impact</span>
+      </div>
     </a>
     <a href="{{checkout_url}}" class="btn-cta" style="padding:9px 20px;font-size:0.82rem;">
       Dapatkan Sekarang
