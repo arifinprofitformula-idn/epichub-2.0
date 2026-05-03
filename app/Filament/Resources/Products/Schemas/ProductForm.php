@@ -129,7 +129,7 @@ class ProductForm
                                         ->image()
                                         ->imageEditor()
                                         ->nullable()
-                                        ->getUploadedFileUrlUsing(function (?string $state): ?string {
+                                        ->getOpenableFileUrlUsing(function (?string $state): ?string {
                                             if (! filled($state)) {
                                                 return null;
                                             }
