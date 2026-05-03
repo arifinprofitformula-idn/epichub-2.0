@@ -50,8 +50,13 @@ class ProductLandingPageController extends Controller
             ->active()
             ->firstOrFail();
 
+        // Channel owner mempreview landing page miliknya sendiri — tampilkan tanpa tracking referral
         if ($request->user()?->epiChannel && $request->user()->epiChannel->epic_code === $channel->epic_code) {
-            abort(404);
+            return response()->view('catalog.products.landing', [
+                'product' => $product,
+                'channel' => $channel,
+                'rendered' => $this->renderLandingPage->execute($product, $channel),
+            ]);
         }
 
         $tracked = $this->trackReferralVisit->execute(
@@ -83,7 +88,6 @@ class ProductLandingPageController extends Controller
         $product = Product::query()
             ->whereKey($product->getKey())
             ->published()
-            ->visiblePublic()
             ->where('landing_page_enabled', true)
             ->firstOrFail();
 
