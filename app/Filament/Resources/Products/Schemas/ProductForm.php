@@ -129,6 +129,41 @@ class ProductForm
                                         ->image()
                                         ->imageEditor()
                                         ->nullable()
+                                        ->getUploadedFileUsing(function (BaseFileUpload $component, string $file, string | array | null $storedFileNames): ?array {
+                                            if (! filled($file)) {
+                                                return null;
+                                            }
+
+                                            $normalizedFile = ltrim($file, '/');
+                                            if (Str::startsWith($normalizedFile, 'storage/')) {
+                                                $normalizedFile = ltrim(Str::after($normalizedFile, 'storage/'), '/');
+                                            }
+                                            if (Str::startsWith($normalizedFile, 'public/')) {
+                                                $normalizedFile = ltrim(Str::after($normalizedFile, 'public/'), '/');
+                                            }
+
+                                            $storage = $component->getDisk();
+                                            $shouldFetchFileInformation = $component->shouldFetchFileInformation();
+
+                                            if ($shouldFetchFileInformation) {
+                                                try {
+                                                    if (! $storage->exists($normalizedFile)) {
+                                                        return null;
+                                                    }
+                                                } catch (\Throwable $exception) {
+                                                    return null;
+                                                }
+                                            }
+
+                                            $url = $storage->url($normalizedFile);
+
+                                            return [
+                                                'name' => ($component->isMultiple() ? ($storedFileNames[$file] ?? null) : $storedFileNames) ?? basename($normalizedFile),
+                                                'size' => $shouldFetchFileInformation ? $storage->size($normalizedFile) : 0,
+                                                'type' => $shouldFetchFileInformation ? $storage->mimeType($normalizedFile) : null,
+                                                'url' => $url,
+                                            ];
+                                        })
                                         ->getOpenableFileUrlUsing(function (?string $state): ?string {
                                             if (! filled($state)) {
                                                 return null;
@@ -138,7 +173,15 @@ class ProductForm
                                                 return $state;
                                             }
 
-                                            return asset('storage/'.$state);
+                                            $normalized = ltrim($state, '/');
+                                            if (Str::startsWith($normalized, 'storage/')) {
+                                                $normalized = ltrim(Str::after($normalized, 'storage/'), '/');
+                                            }
+                                            if (Str::startsWith($normalized, 'public/')) {
+                                                $normalized = ltrim(Str::after($normalized, 'public/'), '/');
+                                            }
+
+                                            return asset('storage/'.$normalized);
                                         }),
 
                                     TextInput::make('sort_order')

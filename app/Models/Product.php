@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'product_category_id',
@@ -85,6 +86,29 @@ class Product extends Model
     public function event(): HasOne
     {
         return $this->hasOne(Event::class);
+    }
+
+    public function getThumbnailUrl(): ?string
+    {
+        if (! filled($this->thumbnail)) {
+            return null;
+        }
+
+        if (Str::startsWith($this->thumbnail, ['http://', 'https://'])) {
+            return $this->thumbnail;
+        }
+
+        $normalized = ltrim($this->thumbnail, '/');
+
+        if (Str::startsWith($normalized, 'storage/')) {
+            $normalized = ltrim(Str::after($normalized, 'storage/'), '/');
+        }
+
+        if (Str::startsWith($normalized, 'public/')) {
+            $normalized = ltrim(Str::after($normalized, 'public/'), '/');
+        }
+
+        return asset('storage/'.$normalized);
     }
 
     /**

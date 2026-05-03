@@ -16,12 +16,14 @@
         <meta property="og:url" content="{{ url()->current() }}" />
         @if (filled($rendered['metaImage']))
             <meta property="og:image" content="{{ $rendered['metaImage'] }}" />
+            <meta property="og:image:secure_url" content="{{ $rendered['metaImage'] }}" />
             <meta property="twitter:card" content="summary_large_image" />
             <meta property="twitter:title" content="{{ $rendered['metaTitle'] }}" />
             @if (filled($rendered['metaDescription']))
                 <meta property="twitter:description" content="{{ $rendered['metaDescription'] }}" />
             @endif
             <meta property="twitter:image" content="{{ $rendered['metaImage'] }}" />
+            <meta property="twitter:image:src" content="{{ $rendered['metaImage'] }}" />
             <link rel="image_src" href="{{ $rendered['metaImage'] }}" />
         @else
             <meta property="twitter:card" content="summary" />
