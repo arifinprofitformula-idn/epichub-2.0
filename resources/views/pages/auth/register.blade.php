@@ -1,6 +1,6 @@
 <x-layouts::auth :title="__('Register')">
     <div
-        class="flex flex-col gap-6"
+        class="flex flex-col gap-4 sm:gap-6"
         x-data="{
             password: @js(old('password', '')),
             passwordConfirmation: @js(old('password_confirmation', '')),
@@ -75,7 +75,7 @@
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('register.store') }}" class="mx-auto flex w-full flex-col gap-6">
+        <form method="POST" action="{{ route('register.store') }}" class="mx-auto flex w-full flex-col gap-3.5 sm:gap-6">
             @csrf
             <!-- Name -->
             <flux:input
@@ -112,12 +112,12 @@
                 viewable
             />
 
-            <div x-cloak x-show="showPasswordGuidance()" x-transition class="-mt-2 rounded-[1.35rem] border border-slate-200/80 bg-white/75 p-4 shadow-[0_12px_26px_rgba(15,23,42,0.05)]">
+            <div x-cloak x-show="showPasswordGuidance()" x-transition class="-mt-1 rounded-[1.1rem] border border-slate-200/80 bg-white/75 p-3 shadow-[0_12px_26px_rgba(15,23,42,0.05)] sm:-mt-2 sm:rounded-[1.35rem] sm:p-4">
                 <div class="flex items-center justify-between gap-3">
                     <div>
-                        <div class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Kekuatan Password</div>
+                        <div class="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-slate-400 sm:text-[0.68rem]">Kekuatan Password</div>
                         <div
-                            class="mt-1 text-sm font-semibold"
+                            class="mt-0.5 text-xs font-semibold sm:mt-1 sm:text-sm"
                             :class="{
                                 'text-rose-600': strengthTone() === 'weak',
                                 'text-amber-600': strengthTone() === 'medium',
@@ -128,7 +128,7 @@
                     </div>
 
                     <div
-                        class="rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em]"
+                        class="rounded-full px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.14em] sm:px-3 sm:py-1 sm:text-[0.68rem]"
                         :class="{
                             'bg-rose-50 text-rose-600': strengthTone() === 'weak',
                             'bg-amber-50 text-amber-600': strengthTone() === 'medium',
@@ -138,7 +138,7 @@
                     ></div>
                 </div>
 
-                <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100">
+                <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 sm:mt-4 sm:h-2.5">
                     <div
                         class="h-full rounded-full transition-all duration-300"
                         :class="{
@@ -150,7 +150,7 @@
                     ></div>
                 </div>
 
-                <div class="mt-4 grid gap-2">
+                <div class="mt-2 grid gap-1.5 sm:mt-4 sm:gap-2">
                     <div class="epi-password-rule" :data-met="hasMinLength()">
                         <span class="epi-password-rule-icon" :data-met="hasMinLength()">
                             <span x-show="!hasMinLength()">!</span>
@@ -199,16 +199,16 @@
                 viewable
             />
 
-            <div x-cloak x-show="confirmationFilled()" x-transition class="-mt-2">
+            <div x-cloak x-show="confirmationFilled()" x-transition class="-mt-1 sm:-mt-2">
                 <div
-                    class="flex items-center gap-3 rounded-[1.1rem] border px-3.5 py-3 text-sm font-medium transition-all duration-200"
+                    class="flex items-center gap-2 rounded-[1rem] border px-3 py-2 text-xs font-medium transition-all duration-200 sm:gap-3 sm:rounded-[1.1rem] sm:px-3.5 sm:py-3 sm:text-sm"
                     :class="{
                         'border-rose-200 bg-rose-50 text-rose-700 animate-pulse': passwordsMismatch(),
                         'border-emerald-200 bg-emerald-50 text-emerald-700': passwordsMatch(),
                     }"
                 >
                     <span
-                        class="flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                        class="flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:size-7 sm:text-sm"
                         :class="{
                             'bg-rose-100 text-rose-600': passwordsMismatch(),
                             'bg-emerald-100 text-emerald-600': passwordsMatch(),
@@ -238,7 +238,7 @@
             />
         </form>
 
-        <div class="mx-auto w-full border-t border-slate-200 pt-7 text-center text-sm text-slate-500">
+        <div class="mx-auto w-full border-t border-slate-200 pt-4 text-center text-sm text-slate-500 sm:pt-7">
             <span class="uppercase tracking-wide">Sudah punya akun?</span>
             <flux:link class="epi-auth-link ml-1 font-semibold uppercase tracking-wide" :href="route('login')">Masuk</flux:link>
         </div>

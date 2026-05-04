@@ -1,11 +1,11 @@
 <x-layouts::auth :title="__('Log in')">
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-4 sm:gap-6">
         <x-auth-header :title="'Selamat Datang'" :description="'Masuk untuk mengakses Akun Anda.'" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('login.store') }}" class="mx-auto flex w-full flex-col gap-6">
+        <form method="POST" action="{{ route('login.store') }}" class="mx-auto flex w-full flex-col gap-3.5 sm:gap-6">
             @csrf
 
             <!-- Email Address -->
@@ -53,7 +53,7 @@
         </form>
 
         @if (Route::has('register'))
-            <div class="mx-auto w-full border-t border-slate-200 pt-7 text-center text-sm text-slate-500">
+            <div class="mx-auto w-full border-t border-slate-200 pt-4 text-center text-sm text-slate-500 sm:pt-7">
                 <span class="uppercase tracking-wide">Belum punya akun?</span>
                 <flux:link class="epi-auth-link ml-1 font-semibold uppercase tracking-wide" :href="route('register')">Daftar Akun Baru</flux:link>
             </div>

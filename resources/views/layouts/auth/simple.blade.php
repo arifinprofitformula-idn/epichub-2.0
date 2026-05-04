@@ -252,8 +252,48 @@
             @media (max-width: 768px) {
                 .epi-auth-shell {
                     --auth-field-width: 100%;
-                    --card-pad-x: 1.5rem;
-                    --card-pad-y: 2rem;
+                    --card-pad-x: 1.25rem;
+                    --card-pad-y: 1.1rem;
+                }
+
+                .epi-auth-card {
+                    border-radius: 1.75rem;
+                    gap: 1rem;
+                }
+
+                .epi-auth-inner :is(input, select, textarea) {
+                    font-size: 0.875rem !important;
+                }
+
+                .epi-auth-inner label {
+                    font-size: 0.76rem;
+                }
+
+                .epi-auth-btn {
+                    padding-top: 0.6rem !important;
+                    padding-bottom: 0.6rem !important;
+                    font-size: 0.875rem !important;
+                }
+
+                .epi-auth-tabs {
+                    padding: 3px;
+                }
+
+                .epi-auth-tab {
+                    padding: 5px 14px;
+                    font-size: 0.62rem;
+                }
+
+                .epi-password-rule {
+                    padding: 0.45rem 0.75rem;
+                    font-size: 0.78rem;
+                    gap: 0.5rem;
+                }
+
+                .epi-password-rule-icon {
+                    height: 1.35rem;
+                    width: 1.35rem;
+                    font-size: 0.72rem;
                 }
             }
 
@@ -265,13 +305,13 @@
         </style>
     </head>
     <body class="min-h-screen antialiased epi-auth-shell epi-style-{{ $authStyle }}">
-        <div class="flex min-h-svh flex-col items-center justify-center gap-4 p-5 md:p-10">
-            <div class="epi-auth-wrap flex flex-col gap-4">
+        <div class="flex min-h-svh flex-col items-center justify-center gap-2 p-3 sm:gap-4 sm:p-5 md:p-10">
+            <div class="epi-auth-wrap flex flex-col gap-2 sm:gap-4">
                 <div class="epi-auth-tabs">
                     <a href="{{ request()->fullUrlWithQuery(['auth_style' => 'corporate']) }}" class="epi-auth-tab {{ $authStyle === 'corporate' ? 'active' : '' }}">Corporate</a>
                     <a href="{{ request()->fullUrlWithQuery(['auth_style' => 'marketing']) }}" class="epi-auth-tab {{ $authStyle === 'marketing' ? 'active' : '' }}">Marketing</a>
                 </div>
-                <div class="epi-auth-card flex flex-col gap-6">
+                <div class="epi-auth-card flex flex-col gap-4 sm:gap-6">
                     <div class="epi-auth-inner">
                         {{ $slot }}
                     </div>
