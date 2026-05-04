@@ -70,7 +70,7 @@
             },
         }"
     >
-        <x-auth-header :title="'Buat Akun Baru'" :description="'Daftar untuk mulai mengakses program belajar Anda.'" />
+        <x-auth-header :title="'Registrasi Akun'" :description="'Bergabung Gratis & Mulai Belajar di EPIC Hub'" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -80,7 +80,6 @@
             <!-- Name -->
             <flux:input
                 name="name"
-                :label="'Nama Lengkap'"
                 :value="old('name')"
                 type="text"
                 required
@@ -92,7 +91,6 @@
             <!-- Email Address -->
             <flux:input
                 name="email"
-                :label="'Alamat Email'"
                 :value="old('email')"
                 type="email"
                 required
@@ -103,7 +101,6 @@
             <!-- Password -->
             <flux:input
                 name="password"
-                :label="'Password'"
                 type="password"
                 required
                 autocomplete="new-password"
@@ -188,7 +185,6 @@
             <!-- Confirm Password -->
             <flux:input
                 name="password_confirmation"
-                :label="'Konfirmasi Password'"
                 type="password"
                 required
                 autocomplete="new-password"
@@ -234,7 +230,7 @@
                 :source="data_get($referralInfo ?? [], 'source', 'default_system')"
                 :locked="(bool) data_get($referralInfo ?? [], 'is_locked', false)"
                 context="register"
-                class="-mt-2"
+                style="margin-top:10px"
             />
         </form>
 

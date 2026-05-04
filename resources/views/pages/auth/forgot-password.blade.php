@@ -11,7 +11,6 @@
             <!-- Email Address -->
             <flux:input
                 name="email"
-                :label="'Alamat Email'"
                 type="email"
                 required
                 autofocus
@@ -20,7 +19,7 @@
 
             <div class="flex items-center justify-center">
                 <flux:button variant="primary" type="submit" class="epi-auth-btn w-full" data-test="email-password-reset-link-button">
-                    Kirim Link Reset
+                    <span style="text-transform:uppercase;letter-spacing:.06em;">Kirim Link Reset
                 </flux:button>
             </div>
         </form>

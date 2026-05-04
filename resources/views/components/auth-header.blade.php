@@ -8,7 +8,7 @@
         <img
             src="{{ asset('epic-hub-auth-logo.png') }}"
             alt="EPIC HUB"
-            class="h-14 w-14 object-contain sm:h-[100px] sm:w-[100px]"
+            class="h-[100px] w-[100px] object-contain"
         />
     </a>
     <flux:heading size="xl" class="epi-auth-title text-[1.45rem] font-extrabold leading-tight sm:text-[2rem] md:text-[2.35rem]">{{ $title }}</flux:heading>

@@ -11,7 +11,6 @@
             <!-- Email Address -->
             <flux:input
                 name="email"
-                :label="'Alamat Email'"
                 :value="old('email')"
                 type="email"
                 required
@@ -21,10 +20,9 @@
             />
 
             <!-- Password -->
-            <div class="relative">
+            <div class="flex flex-col gap-1.5">
                 <flux:input
                     name="password"
-                    :label="'Password'"
                     type="password"
                     required
                     autocomplete="current-password"
@@ -33,9 +31,11 @@
                 />
 
                 @if (Route::has('password.request'))
-                    <flux:link class="epi-auth-link absolute top-0 text-xs font-bold tracking-widest uppercase end-0" :href="route('password.request')">
-                        Lupa Password?
-                    </flux:link>
+                    <div class="flex justify-end">
+                        <flux:link class="epi-auth-link text-xs font-bold tracking-widest uppercase" :href="route('password.request')">
+                            Lupa Password?
+                        </flux:link>
+                    </div>
                 @endif
             </div>
 
