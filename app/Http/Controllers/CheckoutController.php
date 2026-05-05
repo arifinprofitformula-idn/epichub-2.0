@@ -15,6 +15,7 @@ use App\Services\Mailketing\MailketingSubscriberService;
 use App\Services\Notifications\EmailNotificationService;
 use App\Services\Notifications\NotificationDispatcher;
 use App\Services\Notifications\NotificationPayloadBuilder;
+use App\Services\Products\ProductEligibilityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,7 @@ class CheckoutController extends Controller
         Product $product,
         CheckEventCheckoutEligibilityAction $checkEventCheckoutEligibility,
         ResolveCurrentReferralAction $resolveCurrentReferral,
+        ProductEligibilityService $eligibility,
     ): View
     {
         $product = Product::query()
@@ -38,6 +40,20 @@ class CheckoutController extends Controller
             ->published()
             ->visiblePublic()
             ->firstOrFail();
+
+        $user = $request->user();
+
+        // Audience purchase check
+        if (! $eligibility->canPurchase($user, $product)) {
+            $message = $eligibility->getIneligibleReason($user, $product, 'purchase');
+
+            return view($user ? 'checkout.show-app' : 'checkout.show-public', [
+                'product'            => $product,
+                'isEligible'         => false,
+                'eligibilityMessage' => $message,
+                'referralInfo'       => $resolveCurrentReferral->execute($request),
+            ]);
+        }
 
         $unitPrice = (float) $product->effective_price;
         $isEligible = $unitPrice > 0;
@@ -54,11 +70,11 @@ class CheckoutController extends Controller
             }
         }
 
-        return view($request->user() ? 'checkout.show-app' : 'checkout.show-public', [
-            'product' => $product,
-            'isEligible' => $isEligible,
+        return view($user ? 'checkout.show-app' : 'checkout.show-public', [
+            'product'            => $product,
+            'isEligible'         => $isEligible,
             'eligibilityMessage' => $eligibilityMessage,
-            'referralInfo' => $resolveCurrentReferral->execute($request),
+            'referralInfo'       => $resolveCurrentReferral->execute($request),
         ]);
     }
 
@@ -67,6 +83,7 @@ class CheckoutController extends Controller
         Product $product,
         CreateDirectOrderAction $action,
         CreateGuestCheckoutUserAction $createGuestCheckoutUser,
+        ProductEligibilityService $eligibility,
     ): RedirectResponse
     {
         $product = Product::query()
@@ -74,6 +91,14 @@ class CheckoutController extends Controller
             ->published()
             ->visiblePublic()
             ->firstOrFail();
+
+        // Guard checkout URL manipulation — cek purchase eligibility sebelum lanjut
+        $user = $request->user();
+        if (! $eligibility->canPurchase($user, $product)) {
+            $message = $eligibility->getIneligibleReason($user, $product, 'purchase');
+
+            return back()->withErrors(['checkout' => $message]);
+        }
 
         try {
             $guestUserCreated = false;

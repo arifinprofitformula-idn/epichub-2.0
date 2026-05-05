@@ -57,6 +57,16 @@ use Illuminate\Support\Str;
     'contributor_commission_base',
     'sort_order',
     'metadata',
+    'visibility_mode',
+    'purchase_mode',
+    'access_mode',
+    'allowed_viewer_types',
+    'allowed_buyer_types',
+    'allowed_access_types',
+    'allowed_role_ids',
+    'allowed_user_ids',
+    'ineligible_message',
+    'hidden_from_marketplace',
 ])]
 class Product extends Model
 {
@@ -175,6 +185,11 @@ class Product extends Model
         $query->where('visibility', ProductVisibility::Public);
     }
 
+    public function scopeNotHiddenFromMarketplace(Builder $query): void
+    {
+        $query->where('hidden_from_marketplace', false);
+    }
+
     public function scopeFeatured(Builder $query): void
     {
         $query->where('is_featured', true);
@@ -235,6 +250,12 @@ class Product extends Model
             'contributor_commission_base' => ContributorCommissionBase::class,
             'sort_order' => 'integer',
             'metadata' => 'array',
+            'allowed_viewer_types' => 'array',
+            'allowed_buyer_types' => 'array',
+            'allowed_access_types' => 'array',
+            'allowed_role_ids' => 'array',
+            'allowed_user_ids' => 'array',
+            'hidden_from_marketplace' => 'boolean',
         ];
     }
 }

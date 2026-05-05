@@ -10,6 +10,7 @@ use App\Models\LessonProgress;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\UserProduct;
+use App\Services\Products\ProductEligibilityService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -17,7 +18,7 @@ use Illuminate\View\View;
 
 class MarketplaceController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ProductEligibilityService $eligibility): View
     {
         $user = $request->user();
 
@@ -34,6 +35,7 @@ class MarketplaceController extends Controller
         $query = Product::query()
             ->published()
             ->visiblePublic()
+            ->notHiddenFromMarketplace()
             ->with([
                 'category',
                 'course',
@@ -43,6 +45,9 @@ class MarketplaceController extends Controller
             ->orderByDesc('is_featured')
             ->orderByDesc('publish_at')
             ->orderBy('sort_order');
+
+        // Terapkan visibility rule — hanya tampilkan produk yang bisa dilihat user
+        $eligibility->scopeVisibleProducts($query, $user);
 
         $q = trim((string) $request->string('q'));
         if ($q !== '') {
@@ -103,6 +108,13 @@ class MarketplaceController extends Controller
                 ->values(),
         );
 
+        // Map product_id => canPurchase untuk dipakai di blade CTA
+        $canPurchaseByProductId = $products->getCollection()
+            ->mapWithKeys(fn (Product $product) => [
+                $product->id => $eligibility->canPurchase($user, $product),
+            ])
+            ->all();
+
         return view('marketplace.index', [
             'products' => $products,
             'categories' => $categories,
@@ -116,6 +128,7 @@ class MarketplaceController extends Controller
             'ownedUserProducts' => $ownedUserProducts,
             'eventRegistrationsByProductId' => $eventRegistrationsByProductId,
             'progressByUserProductId' => $progressByUserProductId,
+            'canPurchaseByProductId' => $canPurchaseByProductId,
         ]);
     }
 

@@ -9,6 +9,7 @@ use App\Models\EventRegistration;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\UserProduct;
+use App\Services\Products\ProductEligibilityService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -63,19 +64,31 @@ class ProductCatalogController
         ]);
     }
 
-    public function show(Product $product): View
+    public function show(Product $product, ProductEligibilityService $eligibility): View
     {
         $product->load(['category', 'files', 'bundledProducts']);
+
+        abort_unless($product->status?->value === 'published', 404);
+        abort_unless($product->visibility?->value === 'public', 404);
+        abort_if($product->publish_at !== null && $product->publish_at->isFuture(), 404);
+
+        $user          = auth()->user();
         $viewerChannel = null;
         $ownedUserProduct = null;
         $eventRegistration = null;
-        $progress = null;
-        $accessUrl = null;
-        $primaryLabel = null;
-        $showAppLayout = auth()->check();
+        $progress      = null;
+        $accessUrl     = null;
+        $primaryLabel  = null;
+
+        // Visibility rule — jika tidak boleh dilihat, tampilkan 404
+        if (! $eligibility->canView($user, $product)) {
+            abort(404);
+        }
+
+        $canPurchase       = $eligibility->canPurchase($user, $product);
+        $ineligibleMessage = $canPurchase ? null : $eligibility->getIneligibleReason($user, $product, 'purchase');
 
         if (auth()->check()) {
-            $user = auth()->user();
             $user->loadMissing('epiChannel');
             $viewerChannel = $user->epiChannel;
 
@@ -123,33 +136,31 @@ class ProductCatalogController
                 }
 
                 [$accessUrl, $primaryLabel] = match ($typeValue) {
-                    ProductType::Course->value => [route('my-courses.show', $ownedUserProduct), 'Masuk Kelas'],
-                    ProductType::Event->value => [$eventRegistration ? route('my-events.show', $eventRegistration) : route('my-events.index'), 'Lihat Event'],
-                    ProductType::Ebook->value => [route('my-products.show', $ownedUserProduct), 'Baca Ebook'],
+                    ProductType::Course->value     => [route('my-courses.show', $ownedUserProduct), 'Masuk Kelas'],
+                    ProductType::Event->value      => [$eventRegistration ? route('my-events.show', $eventRegistration) : route('my-events.index'), 'Lihat Event'],
+                    ProductType::Ebook->value      => [route('my-products.show', $ownedUserProduct), 'Baca Ebook'],
                     ProductType::DigitalFile->value => [route('my-products.show', $ownedUserProduct), 'Unduh File'],
-                    ProductType::Bundle->value => [route('my-products.show', $ownedUserProduct), 'Akses Bundle'],
+                    ProductType::Bundle->value     => [route('my-products.show', $ownedUserProduct), 'Akses Bundle'],
                     ProductType::Membership->value => [route('my-products.show', $ownedUserProduct), 'Lihat Akses'],
-                    default => [route('my-products.show', $ownedUserProduct), 'Lihat Akses'],
+                    default                        => [route('my-products.show', $ownedUserProduct), 'Lihat Akses'],
                 };
             }
         }
-
-        abort_unless($product->status?->value === 'published', 404);
-        abort_unless($product->visibility?->value === 'public', 404);
-        abort_if($product->publish_at !== null && $product->publish_at->isFuture(), 404);
 
         $view = auth()->check()
             ? 'catalog.products.show-app'
             : 'catalog.products.show-public';
 
         return view($view, [
-            'product' => $product,
-            'viewerChannel' => $viewerChannel,
-            'ownedUserProduct' => $ownedUserProduct,
+            'product'           => $product,
+            'viewerChannel'     => $viewerChannel,
+            'ownedUserProduct'  => $ownedUserProduct,
             'eventRegistration' => $eventRegistration,
-            'progress' => $progress,
-            'accessUrl' => $accessUrl,
-            'primaryLabel' => $primaryLabel,
+            'progress'          => $progress,
+            'accessUrl'         => $accessUrl,
+            'primaryLabel'      => $primaryLabel,
+            'canPurchase'       => $canPurchase,
+            'ineligibleMessage' => $ineligibleMessage,
         ]);
     }
 }

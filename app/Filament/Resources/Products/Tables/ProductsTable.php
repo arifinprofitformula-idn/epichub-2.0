@@ -15,10 +15,12 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 class ProductsTable
@@ -82,6 +84,53 @@ class ProductsTable
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                TextColumn::make('visibility_mode')
+                    ->label('Visibility Rule')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'public'            => 'Public',
+                        'logged_in_only'    => 'Login Only',
+                        'selected_audience' => 'Audience',
+                        'hidden'            => 'Hidden',
+                        default             => 'Public',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'public'            => 'success',
+                        'logged_in_only'    => 'info',
+                        'selected_audience' => 'warning',
+                        'hidden'            => 'danger',
+                        default             => 'success',
+                    })
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('purchase_mode')
+                    ->label('Purchase Rule')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'everyone'          => 'Everyone',
+                        'logged_in_only'    => 'Login Only',
+                        'selected_audience' => 'Audience',
+                        'disabled'          => 'Disabled',
+                        default             => 'Everyone',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'everyone'          => 'success',
+                        'logged_in_only'    => 'info',
+                        'selected_audience' => 'warning',
+                        'disabled'          => 'danger',
+                        default             => 'success',
+                    })
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                IconColumn::make('hidden_from_marketplace')
+                    ->label('Hidden MKT')
+                    ->boolean()
+                    ->trueColor('danger')
+                    ->falseColor('gray')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('publish_at')
                     ->label('Publish')
                     ->dateTime()
@@ -112,6 +161,36 @@ class ProductsTable
                     ->label('Featured'),
                 TernaryFilter::make('is_affiliate_enabled')
                     ->label('Affiliate'),
+
+                SelectFilter::make('visibility_mode')
+                    ->label('Visibility Rule')
+                    ->options([
+                        'public'            => 'Public',
+                        'logged_in_only'    => 'Login Only',
+                        'selected_audience' => 'Audience Tertentu',
+                        'hidden'            => 'Hidden',
+                    ]),
+
+                SelectFilter::make('purchase_mode')
+                    ->label('Purchase Rule')
+                    ->options([
+                        'everyone'          => 'Semua orang',
+                        'logged_in_only'    => 'Login Only',
+                        'selected_audience' => 'Audience Tertentu',
+                        'disabled'          => 'Dinonaktifkan',
+                    ]),
+
+                TernaryFilter::make('hidden_from_marketplace')
+                    ->label('Hidden dari Marketplace'),
+
+                Filter::make('epi_channel_only')
+                    ->label('Khusus EPI Channel')
+                    ->query(fn (Builder $query): Builder => $query
+                        ->where(function (Builder $q): void {
+                            $q->whereJsonContains('allowed_viewer_types', 'epi_channel_active')
+                              ->orWhereJsonContains('allowed_buyer_types', 'epi_channel_active');
+                        })
+                    ),
             ])
             ->recordActions([
                 EditAction::make(),

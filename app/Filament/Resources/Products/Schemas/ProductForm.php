@@ -27,6 +27,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class ProductForm
 {
@@ -521,6 +522,153 @@ class ProductForm
                                     ->default(true),
                             ])
                             ->columns(2)
+                            ->columnSpanFull(),
+                    ])
+                    ->columnSpanFull(),
+
+                /* ── Audience & Eligibility ── */
+                Section::make('Audience & Eligibility')
+                    ->description('Atur siapa yang dapat melihat, membeli, dan mengakses produk ini. Visibility mengatur produk terlihat atau tidak. Purchase mengatur siapa yang boleh checkout. Access tetap membutuhkan entitlement aktif melalui Produk Saya.')
+                    ->icon('heroicon-o-shield-check')
+                    ->iconColor('danger')
+                    ->collapsed()
+                    ->schema([
+                        Toggle::make('hidden_from_marketplace')
+                            ->label('Sembunyikan dari Marketplace')
+                            ->helperText('Jika aktif, produk tidak muncul di marketplace umum meskipun visibility public.')
+                            ->default(false)
+                            ->columnSpanFull(),
+
+                        Grid::make(3)->schema([
+                            /* Visibility Mode */
+                            Select::make('visibility_mode')
+                                ->label('Siapa yang dapat melihat produk ini?')
+                                ->options([
+                                    'public'            => 'Public — Semua orang',
+                                    'logged_in_only'    => 'Hanya user login',
+                                    'selected_audience' => 'Hanya audience tertentu',
+                                    'hidden'            => 'Hidden — Tidak ditampilkan',
+                                ])
+                                ->default('public')
+                                ->native(false)
+                                ->live(),
+
+                            /* Purchase Mode */
+                            Select::make('purchase_mode')
+                                ->label('Siapa yang dapat membeli produk ini?')
+                                ->options([
+                                    'everyone'          => 'Semua orang',
+                                    'logged_in_only'    => 'Hanya user login',
+                                    'selected_audience' => 'Hanya audience tertentu',
+                                    'disabled'          => 'Pembelian dinonaktifkan',
+                                ])
+                                ->default('everyone')
+                                ->native(false)
+                                ->live(),
+
+                            /* Access Mode */
+                            Select::make('access_mode')
+                                ->label('Aturan akses setelah pembelian')
+                                ->options([
+                                    'entitlement_only'                  => 'Entitlement saja (default)',
+                                    'entitlement_and_selected_audience' => 'Entitlement + audience tertentu',
+                                ])
+                                ->default('entitlement_only')
+                                ->native(false)
+                                ->live()
+                                ->helperText('Rekomendasi: gunakan "Entitlement saja" agar pembelian lama tetap aman.'),
+                        ]),
+
+                        /* Allowed Viewers */
+                        Select::make('allowed_viewer_types')
+                            ->label('Audience yang dapat melihat')
+                            ->multiple()
+                            ->options([
+                                'guest'                => 'Guest (belum login)',
+                                'authenticated_user'   => 'User Login (semua)',
+                                'customer'             => 'Customer / Member',
+                                'epi_channel_active'   => 'EPI Channel Aktif',
+                                'epi_channel_inactive' => 'EPI Channel Belum Aktif',
+                                'contributor'          => 'Contributor',
+                                'admin'                => 'Admin / Operator',
+                            ])
+                            ->hidden(fn (Get $get): bool => $get('visibility_mode') !== 'selected_audience')
+                            ->columnSpanFull(),
+
+                        /* Allowed Buyers */
+                        Select::make('allowed_buyer_types')
+                            ->label('Audience yang dapat membeli')
+                            ->multiple()
+                            ->options([
+                                'guest'                => 'Guest (belum login)',
+                                'authenticated_user'   => 'User Login (semua)',
+                                'customer'             => 'Customer / Member',
+                                'epi_channel_active'   => 'EPI Channel Aktif',
+                                'epi_channel_inactive' => 'EPI Channel Belum Aktif',
+                                'contributor'          => 'Contributor',
+                                'admin'                => 'Admin / Operator',
+                            ])
+                            ->hidden(fn (Get $get): bool => $get('purchase_mode') !== 'selected_audience')
+                            ->columnSpanFull(),
+
+                        /* Allowed Access Audience */
+                        Select::make('allowed_access_types')
+                            ->label('Audience yang dapat mengakses (di atas entitlement)')
+                            ->multiple()
+                            ->options([
+                                'authenticated_user'   => 'User Login (semua)',
+                                'customer'             => 'Customer / Member',
+                                'epi_channel_active'   => 'EPI Channel Aktif',
+                                'epi_channel_inactive' => 'EPI Channel Belum Aktif',
+                                'contributor'          => 'Contributor',
+                                'admin'                => 'Admin / Operator',
+                            ])
+                            ->hidden(fn (Get $get): bool => $get('access_mode') !== 'entitlement_and_selected_audience')
+                            ->columnSpanFull(),
+
+                        Grid::make(2)->schema([
+                            /* Specific Roles */
+                            Select::make('allowed_role_ids')
+                                ->label('Role tertentu (opsional)')
+                                ->multiple()
+                                ->options(fn (): array => Role::query()->orderBy('name')->pluck('name', 'id')->all())
+                                ->searchable()
+                                ->helperText('Pilih role Spatie yang diizinkan. Berlaku untuk semua mode audience tertentu.')
+                                ->hidden(fn (Get $get): bool => ! in_array(
+                                    $get('visibility_mode') . '|' . $get('purchase_mode') . '|' . $get('access_mode'),
+                                    [],
+                                    true
+                                ) && ! (
+                                    $get('visibility_mode') === 'selected_audience' ||
+                                    $get('purchase_mode') === 'selected_audience' ||
+                                    $get('access_mode') === 'entitlement_and_selected_audience'
+                                )),
+
+                            /* Specific Users */
+                            Select::make('allowed_user_ids')
+                                ->label('User tertentu (opsional)')
+                                ->multiple()
+                                ->options(fn (): array => User::query()
+                                    ->orderBy('name')
+                                    ->select(['id', 'name', 'email'])
+                                    ->get()
+                                    ->mapWithKeys(fn (User $u) => [$u->id => "{$u->name} ({$u->email})"])
+                                    ->all())
+                                ->searchable()
+                                ->helperText('Pilih user spesifik yang diizinkan.')
+                                ->hidden(fn (Get $get): bool => ! (
+                                    $get('visibility_mode') === 'selected_audience' ||
+                                    $get('purchase_mode') === 'selected_audience' ||
+                                    $get('access_mode') === 'entitlement_and_selected_audience'
+                                )),
+                        ]),
+
+                        Textarea::make('ineligible_message')
+                            ->label('Pesan untuk user tidak eligible (opsional)')
+                            ->placeholder('Produk ini hanya tersedia untuk kategori pengguna tertentu.')
+                            ->rows(2)
+                            ->nullable()
+                            ->helperText('Jika kosong, pesan default akan digunakan.')
                             ->columnSpanFull(),
                     ])
                     ->columnSpanFull(),
